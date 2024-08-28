@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-serviceConfig:v1",
+  "type": "object",
+  "properties": {
+    "service": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "port": {
+              "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/port"
+            },
+            "targetPort": {
+              "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/port"
+            },
+            "endpoints": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "http": {
+                      "allOf": [
+                        { "$ref": "urn:adp:helm:schemas:v1:DR-D1123-113:v1/endpoint/tls/enforced" },
+                        {
+                          "$ref": "urn:adp:helm:schemas:v1:DR-D1123-113:v1/endpoint/tls/verifyClientCertificate"
+                        }
+                      ]
+                    }
+                  },
+                  "required": ["http"]
+                },
+                { "$ref": "urn:adp:helm:schemas:v1:gas-serviceConfig-conditional:v1/endpoints" }
+              ]
+            }
+          },
+          "required": ["type", "port", "targetPort", "endpoints"]
+        },
+        { "$ref": "urn:adp:helm:schemas:v1:gas-serviceConfig-conditional:v1/service" }
+      ]
+    }
+  },
+  "required": ["service"]
+}

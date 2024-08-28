@@ -1,0 +1,258 @@
+openapi: 3.0.1
+info:
+  title: UI Metadata REST API (IF.GUI.META.REST)
+  description: |
+    # Introduction
+    This specificaton describes the UI Metadata REST API identified in the ADP GUI FA.
+    UI Metadata (on apps, groups, components, and actions) exposed by these endpoints is an aggregation of UI metadata of individual services discovered by GAS.
+    Most API endpoints are meant to be used by the UI Portal (GAS frontend) to fetch (aggregated) UI meta-data from GAS service backend.
+    I.e. the endpoints are meant to be for internal usage between GAS frontend and backend.
+    Some, however, can be used by other services too (external usage).
+
+    ## Terms
+
+    - **Client Container**: An SPA (Single Page Application) implementing the App Shell pattern e.g. E-UI SDK Container.
+    - **UI App**: A full screen user interface exposed by a Microservice that can execute in the Client Container e.g. E-UI SDK App.
+      - ***External UI App***: Any UIs that have a separate web page (outside the Client Container) or other alternative renderer e.g. Citrix.
+    - **UI Component**: A reusable, embeddable UI Web Component exposed by a Microservice e.g. E-UI SDK Shareable Components.
+
+    ### API Versions
+    #### 1.3.0
+    Adding the `options` attribute to `app` and `component` entities.
+    #### 1.2.0-alpha
+    Adding the `/services` endpoint.
+    #### 1.1.0-alpha
+    Adding `module` attribute to `app` and `component` entities.
+    #### 1.0.0-alpha
+    Initial version.
+
+  contact:
+    name: Smart Insights Team
+    email: PDLSCRUMNW@pdl.internal.ericsson.com
+  version: "1.3.0"
+  x-api-id: 570e4cc5-79bc-4ac9-b76f-5437ee381410
+  x-audience: company-internal
+servers:
+  - url: /ui-meta/v1
+    description: Base
+tags:
+  - name: IF.GUI.META.REST
+    description: Provides aggregated UI Metadata on all accessible UI apps, groups, components, and actions available to the current user in session
+      as well as a possibility to refresh UI Metadata of a given service.
+    x-displayName: UI Metadata REST API
+paths:
+  /services/{name}:
+    put:
+      operationId: serviceChange
+      summary: Update metadata for services (external interface)
+      description:
+        This endpoint can be used to indicate to GAS that UI-meta of a service is changed and request GAS to re-fetch it (i.e. to refresh it in GAS).
+      tags:
+        - IF.GUI.META.REST
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+          description: The name of service where the UI-meta configuration is changed
+        - in: header
+          name: Via
+          description: GAS pod checks the Via header. If the request is not forwarded from
+            another peer gas instance, then the receiver instance will proxy the request to the other peers.
+          schema:
+            type: string
+      requestBody:
+        description: The data of the changed service
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/ui.service.change.yaml"
+            examples:
+              ChangeNotification:
+                $ref: "#/components/examples/ChangeNotification"
+      responses:
+        "200":
+          description: OK - The notification is accepted
+        "202":
+          description: Accepted - Request for refresh has been sent
+        "400":
+          description: Bad Request - Parameters are missing or incorrect
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /apps:
+    get:
+      operationId: getApps
+      summary: Get all UI apps
+      description: Returns list of available UI apps.
+        The list will contains based on users access to an application and availability of an active license.
+      tags:
+        - IF.GUI.META.REST
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/ui.schemas.yaml#/components/schemas/Apps"
+              examples:
+                UiTools:
+                  $ref: "#/components/examples/UiTools"
+        "400":
+          description: Bad Request - Path is incorrect
+  /groups:
+    get:
+      operationId: getGroups
+      summary: Get all UI groups
+      description: Returns list of all available UI groups and related UI apps.
+        UI apps list be included based on users access to an application and availability of an active license
+      tags:
+        - IF.GUI.META.REST
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/ui.schemas.yaml#/components/schemas/Groups"
+              examples:
+                Tools:
+                  $ref: "#/components/examples/Tools"
+        "400":
+          description: Bad Request - Path is incorrect
+  /components:
+    get:
+      operationId: getComponents
+      summary: Get all UI components
+      description: Returns list of all available shared UI components.
+      tags:
+        - IF.GUI.META.REST
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/ui.schemas.yaml#/components/schemas/Components"
+              examples:
+                LatestComponents:
+                  $ref: "#/components/examples/LatestComponents"
+        "400":
+          description: Bad Request - Path is incorrect
+  /actions:
+    get:
+      operationId: getActions
+      summary: Get all UI actions
+      description: Returns list of all available UI actions and UI action groups.
+      tags:
+        - IF.GUI.META.REST
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/ui.actions.yaml#/components/schemas/Actions"
+        "400":
+          description: Bad Request - Path is incorrect
+
+components:
+  schemas:
+    Error:
+      type: object
+      description: User Interface API Error Response
+      required:
+        - errors
+      properties:
+        errors:
+          description: Detailed error object.
+          type: object
+  examples:
+    ChangeNotification:
+      summary: An example change notification
+      value:
+        name: eric-eea-spotfire-manager
+    UiTools:
+      value:
+        - name: "adp-oam-ui-tools"
+          service: "adp-oam-ui-service"
+          displayName: "Configuration Tools"
+          descriptionLong: "ADP.OAM.UI.TOOLS.DESC.LONG"
+          descriptionShort: "ADP.OAM.UI.TOOLS.DESC.SHORT"
+          module: "@adp-oam/ui-tools"
+          color: "blue"
+          acronym: "AUT"
+          version: "0.1.0"
+          type: "euisdk"
+          route: "oam-tools"
+          priority: 1
+          childNames: ["adp-oam-ui-tools-scheduler"]
+          groupNames: ["adp-tools"]
+          tags: ["tools"]
+          specification: "./adp-oam-ui-tools/app.config.json"
+        - id: 5956ab3d-2285-4cf8-82e3-38c40d902f1d
+          name: "adp-oam-ui-tools-scheduler"
+          displayName: "Scheduler"
+          descriptionLong: "ADP.OAM.UI.TOOLS.SCH.DESC.LONG"
+          descriptionShort: "ADP.OAM.UI.TOOLS.SCH.DESC.SHORT"
+          module: "@adp-oam/ui-tools-scheduler"
+          color: "#D2691E"
+          acronym: "SCH"
+          version: "0.1.0"
+          type: "euisdk"
+          route: "oam-tools/scheduler"
+          priority: 1
+          groupNames: ["adp-tools", "oam"]
+          tags: ["tools"]
+          specification: "./adp-oam-ui-tools-scheduler/app.config.json"
+        - id: 33a1f160-017e-4390-9060-255a69c78e76
+          name: "adp-market-place"
+          displayName: "ADP Market Place"
+          module: "@adp/marketplace"
+          color: "#008B8B"
+          acronym: "AMP"
+          version: "1.0.0"
+          type: "external"
+          url: "https://adp.ericsson.se/marketplace"
+          priority: 10
+          groupNames: ["adp-tools"]
+          tags: ["adp", "marketplace"]
+    Tools:
+      value:
+        - id: 7382eb95-b9cf-4d62-a276-f920cf130f31
+          version: "1.0.0"
+          name: "adp-tools"
+          displayName: "Tools"
+          descriptionLong: "Tools Application"
+          descriptionShort: "Utility applications helps to perform common activities."
+          color: "green"
+          acronym: "TL"
+          type: "domain"
+          priority: 10
+          tags: ["tools"]
+        - id: 205e66cb-e979-4ba5-9da6-dc09f3ad5fde
+          version: "1.0.0"
+          name: "oam"
+          displayName: "OAM"
+          descriptionShort: "Operation and Maintenance Application"
+          color: "#8B008B"
+          type: "domain"
+          priority: 20
+    LatestComponents:
+      value:
+        - id: 0b1d3330-2056-40ba-a1e6-1487afa809fc
+          name: "adp-latest-entities"
+          version: "0.1.0"
+          displayName: "Latest Entities"
+          descriptionLong: "Overview of all the entities created during last 2 weeks."
+          module: "@adp/latest-entities"
+          type: "oden"
+          priority: 10
+          specification: "./config/component.config.json"

@@ -1,0 +1,7 @@
+{{- define "eric-adp-gui-aggregator-service.product-labels" }}
+app.kubernetes.io/name: {{ template "eric-adp-gui-aggregator-service.name" . }}
+app.kubernetes.io/version: {{ template "eric-adp-gui-aggregator-service.version" . }}
+app.kubernetes.io/instance: {{ .Release.Name | quote }}
+app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+helm.sh/chart: {{ include "eric-adp-gui-aggregator-service.chart" . }}
+{{- end}}

@@ -1,0 +1,46 @@
+{{- $global := fromJson (include "eric-adp-gui-aggregator-service.global" .) -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-http
+  labels:
+    {{- $helpAggregatorLabels :=  .Values.configuration.helpAggregator.label -}}
+    {{- $commonLabels := include "eric-adp-gui-aggregator-service.labels" . | fromYaml -}}
+    {{- include "eric-adp-gui-aggregator-service.mergeLabels" (dict "location" .Template.Name "sources" (list $helpAggregatorLabels $commonLabels)) | trim | nindent 4 }}
+  annotations:
+    {{- $annotations := dict -}}
+    {{- if and $global.security.tls.enabled (not .Values.ingress.tls.passthrough) -}}
+      {{- /* Required for ICCR to work with internal TLS. But breaks passthrough */ -}}
+      {{- $_ := set $annotations "projectcontour.io/upstream-protocol.tls" (.Values.service.port | toString) -}}
+    {{- end -}}
+    {{- $_ := set $annotations "ui.ericsson.com/config-context" (.Values.configuration.guiContext | toString) -}}
+    {{- $commonAnn := include "eric-adp-gui-aggregator-service.annotations" . | fromYaml -}}
+    {{- $metricAnn := include "eric-adp-gui-aggregator-service.prometheus-annotations" . | fromYaml -}}
+    {{- include "eric-adp-gui-aggregator-service.mergeAnnotations" (dict "location" .Template.Name "sources" (list $annotations $commonAnn $metricAnn)) | trim | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  # the primary IP address family of an existing Service cannot be changed
+  {{- if .Release.IsInstall -}}
+  {{- if $global.internalIPFamily }}
+  ipFamilies: [{{ $global.internalIPFamily | quote }}]
+  ipFamilyPolicy: SingleStack
+  {{- else }}
+  ipFamilyPolicy: PreferDualStack
+  {{- end }}
+  {{- end }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: adp-ui-port
+      protocol: TCP
+      {{- if $global.security.tls.enabled }}
+      name: http-tls
+      {{- else }}
+      name: http
+      {{- end }}
+    - port: {{ .Values.metrics.port }}
+      targetPort: adp-metric-port
+      protocol: TCP
+      name: {{ include "eric-adp-gui-aggregator-service.metric-port-name" . }}
+  selector:
+    app.kubernetes.io/name: {{ include "eric-adp-gui-aggregator-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

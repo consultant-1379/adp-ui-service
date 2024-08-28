@@ -1,0 +1,26 @@
+/* style goes here */
+:host {
+  display: block;
+  height: calc(100% - 2 * var(--space-large, 16px) - 32px);
+}
+
+.empty-state {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.launcher-tile {
+  padding: var(--space-base);
+  border-bottom: var(--space-small) solid var(--layer1);
+}
+
+.launcher-tile:last-child {
+  border-bottom: none;
+}
+
+:host([is-in-sys-bar]) .launcher-tile {
+  border-bottom: unset;
+}

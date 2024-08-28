@@ -1,0 +1,30 @@
+{
+  "apps": [
+    {
+      "displayName": "Nova Explorer",
+      "version": "0.1.0",
+      "url": "http://localhost:9999/nova-explorer",
+      "descriptionLong": "Dummy external app for testing purposes.",
+      "groupNames": ["eea", "nova"],
+      "type": "external"
+    },
+    {
+      "displayName": "Nova Explorer Standalone - Very Long External Application Name",
+      "version": "0.1.0",
+      "url": "http://localhost:9999/nova-explorer-standalone",
+      "descriptionLong": "Dummy external app for testing purposes.",
+      "name": "nova2",
+      "groupNames": ["ecm", "nova"],
+      "type": "external"
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Nova explorer",
+      "version": "0.1.0",
+      "name": "nova",
+      "type": "category",
+      "descriptionLong": "Dummy external category for testing purposes."
+    }
+  ]
+}

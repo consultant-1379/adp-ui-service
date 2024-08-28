@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "id": "file://schema/ManualServiceConfig#",
+  "title": "Manual Service Config",
+  "description": "This schema describes the required schema of the manual service config.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["name", "version", "URL"],
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "The name of the service."
+      },
+      "version": {
+        "type": "string",
+        "description": "The version of the service."
+      },
+      "URL": {
+        "type": "string",
+        "description": "The url where the config.json descriptor is available.",
+        "pattern": "^(http(s)?://)(?:\\w+)+[\\w\\-\\._~:/?#&';=.]+.*(?<=\\w)$"
+      }
+    }
+  }
+}

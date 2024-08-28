@@ -1,0 +1,69 @@
+{
+  "apps": [
+    {
+      "displayName": "ADP Marketplace",
+      "version": "1.0.0",
+      "descriptionShort": "Microservices Marketplace",
+      "descriptionLong": "The Microservices Marketplace to help build Ericsson cloud native applications.",
+      "name": "adp-marketplace",
+      "groupNames": ["3pp-apps"],
+      "type": "euisdk",
+      "module": "wrapper-app",
+      "route": "adp-marketplace",
+      "options": {
+        "url": "https://adp.ericsson.se/marketplace"
+      }
+    },
+    {
+      "displayName": "Jupyter Notebook",
+      "version": "1.0.0",
+      "name": "jupyter-notebook",
+      "groupNames": ["3pp-apps"],
+      "type": "euisdk",
+      "module": "wrapper-app",
+      "route": "jupyter-notebook",
+      "options": {
+        "url": "https://jupyter.org/try-jupyter/retro/notebooks/",
+        "query": "path=notebooks/Intro.ipynb"
+      }
+    },
+    {
+      "displayName": "Web Traffic",
+      "version": "1.0.0",
+      "descriptionShort": "Elastic Dashboard",
+      "name": "web-traffic",
+      "groupNames": ["3pp-apps"],
+      "type": "euisdk",
+      "module": "wrapper-app",
+      "route": "web-traffic",
+      "options": {
+        "url": "https://demo.elastic.co/app/dashboards#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+        "query": "embed=true&_g=(filters:!())"
+      }
+    },
+    {
+      "displayName": "Metricbeat Kubernetes",
+      "version": "1.0.0",
+      "descriptionShort": "Elastic Dashboard",
+      "name": "metricbeat-kubernetes",
+      "groupNames": ["3pp-apps"],
+      "type": "euisdk",
+      "module": "wrapper-app",
+      "route": "metricbeat-kubernetes",
+      "options": {
+        "url": "https://demo.elastic.co/app/dashboards#/view/kubernetes-e0195ce0-bcaf-11ec-b64f-7dd6e8e82013",
+        "query": "embed=true&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "3PP App Integrations",
+      "version": "1.0.0",
+      "name": "3pp-apps",
+      "type": "product",
+      "descriptionShort": "3PP",
+      "descriptionLong": "Several third party applications integrated in an IFrame."
+    }
+  ]
+}

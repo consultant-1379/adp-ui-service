@@ -1,0 +1,34 @@
+{{- $global := fromJson (include "eric-adp-gui-aggregator-service.global" .) -}}
+{{- $authorizationProxy := fromJson (include "eric-adp-gui-aggregator-service.authz-proxy-values" .) -}}
+{{- if $authorizationProxy.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "eric-adp-gui-aggregator-service.authz-proxy-service-name" . }}
+  labels:
+    {{- $authProxyLabels := include "eric-adp-gui-aggregator-service.authz-proxy-labels" . | fromYaml -}}
+    {{- $commonLabels := include "eric-adp-gui-aggregator-service.labels" . | fromYaml -}}
+    {{- include "eric-adp-gui-aggregator-service.mergeLabels" (dict "location" .Template.Name "sources" (list $authProxyLabels $commonLabels)) | trim | nindent 4 }}
+  annotations:
+    {{- /* APO2 metrics */ -}}
+    {{- $prometheusAnn := include "eric-adp-gui-aggregator-service.authz-proxy-prometheus-annotations" . | fromYaml -}}
+    {{- $authProxyAnn := include "eric-adp-gui-aggregator-service.authz-proxy-service-annotations" . | fromYaml -}}
+    {{- $commonAnn := include "eric-adp-gui-aggregator-service.annotations" . | fromYaml -}}
+    {{- include "eric-adp-gui-aggregator-service.mergeAnnotations" (dict "location" .Template.Name "sources" (list $authProxyAnn $commonAnn $prometheusAnn)) | trim | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+{{ include "eric-adp-gui-aggregator-service.authz-proxy-service-port" . | indent 4 }}
+  selector:
+    app.kubernetes.io/name: {{ include "eric-adp-gui-aggregator-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  # the primary IP address family of an existing Service cannot be changed
+  {{- if .Release.IsInstall -}}
+  {{- if $global.internalIPFamily }}
+  ipFamilies: [{{ $global.internalIPFamily | quote }}]
+  ipFamilyPolicy: SingleStack
+  {{- else }}
+  ipFamilyPolicy: PreferDualStack
+  {{- end }}
+  {{- end }}
+{{- end -}}

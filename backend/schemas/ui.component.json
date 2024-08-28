@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "$id": "http://adp.ericsson.com/ui.component.json",
+  "description": "UI Component Definition.",
+  "required": ["name", "displayName", "version"],
+
+  "type": "object",
+  "properties": {
+    "name": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/name",
+      "description": "Unique name of the UI entity.",
+      "type": "string"
+    },
+    "displayName": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/displayName",
+      "description": "Name of an UI entity. This will be used as display name in the launcher.",
+      "type": "string"
+    },
+    "version": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/version",
+      "description": "Version of an UI application. Should be in semantic version.",
+      "type": "string"
+    },
+    "module": {
+      "$id": "http://adp.ericsson.com/ui.component.json#/properties/module",
+      "description": "Module reference which implements this component.",
+      "type": "string"
+    },
+    "specification": {
+      "$id": "http://adp.ericsson.com/ui.component.json#/properties/specification",
+      "description": "Location of the component specification file.",
+      "type": "string"
+    },
+    "options": {
+      "$id": "http://adp.ericsson.com/ui.component.json#/properties/options",
+      "description": "Extra runtime options for the component.",
+      "type": "object"
+    },
+    "descriptionLong": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/descriptionLong",
+      "description": "Long detailed description of an UI entity.",
+      "type": "string"
+    },
+    "descriptionShort": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/descriptionShort",
+      "description": "Short description of an UI entity.",
+      "type": "string"
+    },
+    "color": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/color",
+      "description": "Color of the entity.",
+      "type": "string"
+    },
+    "acronym": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/acronym",
+      "description": "Acronym of the entity.",
+      "type": "string"
+    },
+    "type": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/type",
+      "description": "Classification of an UI entity.",
+      "type": "string"
+    },
+    "priority": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/priority",
+      "description": "Display priority order.",
+      "type": "integer"
+    },
+    "service": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/service",
+      "description": "The service this component is related to.",
+      "type": "string"
+    },
+    "tags": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/tags",
+      "description": "Tags associated.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+
+  "additionalProperties": false,
+
+  "examples": [
+    {
+      "name": "adp-latest-entities",
+      "version": "0.1.0",
+      "descriptionLong": "Latest Entities",
+      "type": "json",
+      "priority": 10,
+      "specification": "./config/component.config.json"
+    }
+  ]
+}

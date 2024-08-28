@@ -1,0 +1,15 @@
+apiVersion: v2
+appVersion: 0.0.0
+description: Extension of the CI chart for the generation of characteristics reports
+name: characteristics-report
+version: 0.0.0
+dependencies:
+  - condition: eric-pm-server.enabled
+    name: eric-pm-server
+    repository: https://arm.rnd.ki.sw.ericsson.se/artifactory/proj-adp-gs-all-helm
+    version: ~0.0.0
+
+  - condition: eric-pm-node-exporter.enabled
+    name: eric-pm-node-exporter
+    repository: https://arm.seli.gic.ericsson.se/artifactory/proj-adp-pm-node-exporter-released-helm
+    version: ~0.0.0

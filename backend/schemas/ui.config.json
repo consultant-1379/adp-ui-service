@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "$id": "http://adp.ericsson.com/ui.config.json",
+  "type": "object",
+  "description": "File descriptor for UI micro front-ends.\nThis file includes all apps, components and groups supported by UI micro front-ends.\nThis file should be named 'config.json' and should be accessible from the service root URL.\n",
+  "properties": {
+    "version": {
+      "$id": "http://adp.ericsson.com/ui.config.json#/properties/version",
+      "type": "string",
+      "description": "Schema version of the config.json."
+    },
+    "apps": {
+      "$id": "http://adp.ericsson.com/ui.config.json#/properties/apps",
+      "type": "array",
+      "description": "List of applications available as part of the service.",
+      "items": {
+        "$ref": "ui.app.json"
+      }
+    },
+    "groups": {
+      "$id": "http://adp.ericsson.com/ui.config.json#/properties/groups",
+      "type": "array",
+      "description": "List of groups available as part of the service.",
+      "items": {
+        "$ref": "ui.entity.json"
+      }
+    },
+    "components": {
+      "$id": "http://adp.ericsson.com/ui.config.json#/properties/components",
+      "type": "array",
+      "description": "List of components available as part of the service.",
+      "items": {
+        "$ref": "ui.component.json"
+      }
+    },
+    "overrides": {
+      "$id": "http://adp.ericsson.com/ui.config.json#/properties/overrides",
+      "type": "object",
+      "description": "List of config overrides.",
+      "items": {
+        "$ref": "ui.config.override.json"
+      }
+    },
+    "groupMappings": {
+      "$id": "http://adp.ericsson.com/ui.config.json#/properties/groupMappings",
+      "type": "array",
+      "description": "List of group mapping.",
+      "items": {
+        "$ref": "ui.config.groupMappings.json"
+      }
+    },
+    "actions": {
+      "description": "UI Actions",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "ui.actions.json"
+      }
+    }
+  },
+  "additionalProperties": false
+}

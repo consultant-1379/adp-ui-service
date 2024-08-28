@@ -1,0 +1,130 @@
+{
+  "apps": [
+    {
+      "displayName": "Call Browser",
+      "route": "/callbrowser/#callbrowser",
+      "version": "1.0.0",
+      "name": "call_browser",
+      "descriptionLong": "Provides insight into call sessions.",
+      "descriptionShort": "CB",
+      "groupNames": ["eea", "subscriber_troubleshooting", "eea_sys"],
+      "tags": ["call analysis"],
+      "childNames": ["call_browser_child"],
+      "hidden": true
+    },
+    {
+      "displayName": "Session Browser",
+      "route": "/sessionbrowser/#aggregated",
+      "version": "1.0.0",
+      "name": "session_browser",
+      "descriptionLong": "Provides insight into subscriber sessions (except VoLTE calls).",
+      "descriptionShort": "SB",
+      "groupNames": ["eea", "subscriber_troubleshooting", "eea_sys"]
+    },
+    {
+      "displayName": "Subscriber Insights",
+      "route": "/subscriber-insights-exploration/#voice",
+      "version": "1.0.0",
+      "name": "subscriber_insights",
+      "descriptionLong": "Provides a fully automated subscriber-based analysis for problem detection and resolution.",
+      "descriptionShort": "SI",
+      "groupNames": ["eea", "subscriber_troubleshooting", "eea_sys"]
+    },
+    {
+      "displayName": "Expert Insights Studio",
+      "route": "/engineering-insights/#ei-editor",
+      "version": "1.0.0",
+      "name": "ei-studio",
+      "descriptionLong": "Provides a platform for in-depth ad-hoc queries for experienced system engineers with deep telecom knowledge.",
+      "descriptionShort": "EI Studio",
+      "groupNames": ["eea", "network_analytics", "eea_sys"],
+      "tags": ["ad hoc queries"]
+    },
+    {
+      "displayName": "Expert Insights Dashboard",
+      "route": "/engineering-insights/#ei-dashboard",
+      "version": "1.0.0",
+      "name": "ei_dashboard",
+      "descriptionLong": "Provides a configurable dashboard.",
+      "descriptionShort": "EI Dashboard",
+      "groupNames": ["eea", "network_analytics", "eea_sys"],
+      "tags": ["advanced dashboards"]
+    },
+    {
+      "displayName": "Automated Insights - Operations",
+      "route": "/automated-expert-insights/#aei",
+      "version": "1.0.0",
+      "name": "aio",
+      "descriptionLong": "Provides network insights, based on machine learning.",
+      "descriptionShort": "AIO",
+      "groupNames": ["eea", "network_analytics", "eea_sys"]
+    },
+    {
+      "displayName": "Service Quality Manager",
+      "route": "/sqm/#sqm",
+      "version": "1.0.0",
+      "name": "sqm",
+      "descriptionLong": "Provides an interface for Network Specialists to track and monitor the performance on an entire telecommunication network.",
+      "descriptionShort": "SQM",
+      "groupNames": ["eea", "network_analytics", "eea_sys"]
+    },
+    {
+      "displayName": "Config Store Editor",
+      "route": "/configstore-editor/#configstoreviewer",
+      "version": "1.0.0",
+      "name": "config_store_editor",
+      "descriptionShort": "CSM",
+      "groupNames": ["eea", "eea_sys"]
+    },
+    {
+      "displayName": "Nova Explorer",
+      "url": "http://localhost:9999/nova-explorer",
+      "version": "1.0.0",
+      "descriptionLong": "Dummy external app for testing purposes.",
+      "name": "nova1",
+      "groupNames": ["eea", "eea_sys"],
+      "descriptionShort": "NE",
+      "type": "external"
+    },
+    {
+      "displayName": "Call Browser Child",
+      "route": "/callbrowser/#callbrowser_child",
+      "version": "1.0.0",
+      "name": "call_browser_child",
+      "descriptionLong": "Provides insight into call sessions.",
+      "descriptionShort": "CB",
+      "groupNames": ["eea", "subscriber_troubleshooting", "eea_sys"],
+      "tags": ["call analysis"]
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Ericsson Expert Analytics Product",
+      "version": "1.0.0",
+      "name": "eea",
+      "type": "product",
+      "descriptionLong": "Ericsson Expert Analytics (EEA) is a multi-vendor, customer-centric analytics product for mobile operators who want to capitalize on their network data.",
+      "descriptionShort": "EEA"
+    },
+    {
+      "displayName": "Ericsson Expert Analytics System",
+      "version": "1.0.0",
+      "name": "eea_sys",
+      "type": "system",
+      "descriptionLong": "Ericsson Expert Analytics (EEA) is a multi-vendor, customer-centric analytics product for mobile operators who want to capitalize on their network data.",
+      "descriptionShort": "EEA"
+    },
+    {
+      "displayName": "Subscriber Troubleshooting",
+      "version": "1.0.0",
+      "name": "subscriber_troubleshooting",
+      "type": "category"
+    },
+    {
+      "displayName": "Network Analytics",
+      "version": "1.0.0",
+      "name": "network_analytics",
+      "type": "category"
+    }
+  ]
+}

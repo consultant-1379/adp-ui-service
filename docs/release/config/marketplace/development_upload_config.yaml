@@ -1,0 +1,81 @@
+documents:
+  # Eridoc
+  - name: "API Documentation - Eridoc"
+    external-link:
+      Title: "{api-title}"
+      Document_id: "{api-id}"
+      Rev: "{api-rev}"
+  - name: "Service user guide - Eridoc"
+    external-link:
+      Title: "{user-guide-title}"
+      Document_id: "{user-guide-id}"
+      Rev: "{user-guide-rev}"
+  - name: "Software Vendor List (SVL)"
+    filepath: build/doc-archive/svl.zip
+  - name: "Test Report"
+    external-link:
+      Title: "{test-report-title}"
+      Document_id: "{test-report-id}"
+      Rev: "{test-report-rev}"
+  - name: "Test Specification - Eridoc"
+    external-link:
+      Title: "{test-spec-title}"
+      Document_id: "{test-spec-id}"
+      Rev: "{test-spec-rev}"
+  - name: "Application Developers Guide - Eridoc"
+    external-link:
+      Title: "{dev-guide-title}"
+      Document_id: "{dev-guide-id}"
+      Rev: "{dev-guide-rev}"
+  - name: "Vulnerability Analysis Report"
+    external-link:
+      Title: "{vul-anal-title}"
+      Document_id: "{vul-anal-id}"
+      Rev: "{vul-anal-rev}"
+    restricted: true
+  - name: "Risk Assessment & Privacy Impact Assessment"
+    external-link:
+      Title: "{risk-assessment-title}"
+      Document_id: "{risk-assessment-id}"
+      Rev: "{risk-assessment-rev}"
+    restricted: true
+  - name: "Secure coding report"
+    external-link:
+      Title: "{sec-coding-title}"
+      Document_id: "{sec-coding-id}"
+      Rev: "{sec-coding-rev}"
+    restricted: true
+  - name: "Characteristics Report"
+    external-link:
+      Title: "{characteristics-report-title}"
+      Document_id: "{characteristics-report-id}"
+      Rev: "{characteristics-report-rev}"
+  - name: "K8S Robustness Report"
+    external-link:
+      Title: "{k8s-test-report-title}"
+      Document_id: "{k8s-test-report-id}"
+      Rev: "{k8s-test-report-rev}"
+  - name: "Service User Guide"
+    filepath: build/doc-archive/html/service-user-guide.zip
+    default: true
+  - name: "Release Notes"
+    filepath: build/doc-archive/html/release-notes.zip
+  - name: "UI Integration Guide"
+    filepath: build/doc-archive/html/ui-integration-guide.zip
+  - name: "API Documentation"
+    filepath: build/doc-archive/html/api-documentation.zip
+  - name: "Application Developers Guide"
+    filepath: build/doc-archive/html/application-developers-guide.zip
+  - name: "Test Specification"
+    filepath: build/doc-archive/html/test-specification.zip
+  - name: "Microfronted Concept"
+    filepath: build/doc-archive/html/microfrontend.zip
+  # Inner Source
+  - name: "Inner Source README"
+    external-link: "https://gerrit-gamma.gic.ericsson.se/plugins/gitiles/EEA/adp-ui-service/+/master/README.md"
+  - name: "Contributing Guideline"
+    filepath: build/doc-archive/html/contributing-guideline.zip
+  # ARM docs
+  - name: "Performance Management Metrics JSON - Artifactory"
+    external-link: {pm-metrics-folder-path}/eric-adp-gui-aggregator-service_pm_metrics.json
+    restricted: true

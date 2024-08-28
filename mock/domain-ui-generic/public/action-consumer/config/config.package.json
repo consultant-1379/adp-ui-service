@@ -1,0 +1,10 @@
+{
+  "modules": [
+    {
+      "name": "action-consumer",
+      "version": "1.0.0",
+      "path": "apps/action-consumer",
+      "main": "action-consumer.js"
+    }
+  ]
+}

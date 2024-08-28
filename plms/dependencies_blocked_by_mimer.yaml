@@ -1,0 +1,4 @@
+# This file collects all dependencies which are blocked by Mimer bugs.
+# For a release this file shall be empty, so it can help only to avoid CI blockers temporarily.
+# This is a list of PRIM number of the dependencies to be excluded.
+dependencies: []

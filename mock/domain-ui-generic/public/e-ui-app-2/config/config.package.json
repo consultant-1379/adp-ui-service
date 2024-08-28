@@ -1,0 +1,22 @@
+{
+  "modules": [
+    {
+      "name": "@eui/layout",
+      "version": "1.0.5",
+      "path": "node_modules/@eui/layout",
+      "main": "index.js"
+    },
+    {
+      "name": "charts",
+      "version": "0.0.1",
+      "path": "apps/charts",
+      "main": "charts.js"
+    },
+    {
+      "name": "donut-chart",
+      "version": "0.0.1",
+      "path": "components/donut-chart",
+      "main": "donut-chart.js"
+    }
+  ]
+}

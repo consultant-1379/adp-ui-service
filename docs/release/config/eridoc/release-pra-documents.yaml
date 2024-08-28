@@ -1,0 +1,25 @@
+repository: eridoca
+folderId: 0b004cffc6b574c5
+documents:
+# PRA DOCUMENT UPLOADED BY THE PRI.PY, SO THIS ENTRY IS A HELPER ONLY IF IT HAS NOT HAPPENED
+# The following rows help only for manual upload, check these information when you create ERIDOC document
+#  - file: start_document.pdf
+#    title: "Product Revision Information"
+#    decimal-class: "10921"
+#    individual-number: "APR 201 088/2"
+#    eri_document_type: "Product Revision Information"
+#    format: "pdf"
+#    lang: "en"
+#    strategy: "ordinal"
+#    eri_doc_responsible: "BCSDSCKD"
+
+# The following rows help only for manual upload, check these information when you create ERIDOC document
+# Todo replace the file path and the semVer with the semantic version.
+# - file: start_document.xlsx
+#   title: "Software Vendor List {semVer}"
+#   decimal-class: "24050"
+#   individual-number: "APR 201 088/2"
+#   eri_document_type: "Software Vendor List"
+#   format: "excel15book"
+#   lang: "en"
+#   eri_doc_responsible: "BCSDSCKD"

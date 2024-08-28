@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+  <head>
+    <script
+      async
+      src="https://unpkg.com/@webcomponents/scoped-custom-element-registry@0.0.9/scoped-custom-element-registry.min.js"
+    ></script>
+    <script async src="https://unpkg.com/es-module-shims@1.7.1/dist/es-module-shims.js"></script>
+    <script
+      type="module"
+      async
+      src="https://unpkg.com/urlpattern-polyfill@5.0.9/dist/urlpattern.js"
+    ></script>
+    <script type="importmap-shim">
+      {
+        "imports": {
+          "settings-panel.js": "./src/panels/settings-panel.js",
+          "@eui/container": "./node_modules/@eui/container/index.js",
+          "@eui/theme": "./node_modules/@eui/theme/index.js",
+          "@eui/navigation-menu": "./node_modules/@eui/navigation-menu/index.js",
+          "my-gui-main": "./apps/configuration-checker/configuration-checker.js",
+          "my-gui-dashboards": "./apps/configuration-checker/configuration-checker.js",
+          "my-gui-dashboard-1": "./apps/configuration-checker/configuration-checker.js",
+          "my-gui-dashboard-2": "./apps/configuration-checker/configuration-checker.js",
+          "my-gui-main-2": "./apps/configuration-checker/configuration-checker.js"
+        }
+      }
+    </script>
+    <script type="module-shim">
+      import '@eui/container';
+      import { NavigationMenu } from '@eui/navigation-menu';
+      import { Theme, Icon } from '@eui/theme';
+
+      Theme.register('eui-theme');
+      NavigationMenu.register('eui-navigation-menu');
+      Icon.register('eui-icon');
+    </script>
+  </head>
+  <body>
+    <eui-theme theme="light" font-path="./node_modules/@eui/theme/dist/fonts/"></eui-theme>
+    <eui-container default-app="my-gui-main">
+      <eui-icon name="econ" slot="system-left"></eui-icon>
+      <span slot="system-left">Dev Portal Demo</span>
+      <eui-navigation-menu slot="app-navigation"></eui-navigation-menu>
+      <eui-system-bar-actions></eui-system-bar-actions>
+    </eui-container>
+    <script>
+      // load the config files into the Container...
+      const loadConfig = async () => {
+        // fetch config.json (public config file)...
+        const config = await fetch('./config.json').then((response) => response.json());
+        const euiContainer = document.querySelector('eui-container');
+        euiContainer.metaData = config;
+      };
+      loadConfig();
+    </script>
+  </body>
+</html>

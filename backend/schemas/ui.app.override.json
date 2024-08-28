@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "$id": "http://adp.ericsson.com/ui.app.override.json",
+  "description": "UI Application Override Definition.",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/name",
+      "description": "Unique name of the UI entity.",
+      "type": "string"
+    },
+    "displayName": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/displayName",
+      "description": "Name of an UI entity. This will be used as display name in the launcher.",
+      "type": "string"
+    },
+    "version": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/version",
+      "description": "Version of an UI application. Should be in semantic version.",
+      "type": "string"
+    },
+    "descriptionLong": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/descriptionLong",
+      "description": "Long detailed description of an UI entity.",
+      "type": "string"
+    },
+    "descriptionShort": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/descriptionShort",
+      "description": "A short description of an UI entity.",
+      "type": "string"
+    },
+    "type": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/type",
+      "description": "Classification of an UI entity.",
+      "type": "string"
+    },
+    "priority": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/priority",
+      "description": "Display priority order.",
+      "type": "integer"
+    },
+    "tags": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/tags",
+      "description": "Tags associated.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "route": {
+      "$id": "http://adp.ericsson.com/ui.app.json#/properties/route",
+      "description": "Relative or full path of an application.",
+      "type": "string"
+    },
+    "module": {
+      "$id": "http://adp.ericsson.com/ui.app.json#/properties/module",
+      "description": "Module reference which implements this application.",
+      "type": "string"
+    },
+    "url": {
+      "$id": "http://adp.ericsson.com/ui.app.json#/properties/url",
+      "description": "Absolute url of the external application.",
+      "type": "string"
+    },
+    "specification": {
+      "$id": "http://adp.ericsson.com/ui.app.json#/properties/specification",
+      "description": "Location of the application specification file.",
+      "type": "string"
+    },
+    "options": {
+      "$id": "http://adp.ericsson.com/ui.app.json#/properties/options",
+      "description": "Extra runtime options for the application.",
+      "type": "object"
+    },
+    "color": {
+      "$id": "http://adp.ericsson.com/ui.app.json#/properties/color",
+      "description": "Color of the application.",
+      "type": "string"
+    },
+    "acronym": {
+      "$id": "http://adp.ericsson.com/ui.app.json#/properties/acronym",
+      "description": "Acronym of the application.",
+      "type": "string"
+    },
+    "groupNames": {
+      "$id": "http://adp.ericsson.com/ui.app.json#/properties/groupNames",
+      "description": "Groups of an UI application.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "childNames": {
+      "$id": "http://adp.ericsson.com/ui.app.json#/properties/childNames",
+      "description": "Child applications",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hidden": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/hidden",
+      "description": "Default: false. Set to true to hide the app form the menu.",
+      "type": "boolean"
+    }
+  },
+
+  "additionalProperties": false,
+
+  "examples": [
+    {
+      "name": "adp-oam-ui-tools",
+      "displayName": "OAM Tools",
+      "descriptionLong": "ADP.OAM.UI.TOOLS.DESC",
+      "descriptionShort": "ADP.OAM",
+      "version": "0.1.0",
+      "type": "internal",
+      "route": "oam-tools",
+      "priority": 1,
+      "groupNames": ["adp-tools"],
+      "childNames": ["adp-tool-1"],
+      "tags": ["tools"],
+      "specification": "./config/app.config.json",
+      "color": "purple",
+      "acronym": "OAM"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "serviceHelmChartName": "eric-sec-authorization-proxy-oauth2",
+    "usedSchemaVersion": "1.0.0",
+    "fileVersion": "1.0.0",
+    "dateEdited": "2023-10-12"
+  },
+  "interfaceImpls": [
+    {
+      "id": "IMPL.ADP.APOAUTH2.IF.PROXY",
+      "uses": {
+        "netIf": [
+          {
+           "id": "IF.ADP.IAM.ADM.REST.V5",
+            "specVer": "5.0.0",
+            "duringPhases": [
+              "startup",
+              "runtime"
+            ]
+          },
+          {
+            "id": "IF.ADP.IAM.OAUTH2.REST.V3",
+            "specVer": "3.0.0",
+            "duringPhases": [
+              "runtime"
+            ]
+          },
+          {
+            "id": "IF.ADP.IAM.UMA.PROT.REST.V5",
+            "specVer": "5.0.0",
+            "duringPhases": [
+              "runtime"
+            ]
+          },
+          {
+            "id": "IF.ADP.LT.LOGSTREAM.LUMBERJACK.V1",
+            "specVer": "1.2.0",
+            "duringPhases": [
+              "runtime"
+            ]
+          },
+          {
+            "id": "IF.ADP.PM.PROM.SCRAPING.V0",
+            "specVer": "0.0.4",
+            "duringPhases": [
+              "runtime"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

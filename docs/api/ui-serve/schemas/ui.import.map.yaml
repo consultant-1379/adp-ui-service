@@ -1,0 +1,24 @@
+type: object
+description: ESM Import map schema, based on the specification (https://wicg.github.io/import-maps/)
+required:
+  - imports
+  - scopes
+properties:
+  imports:
+    description: A specifier map which contains string-URL mappings.
+    type: object
+    additionalProperties:
+      description:
+        A moduleString-URL entry, where the key can be used in ESM import expressions which is resolved to URL.
+        Multiple strings **MAY** resolve to the same URL.
+      type: string
+  scopes:
+    description: Ordered map of URLs to specifier maps.
+    type: object
+    additionalProperties:
+      description: A scope entry of URL-specifier map pairs.
+        The URL defines the module scope where the specifier map **WILL** override the global import definitions.
+      type: object
+      additionalProperties:
+        description: A moduleString-URL entry, which **MUST** be applied in the current URL scope.
+        type: string

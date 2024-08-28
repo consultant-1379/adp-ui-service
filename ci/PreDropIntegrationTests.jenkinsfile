@@ -1,0 +1,120 @@
+pipeline {
+  agent {
+    node('presentation')
+  }
+  options {
+    ansiColor('xterm')
+    timeout(time: 1, unit: 'HOURS')
+    buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '30'))
+  }
+  stages {
+    stage('Clean') {
+      steps {
+        sh 'bob clean'
+      }
+    }
+    stage('Init stage') {
+      failFast true
+      parallel {
+        stage('Check Bob rules') {
+          when {
+            expression {
+              return  sh(
+                script: 'bob -q ruleset-validation-helper:validate-rules',
+                returnStdout: true
+              ).trim() != '0'
+            }
+          }
+          steps {
+            sh 'bob --dryrun $(bob -lq)'
+          }
+        }
+        stage('Set Bob variables') {
+          steps {
+            withCredentials([
+              usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+              usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            ]) {
+              sh 'bob init-pre-drop'
+            }
+          }
+        }
+      }
+    }
+    stage('Install npm dependencies') {
+      steps {
+        sh 'bob npm-install'
+      }
+    }
+    stage('Generate help content') {
+      steps {
+        ansiColor('xterm') {
+          sh 'bob generate-and-copy-help-content'
+        }
+      }
+    }
+    stage('Validate structured data') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI')]) {
+          sh 'bob test-structured-data'
+        }
+      }
+    }
+    stage('K8S Build & Test') {
+      stages {
+        stage('Docker image') {
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI')]) {
+              sh 'bob image'
+            }
+          }
+        }
+        stage('Helm package') {
+          steps {
+            withCredentials([
+              usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI')
+            ]) {
+              ansiColor('xterm') {
+                sh 'bob package'
+              }
+            }
+          }
+        }
+        stage('K8S Test') {
+          steps {
+            lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+              withCredentials([
+                usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+                usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+                file(credentialsId: env.system, variable: 'KUBECONFIG')
+              ]) {
+                ansiColor('css') {
+                  sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml k8s-test-nodeport'
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  post {
+    always {
+      archiveArtifacts artifacts: 'integration-tests/test/backend/reports/mochawesome/mochawesome.html', allowEmptyArchive: true
+      archiveArtifacts artifacts: 'integration-tests/test/ui/allure-report/index.html', allowEmptyArchive: true
+      archiveArtifacts artifacts: '.bob/structured-data/eric-adp-gui-aggregator-service-structured-data.json', allowEmptyArchive: true
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: '.bob/structured-data/',
+        reportFiles: 'artifact_dr_check_report.html',
+        reportName: 'Artifactory DR Checker Report'
+      ])
+    }
+    cleanup {
+      sh "docker ps -a -q --filter label=$BUILD_TAG | xargs --no-run-if-empty  docker stop"
+      sh "docker ps -a -q --filter label=$BUILD_TAG | xargs --no-run-if-empty  docker rm"
+    }
+  }
+}

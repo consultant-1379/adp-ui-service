@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-general-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "appArmorProfile": {
+      "$id": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/appArmorProfile",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "seccompProfile": {
+      "$id": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/seccompProfile",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "productInfo": {
+      "$id": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/productInfo",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "metrics": {
+      "$id": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/metrics",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "resources": {
+      "$id": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/resources",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    }
+  }
+}

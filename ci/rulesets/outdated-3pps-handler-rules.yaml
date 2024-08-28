@@ -1,0 +1,67 @@
+modelVersion: 2.0
+import:
+  common: ../../ruleset2.0.yaml
+  functions: ../../ruleset-functions.yaml
+
+properties:
+  - jira-project-name: ADPRS
+  - outdated-3pps-json: outdated-3pps-config.json
+  - jira-task-summary: "[GAS] Newer versions of 3PPs are available for uplift"
+  - jira-task-severity: "High"
+  - jira-team-id: 5170 # EEA Presentation Global Logic team Id
+  - jenkins-pipeline-page: https://seliius27190.seli.gic.ericsson.se:8443/job/adp-ui-service-outdated-3pps-handler
+  - jira-description: "\n*[Action Required]:*\n\t* Create a subtask and copy outdated 3pps table from the last comment to the subtask. If there are not comments then copy a table from this task description.\n\t* Uplift outdated 3pps which described in the subtask.\n\t* When subtask is done then this task has to be marked as 'Done' as well.\n\n{*}Outdated direct, production 3pps:{*}"
+
+env:
+  - JIRA_API_TOKEN (default=notset)
+  - ADDITIONAL_JIRA_MANAGER_PARAMS (default=notset)
+  - MANAGE_JIRA (default=notset)
+  - BUILD_NUMBER (default=notset)
+  - ARM_USER_SELI (default=notset)
+  - ARM_TOKEN_SELI (default=notset)
+
+var:
+  - additional-params
+  - build-reference
+
+rules:
+  init:
+    - rule: functions.init-selected-version
+      properties:
+        - arm-api-user: ${env.ARM_USER_SELI}
+        - arm-api-token: ${env.ARM_TOKEN_SELI}
+        - helm-version: "notset"
+    - rule: common.init-outdated-3pps-handler
+
+  generate-outdated-3pps-list:
+    - task: generate-list
+      docker-image: common.nodejs-builder
+      docker-flags:
+        - "--env NODE_ENV=" # Unset production flag
+        - "--env ARM_NPM_TOKEN=${var.common.token}"
+        - "--env RND_ARM_NPM_TOKEN=${var.common.rnd-token}"
+      cmd:
+        - npm run outdated:all:generateReport
+
+  manage-jira-cards:
+    - task: save-additional-params
+      cmd:
+        - if [[ "${env.MANAGE_JIRA}" == "true" ]]; then echo ${env.ADDITIONAL_JIRA_MANAGER_PARAMS} > .bob/var.additional-params; fi
+    - task: manage-cards
+      docker-image: common.ci-toolbox
+      cmd: >
+        /bin/bash -c '
+        outdated-3pps-to-jira.js
+        --project ${jira-project-name}
+        --token ${env.JIRA_API_TOKEN}
+        --component "${common.jira-component-name}"
+        --summary "${jira-task-summary}"
+        --severity ${jira-task-severity}
+        --chart-name ${common.helm-chart-name}
+        --chart-version ${var.functions.selected-version}
+        --jira-team-id ${jira-team-id}
+        --jenkins-build-page "${jenkins-pipeline-page}/${env.BUILD_NUMBER}"
+        --outdated-3pps-json ${outdated-3pps-json}
+        --jira-description "${jira-description}"
+        ${var.additional-params}
+        '

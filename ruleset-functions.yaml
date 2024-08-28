@@ -1,0 +1,248 @@
+modelVersion: 2.0
+
+docker-images:
+  - adp-release-auto: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/bob-adp-release-auto:latest
+  - nodejs-builder: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/adp-nodejs-lts-builder-image:20.12.2-0
+  - k8-test: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/bob-py3kubehelmbuilder:latest
+
+properties:
+  # common constants:
+  - docker-image-name: eric-adp-gui-aggregator-service
+  - image-registry: ${env.DOCKER_REGISTRY}
+  - helm-chart-repo-server: ${env.HELM_CHART_ARTIFACTORY}/artifactory
+  - helm-chart-name: eric-adp-gui-aggregator-service
+  - helm-drop: proj-eea-drop-helm
+  - helm-release: proj-eea-released-helm
+  - helm-drop-artifactory: ${helm-chart-repo-server}/${helm-drop}/${helm-chart-name}
+  - helm-chart-released-repo: ${helm-chart-repo-server}/${helm-release}
+  - helm-chart-name-ha: eric-oss-help-aggregator
+  - helm-drop-artifactory-ha: ${helm-chart-repo-server}/${helm-drop}/${helm-chart-name-ha}/
+  - mocks-config-yaml: ci/config/mocks-config.yaml
+  - netrc-path: .bob/.netrc
+  # list of all Docker registries used in this repo:
+  - docker-registry-default: armdocker.rnd.ericsson.se
+  # properties to be overriden / defined by caller:
+  - image-repo-path: proj-eea-dev
+  - helm-chart-repo-path: proj-eea-dev-helm
+  - run-type: "dev"
+  - marketplace-stylesheet: /usr/share/marketplace/resources/pdf_style.css
+  - pri-param: ""
+  - file-to-upload: ""
+  - repo-for-upload: ""
+  - upload-api-token: ""
+  - is-release: "false"
+  - report-name: ""
+  - report-template-file: ""
+  - template-variables: ""
+  - report-output-path: ""
+  - report-generation-config: ""
+  - version: ""
+  - deployment-to-uninstall: ""
+
+var:
+  - version
+  - mock-version
+  - ha-mock-version
+  - ha-version
+  - run-type
+  - k8s-namespace
+  - mock-service-iccr-value
+  - ingress-hostname
+  - ingress-iccr-ip
+  - last-released-version
+  - selected-version
+  - helm-chart-repo-fqdn
+
+env:
+  - DOCKER_REGISTRY (default=armdocker.rnd.ericsson.se)
+  - HELM_CHART_ARTIFACTORY (default=https://arm.seli.gic.ericsson.se)
+  - BUILD_TAG (default=proj-eea-app-local)
+  - GAS_VERSION (default=>0.0.0-0)
+  - ARM_TOKEN_SELI (default=notset)
+  - PWD (default=notset)
+  - KUBECONFIG (default=notset) #Have to set before run
+  - ARM_USER_SELI (default=test)
+  - ARM_TOKEN_SELI (default=test)
+
+rules:
+  # common init tasks
+  init:
+    - task: version
+      docker-image: adp-release-auto
+      cmd:
+        - version-handler generate
+          --is-release ${is-release}
+          --output version
+          --git-repo-path .
+          --version-prefix-file "VERSION_PREFIX"
+        - sed -e 's@-.*$@@' .bob/var.version > .bob/var.semver
+        - sed -e 's/\..*$//' .bob/var.version > .bob/var.doc-version
+    - task: save-run-type
+      cmd: echo "${run-type}" > .bob/var.run-type
+    - task: version-validator
+      cmd: >
+        bash -c '
+        if [[ "${var.run-type}" == "drop" ]]  && [[ "${var.version}" == *".dirty.adpauto"* ]]; then
+            echo "ERROR: version contains dirty.adpauto postfix. Not a valid version."
+            exit 1
+        fi'
+    - task: commit
+      docker-image: adp-release-auto
+      cmd: git rev-parse --short HEAD > .bob/var.commithash
+    - task: get-branch
+      docker-image: adp-release-auto
+      cmd: git rev-parse --abbrev-ref HEAD > .bob/var.branch
+    - task: rstate
+      docker-image: adp-release-auto
+      cmd: get_rstate.py ${var.version} > .bob/var.rstate
+    - task: image-repo-path-internal
+      cmd: echo "${image-repo-path}" > .bob/var.image-repo-path-internal
+    - task: image-full-name-internal
+      cmd: echo "${image-registry}/${image-repo-path}/${docker-image-name}" > .bob/var.image-full-name-internal
+    - task: helm-chart-repo-internal
+      cmd: echo "${helm-chart-repo-server}/${helm-chart-repo-path}" > .bob/var.helm-chart-repo-internal
+    - task: gas-mock-version
+      cmd: >
+        bash -c '
+        if [ "${var.run-type}" = "demo" ] || [ "${var.run-type}" = "ci-test" ];
+          then
+            if [ "${env.GAS_VERSION}" = ">0.0.0-0" ];
+              then
+                curl -L -H "X-JFrog-Art-Api:${env.ARM_TOKEN_SELI}" ${helm-drop-artifactory} -o .bob/var.gas-all-releases;
+                sed -i "s/[a-zA-Z]\+//g;s/< =*.*-----//g;s/<.*$//g;s/.*>.*$//g;s/[.][0-9]*$//g;s/[.] *$//g;/^$/d" .bob/var.gas-all-releases;
+                sort -V -u -b -r -o .bob/var.gas-all-releases .bob/var.gas-all-releases;
+                cut -d" " -f1 .bob/var.gas-all-releases | sed -n 1p > .bob/var.mock-version;
+              else
+                echo "${env.GAS_VERSION}" | sed "s/+/-/;s/>/~/" > .bob/var.mock-version;
+            fi
+          else
+            echo "${var.version}" > .bob/var.mock-version;
+        fi'
+    - task: ha-version
+      cmd: >
+        bash -c '
+        if [ "${var.run-type}" != "precodereview" ];
+          then
+            curl -L -H "X-JFrog-Art-Api:${env.ARM_TOKEN_SELI}" ${helm-drop-artifactory-ha} -o .bob/var.ha-all-releases;
+            sed -i "s/[a-zA-Z]\+//g;s/< =*.*----//g;s/<.*$//g;s/.*>.*$//g;s/[.][0-9]*$//g;s/[.] *$//g;/^$/d" .bob/var.ha-all-releases;
+            sort -V -u -b -r -o .bob/var.ha-all-releases .bob/var.ha-all-releases;
+            cut -d" " -f1 .bob/var.ha-all-releases | sed -n 1p > .bob/var.ha-version;
+        fi'
+    - task: ha-mock-version
+      cmd: >
+        bash -c '
+        if [ "${var.run-type}" != "precodereview" ];
+          then
+            curl -L -H "X-JFrog-Art-Api:${env.ARM_TOKEN_SELI}" ${helm-drop-artifactory-ha} -o .bob/var.ha-mock-all-releases;
+            sed -i "s/[a-zA-Z]\+//g;s/< =*.*----//g;s/<.*$//g;s/.*>.*$//g;s/[.][0-9]*$//g;s/[.] *$//g;/^$/d" .bob/var.ha-mock-all-releases;
+            sort -V -u -b -r -o .bob/var.ha-mock-all-releases .bob/var.ha-mock-all-releases;
+            cut -d" " -f1 .bob/var.ha-mock-all-releases | sed -n 1p > .bob/var.ha-mock-version;
+        fi'
+    - task: set-pri_params
+      cmd: echo "${pri-param}" > .bob/var.pri_params
+    - task: set-fossa-id
+      cmd: uuidgen -r > .bob/var.fossa-id
+    - task: set-default-helm-chart-file-name
+      cmd: echo "${helm-chart-name}-${var.version}.tgz" > .bob/var.helm-chart-file-name
+    - rule: generate-netrc
+    - task: set-default-additional-dependencies-values
+      cmd: echo "" > .bob/var.additional-dependencies-chart-values
+    - task: set-default-additional-dependencies-values-ha
+      cmd: echo "" > .bob/var.additional-dependencies-chart-values-ha
+    - task: set-default-additional-dependencies-values-file
+      cmd: echo "${mocks-config-yaml}" > .bob/var.additional-dependencies-chart-values-file
+    - task: set-k8s-namespace
+      cmd: echo ${env.BUILD_TAG} > .bob/var.k8s-namespace;
+    - task: docker-login
+      cmd:
+        - echo ${env.ARM_TOKEN_SELI} | docker login ${docker-registry-default} -u ${env.ARM_USER_SELI} --password-stdin
+
+  generate-netrc:
+    - task: set-artifactory-fqdn
+      cmd: echo ${helm-chart-repo-server} | awk -F[/:] '{print $4}' > .bob/var.helm-chart-repo-fqdn
+    - task: create-netrc-file
+      cmd:
+        - echo -e machine ${var.helm-chart-repo-fqdn} >> ${netrc-path}
+        - echo -e login ${env.ARM_USER_SELI} >> ${netrc-path}
+        - echo -e password ${env.ARM_TOKEN_SELI} >> ${netrc-path}
+
+  # common test tasks
+  test:
+    - task: get-ip-from-k8s
+      docker-image: k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.KUBECONFIG}"
+        - "--volume ${env.KUBECONFIG}:${env.KUBECONFIG}:ro"
+        - "--volume ${env.PWD}:${env.PWD}"
+      cmd:
+        - kubectl get service -n ${var.k8s-namespace} -o=jsonpath='{.items[?(@.spec.type == "LoadBalancer")].status.loadBalancer.ingress[0].ip}' > .bob/var.ingress-iccr-ip
+        - echo ci.gas.${var.ingress-iccr-ip}.nip.io > .bob/var.ingress-hostname
+        - echo "${var.ingress-iccr-ip}" > .bob/var.mock-service-iccr-value
+
+  # common release tasks
+  release:
+    - task: upload-file
+      docker-image: adp-release-auto
+      cmd: upload_file.sh
+        --filename=${file-to-upload}
+        --repository=${repo-for-upload}
+        --api-token=${upload-api-token}
+
+  # common report generation tasks
+  report-generation:
+    - task: fill-ejs-template
+      docker-image: nodejs-builder
+      cmd:
+        - mkdir -p ${report-output-path}/final
+        - node node_modules/ejs/bin/cli.js ${report-template-file} ${template-variables} -o ./${report-output-path}/${report-name}.md
+    - task: echo-messages
+      cmd:
+        - "echo 'documents:' > ./${report-output-path}/cfg.yaml"
+        - "echo '  - name: ${report-name}' >> ./${report-output-path}/cfg.yaml"
+        - "echo '    files:' >> ./${report-output-path}/cfg.yaml"
+        - "echo '      - ./${report-name}.md' >> ./${report-output-path}/cfg.yaml"
+    - task: convert-to-pdf
+      docker-image: adp-release-auto
+      cmd:
+        - doc-handler generate --config ./${report-output-path}/cfg.yaml
+          --output ./${report-output-path}/pdf
+          --format pdf
+          --stylesheet ${marketplace-stylesheet}
+
+  init-selected-version:
+    - task: download-last-released-chart
+      docker-image: k8-test
+      cmd: helm pull ${helm-chart-name}
+        --repo ${helm-chart-released-repo}
+        --username ${arm-api-user}
+        --password ${arm-api-token}
+        --destination .bob
+    - task: get-last-released-version
+      cmd: ls .bob | grep -oP '(\d{1,2}[\.+]){3}\d+' > .bob/var.last-released-version
+    - task: get-selected-version
+      cmd:
+        - echo ${var.last-released-version} | tr + - > .bob/var.selected-version
+        - if [[ "${helm-version}" != "notset" ]]; then echo ${helm-version} | tr + - > .bob/var.selected-version; fi
+
+  uninstall-gas:
+    - task: uninstall
+      docker-image: k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.KUBECONFIG}"
+        - "--volume ${env.KUBECONFIG}:${env.KUBECONFIG}:ro"
+        - "--volume ${env.PWD}:${env.PWD}"
+      cmd:
+        - helm uninstall -n ${var.k8s-namespace} ${deployment-to-uninstall}
+
+  get-free-loadbalancer-ip:
+    - task: get-free-loadbalancer-ip-from-k8s
+      docker-image: k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.KUBECONFIG}"
+        - "--volume ${env.KUBECONFIG}:${env.KUBECONFIG}:ro"
+        - "--volume ${env.PWD}:${env.PWD}"
+      cmd:
+        - ci/scripts/get-free-loadbalancer-ip.sh > .bob/var.free-loadbalancer-ip

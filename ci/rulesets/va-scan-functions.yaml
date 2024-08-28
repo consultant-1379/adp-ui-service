@@ -1,0 +1,458 @@
+modelVersion: 2.0
+import:
+  common: ../../ruleset2.0.yaml
+
+properties:
+  # MUST TO OVERRIDE
+  - helm-chart-name: helm-chart-name
+  - image-name: image-name
+  - version: 1.0.0-0
+  - nmap-config-path: path/to/the/nmap/config
+  - zap-config-path: path/to/the/zap/config
+  - mitigation-config-path: path/to/the/mitigation/config
+  - aggregated-vulns-template: path/to/the/aggregated-vulnerabilities.jinja2
+  - jira-component-name: placeholder-component-name
+  # OPTIONAL TO OVERRIDE
+  - xray-scanpath-base: ARM-SEKA/proj-eea-ci-internal-docker-global/proj-eea-ci-internal
+  - image-registry-base-path: armdocker.rnd.ericsson.se/proj-eea-ci-internal
+  - arm-report-base: https://arm.seli.gic.ericsson.se/artifactory/proj-eea-reports-generic-local
+  - image-scan-timeout: 1000
+  - xray-number-of-retries: 200
+  - report-folder: .bob/reports
+  - output-version: ${version}
+  - xray-reports: ${report-folder}/xray
+  - xray-raw-reports: ${report-folder}/xray-raw
+  - xray-report-file: ${xray-reports}/${helm-chart-name}_${output-version}_${image-name}_xray_report.json
+  - xray-raw-report-file: ${xray-raw-reports}/${helm-chart-name}_${output-version}_${image-name}_raw_xray_report.json
+  - anchore-reports: ${report-folder}/anchore
+  - nmap-reports: ${report-folder}/nmap
+  - cis-cat-reports: ${report-folder}/cis-cat
+  - trivy-reports: ${report-folder}/trivy
+  - zap-reports: ${report-folder}/zap
+  - va-report-file: ${report-folder}/${helm-chart-name}_${version}_va-report.md
+  - va-report-file-fix: ${report-folder}/va-report.md
+  - eridoc-config-path: path/to/the/eridoc/config
+  - anchore-image: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/anchore-inline-scan:latest
+  - trivy-image: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/trivy-inline-scan:latest
+  - cis-cat-benchmark: "CIS_SUSE_Linux_Enterprise_15_Benchmark_v1.1.1-xccdf.xml 'Level 2 - Server'"
+  - cis-cat-report-prefix: cis-cat-report
+  - cis-cat-applicability-spec: path/to/the/specfile
+  - cis-cat-test-target-image-name: cis-cat-test-target-image
+  - cis-cat-target-image-dockerfile: path/to/the/target/image/dockerfile
+  - cis-cat-target-image-dockerfile-context: path/to/the/target/image/dockerfile/context
+  - aggregated-vulns-result: ${report-folder}/aggregated-vulns.yaml
+  - finalized-vulns-path: ${report-folder}
+  - defensics-reports: ${report-folder}/defensics
+  - defensics-home: path/to/defensics/homedir
+  - fuzz-testplan-path: path/to/the/fuzz/testplan
+  - kubesec-reports: ${report-folder}/kubesec
+  - kubesec-config: path/to/kubesec/config
+  - kubeaudit-workdir: /opt/va-scan-kubeaudit/
+  - kubeaudit-reports: ${report-folder}/kubeaudit
+  - kubeaudit-config: path/to/kubeaudit/config
+  - cis-cat-conf: ci/va/cis-cat/conf
+
+env:
+  # MUST BE SET
+  - ARM_USER_SELI (default=notset)
+  - ARM_USER_SERO (default=notset)
+  - ARM_TOKEN_SELI (default=notset)
+  - ARM_TOKEN_SERO (default=notset)
+  - KUBECONFIG (default=notset)
+  # OPTIONAL
+  - ERIDOC_USERNAME (default=notset)
+  - ERIDOC_PASSWORD (default=notset)
+  - VHUB_TOKEN (default=notset)
+  - UPLOAD_VHUB (default=false)
+  - ADDITIONAL_JIRA_MANAGER_PARAMS (default=notset)
+  - FUZZ_SCAN_MAX_CASES (default=notset)
+  - FUZZ_SCAN_MAX_TIME (default=notset)
+
+var:
+  - additional-va-generator-attributes
+  - va-xray-report-parameter
+  - va-xray-raw-report-parameter
+
+docker-images:
+  - trivy: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/trivy-inline-scan:latest
+  - adp-grype-scanner: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/va-image-scanning-grype:latest
+  - cis-cat-scanner: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/va-image-scan-ciscat-assessor:latest
+  - va-scan-kubesec: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/va-scan-kubesec:latest
+  - va-scan-kubeaudit: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/va-scan-kubeaudit:latest
+
+rules:
+  anchore-scan:
+    - task: fetch-image
+      cmd: docker pull ${image-registry-base-path}/${image-name}:${version}
+    - task: create-report-folder
+      cmd: mkdir -p ${anchore-reports}
+    - task: scan
+      docker-image: adp-grype-scanner
+      docker-in-docker: socket
+      cmd: grype_scan
+        --image ${image-registry-base-path}/${image-name}:${version}
+        --report-dir ${anchore-reports}
+        --grype-parameters '--scope squashed'
+    - task: move-report-to-the-target
+      cmd:
+        - mv ${anchore-reports}/${image-name}_${version}-vuln.json ${anchore-reports}/${helm-chart-name}_${output-version}_${image-name}-vuln.json
+        - mv ${anchore-reports}/${image-name}_${version}-details.json ${anchore-reports}/${helm-chart-name}_${output-version}_${image-name}-details.json
+
+  xray-report:
+    - task: create-report-folder
+      cmd: mkdir -p ${xray-reports}
+    - task: create-report-raw-folder
+      cmd: mkdir -p ${xray-raw-reports}
+    - task: fetch-xray-report
+      docker-image: common.adp-release-auto
+      cmd: >
+        bash -c '
+        for i in {0..${xray-number-of-retries}}
+          do
+            fetch-xray --scanpath ${xray-scanpath-base}/${image-name}/${version} --user ${env.ARM_USER_SELI}  --apikey ${env.ARM_TOKEN_SELI} --output ${xray-report-file} --raw-output ${xray-raw-report-file};
+            check_rc=$?;
+            if [[ $check_rc -eq 2 ]]; then
+              if [[ $i -eq ${xray-number-of-retries} ]]; then
+                echo "Number of retries are exceeded! X-ray scan is failed!"
+                exit 1
+              fi
+              echo "Report was unreachable 10 sec until retry"
+              sleep 10
+            elif [[ $check_rc -eq 1 ]]; then
+              exit 1
+            else
+              echo "Report is fetched. Return code:"
+              echo $check_rc
+              break
+            fi
+          done
+        if [ ! -f "${xray-report-file}" ]; then
+          echo "Report is missing! X-ray scan is failed!"
+          exit 1
+        fi'
+
+  nmap-scan:
+    - task: create-report-folder
+      cmd: mkdir -p ${nmap-reports}
+    - task: scan
+      docker-image: common.k8-test
+      docker-flags:
+        - --network=host
+        - --env KUBECONFIG=${env.KUBECONFIG}
+        - --volume ${env.KUBECONFIG}:${env.KUBECONFIG}:ro
+      cmd: /test.py
+        --kubernetes-admin-conf=${env.KUBECONFIG}
+        --helm-user=${env.ARM_USER_SERO}
+        --arm-api-token=${env.ARM_TOKEN_SERO}
+        --kubernetes-namespace=${var.common.k8s-namespace}
+        --nmap-config-file=${nmap-config-path}
+        --nmap-test
+
+  cis-cat-scan:
+    - task: fetch-image
+      cmd: docker pull ${image-registry-base-path}/${image-name}:${version}
+    - task: build-target-image
+      cmd: docker build
+        --tag ${cis-cat-test-target-image-name}:${version}
+        --build-arg TARGET_IMAGE=${image-registry-base-path}/${image-name}:${version}
+        --build-arg BASE_OS_VERSION=${common.image-base-os-version}
+        --file ${cis-cat-target-image-dockerfile}
+        ${cis-cat-target-image-dockerfile-context}
+    - task: create-report-folder
+      cmd: mkdir -p ${cis-cat-reports}
+    - task: execute-cis-cat-scanner
+      docker-image: cis-cat-scanner
+      docker-in-docker: socket
+      docker-flags:
+        - "--env HOST_CIS_CAT_WS=$PWD"
+        - "--volume $PWD/${cis-cat-conf}:/opt/cis_cat_scanner/src/config"
+      cmd: cis-cat-assessor-scan
+        --target-image ${cis-cat-test-target-image-name}:${version}
+        --benchmark ${cis-cat-benchmark}
+        --report-dir report_dir
+        --report-name-prefix ${cis-cat-report-prefix}
+        --applicability-spec ${cis-cat-applicability-spec}
+    - task: copy-cis-cat-reports
+      cmd: cp -a $PWD/cis_cat_assessor/report_dir/*_enriched.json ${cis-cat-reports}
+    - task: rm-target-image-for-cis-cat-scan
+      cmd: docker image rm -f ${cis-cat-test-target-image-name}:${version}
+
+  kubesec-scan:
+    - task: helm-template
+      docker-image: va-scan-kubesec
+      cmd: "helm template charts/${helm-chart-name} --output-dir=.bob/helm_kubesec"
+    - task: create-report-folder
+      cmd:
+        - mkdir -p ${kubesec-reports}
+    - task: kube-scan-test
+      docker-image: va-scan-kubesec
+      docker-flags:
+        - "--workdir /opt/va-scan-kubesec/"
+        - "--volume ${kubesec-config}:/opt/va-scan-kubesec/conf"
+        - "--volume $PWD/.bob/helm_kubesec/:/tmp/src"
+        - "--volume $PWD/${kubesec-reports}:/tmp/reports"
+      cmd: " "
+
+  kubeaudit-scan:
+    - task: helm-template
+      docker-image: common.adp-release-auto
+      cmd: "helm template charts/${helm-chart-name} --output-dir=.bob/kubeaudit_src"
+    - task: create-report-folder
+      cmd:
+        - mkdir -p ${kubeaudit-reports}
+    - task: kubeaudit-scan
+      docker-image: va-scan-kubeaudit
+      docker-flags:
+        - "--workdir ${kubeaudit-workdir}"
+        - "--volume ${kubeaudit-config}:${kubeaudit-workdir}/conf"
+        - "--volume $PWD/.bob/kubeaudit_src/:/tmp/src"
+        - "--volume $PWD/${kubeaudit-reports}:/tmp/reports"
+      cmd: " "
+
+  trivy-scan:
+    - task: fetch-image
+      cmd: docker pull ${image-registry-base-path}/${image-name}:${version}
+    - task: create-report-folder
+      cmd: mkdir -p ${trivy-reports}
+    - task: scan
+      docker-image: trivy
+      docker-in-docker: socket
+      cmd: --format json --output ${trivy-reports}/${helm-chart-name}_${output-version}_${image-name}_trivy_report.json --timeout $((${image-scan-timeout} /60))m0s ${image-registry-base-path}/${image-name}:${version}
+
+  zap-scan:
+    - task: create-report-folder
+      cmd: mkdir -p ${zap-reports}
+    - task: scan
+      docker-image: common.k8-test
+      docker-flags:
+        - --network=host
+        - --env KUBECONFIG=${env.KUBECONFIG}
+        - --volume ${env.KUBECONFIG}:${env.KUBECONFIG}:ro
+      cmd: test.py
+        --kubernetes-admin-conf=${env.KUBECONFIG}
+        --helm-user=${env.ARM_USER_SERO}
+        --arm-api-token=${env.ARM_TOKEN_SERO}
+        --kubernetes-namespace=${var.common.k8s-namespace}
+        --only-zap-test
+        --zap-config=${zap-config-path}
+
+  fuzz-test:
+    - task: create-report-folder
+      cmd: mkdir -p ${defensics-reports}
+    - task: fuzz-test
+      docker-image: common.k8-test
+      docker-flags:
+        - --network=host
+        - --env KUBECONFIG=${env.KUBECONFIG}
+        - --env DEFENSICS_HOME=/tmp/defensics/home
+        - --volume ${env.KUBECONFIG}:${env.KUBECONFIG}:ro
+        - --volume ${defensics-home}:/tmp/defensics/home
+      cmd:
+        - test.py
+          --helm-v3
+          --helm-user=${env.ARM_USER_SERO}
+          --arm-api-token=${env.ARM_TOKEN_SERO}
+          --kubernetes-namespace=${var.common.k8s-namespace}
+          --defensics-test
+          --defensics-test-suite="web-app"
+          --defensics-test-plan-dir="${fuzz-testplan-path}"
+          --defensics-test-report-dir="${defensics-reports}"
+          --defensics-suite-properties="host eric-adp-gui-aggregator-service-http"
+          --defensics-suite-properties="port 3000"
+          --defensics-test-internal-host
+          --defensics-test-options=" ' --verbose --max-run-cases ${env.FUZZ_SCAN_MAX_CASES} --max-run-time ${env.FUZZ_SCAN_MAX_TIME} ' "
+
+  publish-reports-to-arm:
+    - task: va-report
+      docker-image: common.adp-release-auto
+      cmd: upload_file.sh
+        --filename=${va-report-file}
+        --repository=${arm-report-base}/${helm-chart-name}
+        --api-token=${env.ARM_TOKEN_SELI}
+    - task: xray
+      docker-image: common.adp-release-auto
+      cmd: /bin/bash -c '
+        for f in ${xray-reports}/*.json; do
+        upload_file.sh
+        --filename=$f
+        --repository=${arm-report-base}/${helm-chart-name}
+        --api-token=${env.ARM_TOKEN_SELI}
+        ;done'
+    - task: anchore
+      docker-image: common.adp-release-auto
+      cmd: /bin/bash -c '
+        for f in ${anchore-reports}/*.json; do
+        upload_file.sh
+        --filename=$f
+        --repository=${arm-report-base}/${helm-chart-name}
+        --api-token=${env.ARM_TOKEN_SELI}
+        ;done'
+    - task: trivy
+      docker-image: common.adp-release-auto
+      cmd: /bin/bash -c '
+        for f in ${trivy-reports}/*.json; do
+        upload_file.sh
+        --filename=$f
+        --repository=${arm-report-base}/${helm-chart-name}
+        --api-token=${env.ARM_TOKEN_SELI}
+        ;done'
+    - task: kubesec
+      docker-image: common.adp-release-auto
+      cmd:
+        - /bin/bash -c 'CURRENT_FOLDER=$PWD && cd ${kubesec-reports} && tar -cvzf $CURRENT_FOLDER/${report-folder}/${helm-chart-name}_${version}_kubesec_report.tgz *'
+        - upload_file.sh
+          --filename=${report-folder}/${helm-chart-name}_${version}_kubesec_report.tgz
+          --repository=${arm-report-base}/${helm-chart-name}
+          --api-token=${env.ARM_TOKEN_SELI}
+    - task: kubeaudit
+      docker-image: common.adp-release-auto
+      cmd:
+        - /bin/bash -c 'CURRENT_FOLDER=$PWD && cd ${kubeaudit-reports} && tar -cvzf $CURRENT_FOLDER/${report-folder}/${helm-chart-name}_${version}_kubeaudit_report.tgz *'
+        - upload_file.sh
+          --filename=${report-folder}/${helm-chart-name}_${version}_kubeaudit_report.tgz
+          --repository=${arm-report-base}/${helm-chart-name}
+          --api-token=${env.ARM_TOKEN_SELI}
+    - task: nmap
+      docker-image: common.adp-release-auto
+      cmd:
+        - /bin/bash -c 'CURRENT_FOLDER=$PWD && cd ${nmap-reports}/nmap_report && tar -cvzf $CURRENT_FOLDER/${report-folder}/${helm-chart-name}_${version}_nmap_report.tgz *'
+        - upload_file.sh
+          --filename=${report-folder}/${helm-chart-name}_${version}_nmap_report.tgz
+          --repository=${arm-report-base}/${helm-chart-name}
+          --api-token=${env.ARM_TOKEN_SELI}
+    - task: zap
+      docker-image: common.adp-release-auto
+      cmd:
+        - /bin/bash -c 'CURRENT_FOLDER=$PWD && cd ${zap-reports} && tar -cvzf $CURRENT_FOLDER/${report-folder}/${helm-chart-name}_${version}_owasp_zap_report.tgz *'
+        - upload_file.sh
+          --filename=${report-folder}/${helm-chart-name}_${version}_owasp_zap_report.tgz
+          --repository=${arm-report-base}/${helm-chart-name}
+          --api-token=${env.ARM_TOKEN_SELI}
+    - task: defensics
+      docker-image: common.adp-release-auto
+      cmd:
+        - /bin/bash -c 'CURRENT_FOLDER=$PWD && cd ${defensics-reports} && tar -cvzf $CURRENT_FOLDER/${report-folder}/${helm-chart-name}_${version}_defensics_report.tgz *'
+        - upload_file.sh
+          --filename=${report-folder}/${helm-chart-name}_${version}_defensics_report.tgz
+          --repository=${arm-report-base}/${helm-chart-name}
+          --api-token=${env.ARM_TOKEN_SELI}
+    - task: cis-cat
+      docker-image: common.adp-release-auto
+      cmd:
+        - /bin/bash -c 'CURRENT_FOLDER=$PWD && cd ${cis-cat-reports} && tar -cvzf $CURRENT_FOLDER/${report-folder}/${helm-chart-name}_${version}_cis-cat-report.tgz *'
+        - upload_file.sh
+          --filename=${report-folder}/${helm-chart-name}_${version}_cis-cat-report.tgz
+          --repository=${arm-report-base}/${helm-chart-name}
+          --api-token=${env.ARM_TOKEN_SELI}
+
+  publish-va-report-to-eridoc:
+    - task: copy-va-report-with-fix-name-for-eridoc
+      cmd: cp ${va-report-file} ${va-report-file-fix}
+    - task: upload
+      docker-image: common.adp-release-auto
+      docker-flags:
+        - --env ERIDOC_USERNAME="${env.ERIDOC_USERNAME}"
+        - --env ERIDOC_PASSWORD="${env.ERIDOC_PASSWORD}"
+      cmd:
+        - eridoc upload --config ${eridoc-config-path} --debug --no-validate-certificates --set semver=${var.common.semver}
+
+  generate-upload-VA-report:
+    - task: reset-generated-paramaters
+      cmd:
+        - rm -rf .bob/var.va-xray-report-parameter
+        - rm -rf .bob/var.va-xray-raw-report-parameter
+    - task: generate-xray-parameter
+      cmd: /bin/bash -c '
+        for f in ${xray-reports}/*.json; do
+        echo " --xray-report $f " >> .bob/var.va-xray-report-parameter
+        ;done'
+    - task: generate-xray-raw-parameter
+      cmd: /bin/bash -c '
+        for f in ${xray-raw-reports}/*.json; do
+        echo " --raw-xray-report $f " >> .bob/var.va-xray-raw-report-parameter
+        ;done'
+    - task: configure-upload-vhub-switcher
+      cmd: /bin/bash -c '
+        if [[ ${env.UPLOAD_VHUB} == true ]]; then
+        echo " --upload-scan-results --vhub-api-token ${env.VHUB_TOKEN} --upload-va-config ${mitigation-config-path} " > .bob/var.additional-va-generator-attributes;
+        else
+        echo "" > .bob/var.additional-va-generator-attributes;
+        fi'
+    - task: generate
+      docker-image: common.adp-release-auto
+      cmd: >
+        /bin/bash -c '
+        va-report
+        --config ${mitigation-config-path}
+        --output ${va-report-file}
+        --set VERSION=${version}
+        --zap-reports ${zap-reports}
+        --defensics-report ${defensics-reports}
+        --anchore-reports ${anchore-reports}
+        --trivy-reports ${trivy-reports}
+        --ciscat-reports ${cis-cat-reports}
+        --kubesec-reports ${kubesec-reports}
+        --kubeaudit-reports ${kubeaudit-reports}/${helm-chart-name}/templates/deployment
+        --nmap-reports ${nmap-reports}/nmap_report
+        --product-name=${helm-chart-name}
+        --version ${version}
+        --md
+        ${var.va-xray-report-parameter}
+        ${var.va-xray-raw-report-parameter}
+        ${var.additional-va-generator-attributes};
+        check_rc=$?;
+        if [[ $check_rc -gt 2 && $check_rc -ne 6 && $check_rc -ne 7 ]]; then
+          exit 0
+        fi'
+
+  generate-aggregated-vuln-list:
+    - task: generate-from-template
+      docker-image: common.adp-release-auto
+      cmd: >
+        /bin/bash -c '
+        va-report
+        --config ${mitigation-config-path}
+        --output ${aggregated-vulns-result}
+        --set VERSION=${version}
+        --zap-reports ${zap-reports}
+        --defensics-report ${defensics-reports}
+        --anchore-reports ${anchore-reports}
+        --trivy-reports ${trivy-reports}
+        --kubesec-reports ${kubesec-reports}
+        --kubeaudit-reports ${kubeaudit-reports}/${helm-chart-name}/templates/deployment
+        --nmap-reports ${nmap-reports}/nmap_report
+        --ciscat-reports ${cis-cat-reports}
+        --product-name=${helm-chart-name}
+        --version ${version}
+        --debug
+        --template ${aggregated-vulns-template}
+        ${var.va-xray-report-parameter}
+        ${var.va-xray-raw-report-parameter};
+        check_rc=$?;
+        if [[ $check_rc -gt 2 && $check_rc -ne 6 && $check_rc -ne 7 ]]; then
+          exit 0
+        fi'
+
+  manage-jira-cards:
+    - task: manage-cards
+      docker-image: common.ci-toolbox
+      cmd: >
+        /bin/bash -c '
+        vulnerabilities-to-jira.js
+        --project ${jira-project-name}
+        --token ${jira-token}
+        --component "${jira-component-name}"
+        --chart-name ${helm-chart-name}
+        --chart-version ${version}
+        --vulnerabilities ${aggregated-vulns-result}
+        --mitigations ${mitigation-config-path}
+        --output ${finalized-vulns-path}
+        ${env.ADDITIONAL_JIRA_MANAGER_PARAMS}'
+
+  cleanup:
+    - task: remove-temporary-anchore-folder
+      cmd: rm -rf anchore-reports
+    - task: cleanup-docker-images
+      cmd:
+        - docker image rm -f ${anchore-image}
+        - docker image rm -f ${trivy-image}

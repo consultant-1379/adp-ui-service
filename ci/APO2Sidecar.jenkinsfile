@@ -1,0 +1,48 @@
+pipeline {
+  agent {
+    node('presentation')
+  }
+  options {
+    ansiColor('xterm')
+    timeout(time: 1, unit: 'HOURS')
+    buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '30'))
+  }
+  parameters {
+    string(name: 'APO2_RELEASE_VERSION', description: 'The APO2 sidecar release version (e.g. 1.14.0-17)')
+  }
+  stages {
+    stage('Prepare') {
+      steps {
+        sh 'bob --help'
+      }
+    }
+    stage('Update APO2 sidecar') {
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'git-functional-http-user', usernameVariable: 'GERRIT_USERNAME', passwordVariable: 'GERRIT_PASSWORD'),
+          usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+        ]) {
+          ansiColor('xterm') {
+            sh 'bob -r ci/rulesets/apo2-sidecar-rules.yaml create-new-apo2-sidecar-patch'
+          }
+        }
+      }
+    }
+  }
+  post {
+    cleanup {
+      sh "docker ps -a -q --filter label=$BUILD_TAG | xargs --no-run-if-empty  docker stop"
+      sh "docker ps -a -q --filter label=$BUILD_TAG | xargs --no-run-if-empty  docker rm"
+    }
+    failure {
+      mail to: 'f98b007c.ericsson.onmicrosoft.com@emea.teams.ms',
+      subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+      body: "Failure on ${env.BUILD_URL}"
+    }
+    success {
+      mail to: 'f98b007c.ericsson.onmicrosoft.com@emea.teams.ms',
+      subject: "Successful Pipeline: ${currentBuild.fullDisplayName}",
+      body: "Success on ${env.BUILD_URL}"
+    }
+  }
+}

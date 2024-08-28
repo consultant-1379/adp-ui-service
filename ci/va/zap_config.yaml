@@ -1,0 +1,24 @@
+zapConfig:
+  baseUrl: "http://eric-adp-gui-aggregator-service-http:3000"
+  scanType: "api"
+  config_dir: "zap/config"
+  globalConfig:
+  endpoints:
+    - name: "ui"
+      url: "/ui/"
+      config:
+    - name: "backend"
+      url: "/ui-meta/v1/"
+      config:
+    - name: "ui-logging"
+      url: "/ui-logging/v1/"
+      config:
+  report:
+    dir: ".bob/reports/zap"
+    format:
+      - html
+      - json
+      - md
+      - xml
+  properties:
+    zap_container_port: 9625

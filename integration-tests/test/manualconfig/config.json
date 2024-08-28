@@ -1,0 +1,25 @@
+{
+  "apps": [
+    {
+      "displayName": "Manualconfig Wrapper Application",
+      "version": "1.0.0",
+      "name": "manual-wrapper",
+      "groupNames": ["mg"],
+      "type": "euisdk",
+      "module": "wrapper-app",
+      "route": "manual-wrapper",
+      "options": {
+        "url": "https://adp.ericsson.se/marketplace",
+        "query": ""
+      }
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Manualconfig Group",
+      "version": "1.0.0",
+      "name": "mg",
+      "type": "product"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "apps": [
+    {
+      "displayName": "Alex",
+      "route": "/alex",
+      "version": "1.0.0",
+      "name": "alex",
+      "descriptionLong": "External documentation library",
+      "descriptionShort": "Alex",
+      "groupNames": ["network_manager", "documentation"]
+    },
+    {
+      "displayName": "Alarm Monitor",
+      "route": "/#alarmoverview/alarmviewer",
+      "version": "1.0.0",
+      "name": "alarm_monitor",
+      "descriptionShort": "AM",
+      "groupNames": ["network_manager", "monitoring"]
+    },
+    {
+      "displayName": "Alarm Search",
+      "route": "/#alarmoverview/alarmsearch",
+      "version": "1.0.0",
+      "name": "alarm_search",
+      "descriptionLong": "Alarm search form",
+      "descriptionShort": "AS",
+      "groupNames": ["network_manager", "monitoring"]
+    },
+    {
+      "displayName": "Alarm supervision status",
+      "route": "/#alarmoverview/alarm-management",
+      "version": "1.0.0",
+      "name": "alarm_supervision_status",
+      "descriptionLong": "Filter buttons",
+      "descriptionShort": "ASS",
+      "groupNames": ["network_manager", "monitoring"]
+    },
+    {
+      "displayName": "Automatic alarm handling (FMX)",
+      "route": "/#fmx",
+      "version": "1.0.0",
+      "name": "fmx",
+      "descriptionLong": "Archive",
+      "descriptionShort": "FMX",
+      "groupNames": ["network_manager", "monitoring"]
+    },
+    {
+      "displayName": "Analytic session record",
+      "route": "/#asr-ui",
+      "version": "1.0.0",
+      "name": "asr-ui",
+      "groupNames": ["network_manager", "performance_and_optimization"]
+    },
+    {
+      "displayName": "Kpi Management",
+      "route": "/#kpimanagement",
+      "version": "1.0.0",
+      "name": "kpi_management",
+      "descriptionLong": "Import",
+      "groupNames": ["network_manager", "performance_and_optimization"]
+    },
+    {
+      "displayName": "PM initiation and collection",
+      "route": "/#pmiclistsubscription",
+      "version": "1.0.0",
+      "name": "pm_i_c_list_subscription",
+      "descriptionLong": "PM node processes in error",
+      "descriptionShort": "PM",
+      "groupNames": ["network_manager", "performance_and_optimization"]
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Ericsson Network Manager",
+      "version": "1.0.0",
+      "name": "network_manager",
+      "descriptionShort": "ENM",
+      "type": "product"
+    },
+    {
+      "displayName": "Documentation",
+      "version": "1.0.0",
+      "name": "documentation",
+      "type": "category"
+    },
+    {
+      "displayName": "Monitoring",
+      "version": "1.0.0",
+      "name": "monitoring",
+      "type": "category"
+    },
+    {
+      "displayName": "Performance and Optimization",
+      "version": "1.0.0",
+      "name": "performance_and_optimization",
+      "descriptionShort": "P&O",
+      "type": "category"
+    }
+  ]
+}

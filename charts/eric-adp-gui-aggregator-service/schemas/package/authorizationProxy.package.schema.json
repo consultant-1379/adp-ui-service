@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-authorizationProxy-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "sipoauth2": {
+      "$id": "urn:adp:helm:schemas:v1:gas-authorizationProxy-conditional:v1/sipoauth2",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "authorizationProxy": {
+      "$id": "urn:adp:helm:schemas:v1:gas-authorizationProxy-conditional:v1/authorizationProxy",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    }
+  }
+}

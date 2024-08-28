@@ -1,0 +1,43 @@
+pipeline {
+  agent {
+    node('presentation')
+  }
+  options {
+    ansiColor('xterm')
+    timeout(time: 1, unit: 'HOURS')
+    buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '30'))
+  }
+  parameters {
+    string(name: 'IMAGE_TAG', description: 'The image tag for base OS (e.g. 1.0.0-7)')
+  }
+  stages {
+    stage('Prepare') {
+      steps {
+        sh 'bob --help'
+      }
+    }
+    stage('Update Base OS') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'git-functional-http-user', usernameVariable: 'GERRIT_USERNAME', passwordVariable: 'GERRIT_PASSWORD')]) {
+          sh 'bob -r ci/rulesets/misc-job-rules.yaml create-new-cbo-patch'
+        }
+      }
+    }
+  }
+  post {
+    cleanup {
+      sh "docker ps -a -q --filter label=$BUILD_TAG | xargs --no-run-if-empty  docker stop"
+      sh "docker ps -a -q --filter label=$BUILD_TAG | xargs --no-run-if-empty  docker rm"
+    }
+    failure {
+      mail to: 'f98b007c.ericsson.onmicrosoft.com@emea.teams.ms',
+      subject: "CBO Uplift failed: ${currentBuild.fullDisplayName}",
+      body: "Gerrit change is in the log ${env.BUILD_URL}"
+    }
+    success {
+      mail to: 'f98b007c.ericsson.onmicrosoft.com@emea.teams.ms',
+      subject: "New CBO version commit created: ${currentBuild.fullDisplayName}",
+      body: "Gerrit change is in the log ${env.BUILD_URL}"
+    }
+  }
+}

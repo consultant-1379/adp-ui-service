@@ -1,0 +1,14 @@
+*
+!frontend
+!mock
+!backend
+!docker/entrypoint.sh
+!docker/probe.sh
+
+# Ignore these specifically, as they can be nested in directories
+**/node_modules
+**/.cdt
+**/*.pyc
+**/*.gitignore
+**/__tests__
+**/__mocks__

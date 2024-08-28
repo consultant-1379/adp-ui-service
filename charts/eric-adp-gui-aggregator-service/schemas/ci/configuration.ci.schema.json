@@ -1,0 +1,151 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "loggingLogCollector": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/logging/logCollector",
+      "properties": {
+        "facility": true
+      },
+      "additionalProperties": false
+    },
+    "logging": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/logging",
+      "properties": {
+        "defaultLogLevel": true,
+        "logLevelCategories": true,
+        "serviceName": true,
+        "logCollector": true,
+        "stdoutLogFormat": true
+      },
+      "additionalProperties": false
+    },
+    "helpAggregator": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/helpAggregator",
+      "properties": {
+        "enabled": true,
+        "label": true,
+        "serviceName": true
+      },
+      "additionalProperties": false
+    },
+    "faultIndications": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/faultIndications",
+      "properties": {
+        "enabled": true
+      },
+      "additionalProperties": false
+    },
+    "cnomDefaultDashboards": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/cnomDefaultDashboards",
+      "properties": {
+        "enabled": true
+      },
+      "additionalProperties": false
+    },
+    "cnomDashboardTopology": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/cnomDashboardTopology",
+      "properties": {
+        "enabled": true
+      },
+      "additionalProperties": false
+    },
+    "cnomDashboardTreeView": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/cnomDashboardTreeView",
+      "properties": {
+        "enabled": true
+      },
+      "additionalProperties": false
+    },
+    "cnom": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/cnom",
+      "properties": {
+        "defaultDashboards": true,
+        "dashboardTopology": true,
+        "dashboardTreeView": true
+      },
+      "additionalProperties": false
+    },
+    "depsPrometheus": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/depsPrometheus",
+      "properties": {
+        "appName": true,
+        "pmServiceName": true
+      },
+      "additionalProperties": false
+    },
+    "depsFaultHandler": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/depsFaultHandler",
+      "properties": {
+        "hostname": true,
+        "tlsPort": true,
+        "httpPort": true,
+        "serviceName": true
+      },
+      "additionalProperties": false
+    },
+    "depsLogTransformer": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/depsLogTransformer",
+      "properties": {
+        "hostname": true
+      },
+      "additionalProperties": false
+    },
+    "configurationDependencies": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/configurationDependencies",
+      "properties": {
+        "prometheus": true,
+        "faultHandler": true,
+        "logTransformer": true
+      },
+      "additionalProperties": false
+    },
+    "userPermission": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/userPermission",
+      "properties": {
+        "enabled": true,
+        "iamServiceName": true,
+        "realmName": true,
+        "audience": true,
+        "nonTLSMode": true,
+        "userInfo": true
+      },
+      "additionalProperties": false
+    },
+    "userInfo": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/userPermission/userInfo",
+      "properties": {
+        "fieldMappings": true
+      },
+      "additionalProperties": false
+    },
+    "fieldMappings": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/userInfo/fieldMappings",
+      "properties": {
+        "username": true,
+        "lastLoginTime": true,
+        "userId": true
+      },
+      "additionalProperties": false
+    },
+    "configuration": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/configuration",
+      "properties": {
+        "logoutURL": true,
+        "guiContext": true,
+        "userAccountURL": true,
+        "k8sLabelValue": true,
+        "nodeJsRuntimeReservedMemory": true,
+        "logging": true,
+        "helpAggregator": true,
+        "faultIndications": true,
+        "cnom": true,
+        "discoverIngress": true,
+        "dependencies": true,
+        "userPermission": true
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{{- if eq (include "domain-ui-generic.name" . ) "demo-ui-service-configuration-checker" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "domain-ui-generic.name" . }}-ui-configmap
+  labels:
+    dui-generic: {{ include "domain-ui-generic.name" . }}
+    app.kubernetes.io/name: {{ include "domain-ui-generic.name" . }}
+    app.kubernetes.io/version: {{ .Values.productInfo.version }}
+data:
+  config.json: |
+    {
+      "apps": [
+        {
+          "name": "my-gui-main",
+          "module": "my-gui-main",
+          "route": "my-gui-main",
+          "type": "external",
+          "url": "http://{{.Values.ingress.hostname}}{{ .Values.ingress.path }}/#my-gui-main",
+          "version": "1.0.0",
+          "displayName": "My Configuration Checker UI",
+          "descriptionShort": "My Configuration Checker UI as a standalone card.",
+          "groupNames": ["rapps:product", "rapps:category:optimization"]
+        },
+        {
+          "name": "my-gui-dashboards",
+          "module": "my-gui-dashboards",
+          "route": "my-gui-dashboards",
+          "type": "external",
+          "url": "http://{{.Values.ingress.hostname}}{{ .Values.ingress.path }}/#my-gui-dashboards",
+          "version": "1.0.0",
+          "displayName": "My Configuration Checker Dashboards",
+          "descriptionShort": "Expendable card for Configuration Checker Dashboards.",
+          "groupNames": ["rapps:product", "rapps:category:optimization"],
+          "childNames": ["my-gui-dashboard-1", "my-gui-dashboard-2"]
+        },
+        {
+          "name": "my-gui-dashboard-1",
+          "module": "my-gui-dashboard-1",
+          "route": "my-gui-dashboard-1",
+          "type": "external",
+          "url": "http://{{.Values.ingress.hostname}}{{ .Values.ingress.path }}/#my-gui-dashboards/my-gui-dashboard-1",
+          "version": "1.0.0",
+          "displayName": "Dashboards 1",
+          "descriptionShort": "Child entry in the expendable card for dashboard #1.",
+          "groupNames": ["rapps:product", "rapps:category:optimization"]
+        },
+        {
+          "name": "my-gui-dashboard-2",
+          "module": "my-gui-dashboard-2",
+          "route": "my-gui-dashboard-2",
+          "type": "external",
+          "url": "http://{{.Values.ingress.hostname}}{{ .Values.ingress.path }}/#my-gui-dashboards/my-gui-dashboard-2",
+          "version": "1.0.0",
+          "displayName": "Dashboards 2",
+          "descriptionShort": "Child entry in the expendable card for dashboard #2.",
+          "groupNames": ["rapps:product", "rapps:category:optimization"]
+        },
+        {
+          "name": "my-gui-main-2",
+          "module": "my-gui-main-2",
+          "route": "my-gui-main-2",
+          "type": "external",
+          "url": "http://{{.Values.ingress.hostname}}{{ .Values.ingress.path }}/#my-gui-main-2",
+          "version": "1.0.0",
+          "displayName": "My Configuration Checker 2",
+          "descriptionShort": "My Configuration Checker 2 as a standalone card.",
+          "groupNames": ["eic:product"]
+        }
+      ]
+    }
+{{- end }}

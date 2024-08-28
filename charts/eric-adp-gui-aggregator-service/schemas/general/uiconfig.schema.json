@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-uiconfig:v1",
+  "type": "object",
+  "properties": {
+    "uiconfig": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "logging": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "logLevel": {
+                      "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/logLevel"
+                    }
+                  },
+                  "required": ["logLevel"]
+                },
+                { "$ref": "urn:adp:helm:schemas:v1:gas-uiconfig-conditional:v1/logging" }
+              ]
+            },
+            "hostname": {
+              "oneOf": [
+                { "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/hostnameWithPort" },
+                { "type": "null" }
+              ]
+            },
+            "path": {
+              "type": ["null", "string"]
+            },
+            "protocol": {
+              "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/protocol"
+            }
+          },
+          "required": ["logging", "protocol"]
+        },
+        { "$ref": "urn:adp:helm:schemas:v1:gas-uiconfig-conditional:v1/uiconfig" }
+      ]
+    }
+  },
+  "required": ["uiconfig"]
+}

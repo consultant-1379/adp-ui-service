@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-serviceConfig-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "endpoints": {
+      "$id": "urn:adp:helm:schemas:v1:gas-serviceConfig-conditional:v1/endpoints",
+      "properties": {
+        "http": true
+      },
+      "additionalProperties": false
+    },
+    "service": {
+      "$id": "urn:adp:helm:schemas:v1:gas-serviceConfig-conditional:v1/service",
+      "properties": {
+        "type": true,
+        "port": true,
+        "targetPort": true,
+        "endpoints": true
+      },
+      "additionalProperties": false
+    }
+  }
+}

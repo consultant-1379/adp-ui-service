@@ -1,0 +1,31 @@
+type: object
+description: |
+  File descriptor for UI micro front-ends.
+  This file includes meta information of all apps, shared components and groups supported by UI micro front-ends.
+  This file should be named as 'config.json' and be accessible from the service root context path.
+properties:
+  version:
+    type: string
+    description: Schema version of the config.json.
+  apps:
+    type: array
+    description: List of applications available as part of the service.
+    items:
+      allOf:
+        - $ref: "./ui.schemas.yaml#/components/schemas/App"
+        - $ref: "./ui.properties.yaml"
+  groups:
+    type: array
+    description: List of groups available as part of the service.
+    items:
+      $ref: "./ui.schemas.yaml#/components/schemas/Entity"
+  components:
+    type: array
+    description: List of components available as part of the service.
+    items:
+      $ref: "./ui.schemas.yaml#/components/schemas/Component"
+  actions:
+    type: object
+    description: List of actions available as part of the service.
+    items:
+      $ref: "./ui.actions.yaml#/components/schemas/Actions"

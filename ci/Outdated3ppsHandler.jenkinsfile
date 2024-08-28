@@ -1,0 +1,69 @@
+pipeline {
+  agent {
+    node {
+      label 'presentation'
+    }
+  }
+  parameters {
+    string(name: 'ADDITIONAL_JIRA_MANAGER_PARAMS', defaultValue: '--skip-jira true',
+      description: 'Additional parameters for the Jira management tool. Only used if MANAGE_JIRA is set to true.')
+    booleanParam(name: 'MANAGE_JIRA', defaultValue: false, description: 'Enable automatic Jira Vulnerability card management')
+    string(name: 'GERRIT_REFSPEC', defaultValue: 'refs/heads/master',
+      description: 'Gerrit patchset refspec. It is only used if there is change in the ruleset or the Jenkinsfile. The CI chart\'s stage can also be changed with this.')
+  }
+  options {
+    ansiColor('xterm')
+    timeout(time: 1, unit: 'HOURS')
+    buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '30'))
+  }
+  stages {
+    stage('Cleanup') {
+      steps {
+        sh 'bob clean'
+      }
+    }
+    stage('Init') {
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+          usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO')
+        ]) {
+          ansiColor('xterm') {
+            sh 'bob -r ci/rulesets/outdated-3pps-handler-rules.yaml init'
+          }
+        }
+      }
+    }
+    stage('Install npm dependencies') {
+      steps {
+        sh 'bob npm-install'
+      }
+    }
+    stage('Generate Outdated 3pps list') {
+      steps {
+        ansiColor('xterm') {
+          sh 'bob -r ci/rulesets/outdated-3pps-handler-rules.yaml generate-outdated-3pps-list'
+        }
+      }
+    }
+    stage('Manage Outdated 3pps Tickets') {
+      steps {
+        withCredentials([string(credentialsId: 'jira-eceaconfl-token', variable: 'JIRA_API_TOKEN')]) {
+          ansiColor('xterm') {
+            sh 'bob -r ci/rulesets/outdated-3pps-handler-rules.yaml manage-jira-cards'
+          }
+        }
+      }
+    }
+  }
+  post {
+    always {
+      archiveArtifacts artifacts: 'outdated-3pps-config.json', allowEmptyArchive: true
+    }
+    failure {
+      mail to: 'f98b007c.ericsson.onmicrosoft.com@emea.teams.ms',
+      subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+      body: "Failure on ${env.BUILD_URL}"
+    }
+  }
+}

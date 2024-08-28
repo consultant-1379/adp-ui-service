@@ -1,0 +1,25 @@
+{
+  "modules": [
+    {
+      "name": "@eui/testpackage",
+      "version": "1.0.0",
+      "path": "./libs/",
+      "main": "testpackage.js"
+    },
+    {
+      "name": "app-2",
+      "version": "1.0.0",
+      "path": "/apps",
+      "main": "app-1.js"
+    },
+    {
+      "name": "comp-c",
+      "version": "1.0.0",
+      "path": "/components",
+      "main": "comp-a.js",
+      "dependencies": {
+        "utility": "1.x.x"
+      }
+    }
+  ]
+}

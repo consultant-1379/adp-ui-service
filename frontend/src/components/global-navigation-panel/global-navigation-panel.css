@@ -1,0 +1,11 @@
+#back-button {
+  vertical-align: middle;
+  --icon-color: none;
+}
+
+.product-name {
+  display: inline-block;
+  --space-xl: 0;
+  --space-base: 0;
+  padding: 0;
+}

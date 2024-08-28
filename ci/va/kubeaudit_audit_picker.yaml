@@ -1,0 +1,34 @@
+enabledAuditors:
+  # Auditors are enabled by default if they are not explicitly set to "false"
+  apparmor: false
+  asat: true
+  capabilities: true
+  deprecatedapis: false
+  hostns: true
+  image: true
+  limits: true
+  mounts: true
+  netpols: true
+  nonroot: true
+  privesc: true
+  privileged: true
+  rootfs: true
+  seccomp: false
+# auditors:
+#   capabilities:
+#     # add capabilities needed to the add list, so kubeaudit won't report errors
+#     allowAddList: ["AUDIT_WRITE", "CHOWN"]
+#   deprecatedapis:
+#     # If no versions are specified and the'deprecatedapis' auditor is enabled, WARN
+#     # results will be genereted for the resources defined with a deprecated API.
+#     currentVersion: "1.23"
+#     targetedVersion: "1.25"
+#   image:
+#     # If no image is specified and the 'image' auditor is enabled, WARN results
+#     # will be generated for containers which use an image without a tag
+#     image: "myimage:mytag"
+#   limits:
+#     # If no limits are specified and the 'limits' auditor is enabled, WARN results
+#     # will be generated for containers which have no cpu or memory limits specified
+#     cpu: "750m"
+#     memory: "500m"

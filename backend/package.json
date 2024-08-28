@@ -1,0 +1,78 @@
+{
+  "name": "backend",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": "20.12.2"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "node ./bin/www.js",
+    "start:watch": "node_modules/.bin/nodemon ./bin/www.js --watch . --ext js",
+    "start:debug": "node --inspect=0.0.0.0:9229 ./bin/www.js",
+    "start:watch:debug": "node_modules/.bin/nodemon --trace-warnings --inspect=0.0.0.0:9229 ./bin/www.js --watch . --ext js",
+    "lint": "eslint  \"**/*.js\" \"**/www.js\"",
+    "test": "cross-env NODE_ENV=test mocha --loader=testdouble",
+    "test:timeout": "npm-run-all -p -r test timeout",
+    "timeout": "node scripts/timeout.js -- 1200000",
+    "test:coverage": "c8 --reporter=lcov --reporter=text --report-dir=test/reports/coverage cross-env NODE_ENV=test mocha --loader=testdouble",
+    "test:generateReport": "cross-env NODE_ENV=test mocha --loader=testdouble --reporter mochawesome --reporter-options inline=true,reportDir=test/reports/mochawesome",
+    "test:generateReport:timeout": "npm-run-all -p -r test:generateReport timeout",
+    "test:full": "c8 --reporter=lcov --reporter=text --report-dir=test/reports/coverage cross-env NODE_ENV=test mocha --loader=testdouble --reporter mochawesome --reporter-options inline=true,reportDir=test/reports/mochawesome",
+    "test:full:timeout": "npm-run-all -p -r test:full timeout",
+    "sonar-scanner": "sonar-scanner"
+  },
+  "dependencies": {
+    "@adp/auth": "^0.1.20",
+    "@adp/base": "^0.3.24",
+    "@adp/fault-handler": "^0.4.6",
+    "@adp/kubernetes": "^0.2.38",
+    "@adp/pm-service": "^0.3.14",
+    "@adp/telemetry": "^0.1.14",
+    "@adp/utilities": "^0.1.8",
+    "body-parser": "^1.20.2",
+    "express": "^4.19.2",
+    "express-static-gzip": "^2.1.7",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.1.0",
+    "http-proxy-middleware": "^3.0.0",
+    "jsonschema": "^1.4.0",
+    "node-fetch": "^3.3.2",
+    "semver": "^7.5.3"
+  },
+  "devDependencies": {
+    "c8": "^9.1.0",
+    "chai": "^5.1.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "glob": "^10.3.12",
+    "mocha": "^10.4.0",
+    "mochawesome": "^7.1.3",
+    "mock-fs": "^5.2.0",
+    "nock": "^13.5.4",
+    "nodemon": "^3.1.0",
+    "npm-run-all": "4.1.5",
+    "sonarqube-scanner": "^3.4.0",
+    "supertest": "^6.3.4",
+    "testdouble": "^3.20.2"
+  },
+  "overrides": {
+    "@adp/kubernetes": {
+      "@kubernetes/client-node": {
+        "qs": "6.10.3"
+      }
+    },
+    "@adp/base": {
+      "winston": "3.12.0",
+      "fsevents": "2.3.2",
+      "binary-extensions": "2.2.0"
+    },
+    "tough-cookie": "4.1.3",
+    "underscore": "^1.13.6",
+    "http-proxy@1.18.1": {
+      "follow-redirects": "1.15.5"
+    }
+  }
+}

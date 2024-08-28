@@ -1,0 +1,21 @@
+{
+  "name": "docker-tests",
+  "version": "1.0.0",
+  "description": "Testing the built docker container",
+  "type": "module",
+  "scripts": {
+    "docker-tests": "cross-env NODE_ENV=test mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://gerrit-gamma.gic.ericsson.se:29418/EEA/adp-ui-service"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^5.1.0",
+    "cross-env": "^7.0.3",
+    "mocha": "^10.4.0",
+    "testcontainers": "^10.8.2"
+  }
+}

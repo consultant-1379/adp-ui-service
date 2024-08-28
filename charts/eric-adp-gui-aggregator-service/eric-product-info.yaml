@@ -1,0 +1,24 @@
+productName: "Lightweight GUI Aggregator Service"
+productNumber: "CXD 101 0395"
+images:
+  main:
+    productName: "Lightweight GUI Aggregator Service Image"
+    productNumber: "CXU 101 0218"
+    registry: "armdocker.rnd.ericsson.se"
+    repoPath: REPO_PATH
+    name: IMAGE_NAME
+    tag: VERSION
+  ericsecoauthsap:
+    productName: "Authorization Proxy OAuth2 SAP Image"
+    productNumber: "CXU 101 0039"
+    registry: "armdocker.rnd.ericsson.se"
+    repoPath: "proj-common-assets-cd-released/security"
+    name: "eric-sec-authorization-proxy-oauth2-sap"
+    tag: "2.6.0-9"
+  ericsecoauthproxy:
+    productName: "Authorization Proxy OAuth2 Main Image"
+    productNumber: "CXU 101 0038"
+    registry: "armdocker.rnd.ericsson.se"
+    repoPath: "proj-common-assets-cd-released/security"
+    name: "eric-sec-authorization-proxy-oauth2"
+    tag: "2.6.0-9"

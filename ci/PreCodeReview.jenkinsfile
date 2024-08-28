@@ -1,0 +1,299 @@
+pipeline {
+  agent {
+    node('presentation')
+  }
+  options {
+    ansiColor('xterm')
+    timeout(time: 1, unit: 'HOURS')
+    buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '30'))
+  }
+  stages {
+    stage('Clean') {
+      steps {
+        sh 'bob clean'
+      }
+    }
+    stage('Init stage') {
+      stages {
+        stage('Set Bob variables') {
+          steps {
+            withCredentials([
+              usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+              usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            ]) {
+                sh 'bob init-precodereview'
+            }
+          }
+        }
+        stage('Install npm dependencies') {
+          steps {
+            sh 'bob npm-install'
+          }
+        }
+      }
+    }
+    stage('Generate help content') {
+      steps {
+        ansiColor('xterm') {
+          sh 'bob generate-and-copy-help-content'
+        }
+      }
+    }
+    stage('Main stage') {
+      failFast true
+      parallel {
+        stage('Check All Bob Rules') {
+          when {
+            expression {
+              return  sh(
+                script: 'bob -q ruleset-validation-helper:validate-rules',
+                returnStdout: true
+              ).trim() != '0'
+            }
+          }
+          steps {
+            sh './ci/scripts/ruleset-linter.sh'
+          }
+        }
+        stage('Lint') {
+          steps {
+            lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+              withCredentials([
+                file(credentialsId: env.system, variable: 'KUBECONFIG'),
+                usernamePassword(credentialsId: 'jenkins-api-token', usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_PASS')
+              ]) {
+                sh 'bob lint'
+              }
+            }
+          }
+        }
+        stage('Validate OpenAPI specs') {
+          steps {
+            sh 'bob lint-openapi-specs'
+          }
+        }
+        stage('Validate values yaml') {
+          steps {
+            sh 'bob validate-values-yaml'
+          }
+        }
+        stage('FOSS handling') {
+          stages {
+            stage('Lint FOSS') {
+              steps {
+                sh 'bob foss-helper:check-dependencies-files'
+              }
+            }
+            stage('Analyze FOSS') {
+              steps {
+                withCredentials([string(credentialsId: 'fossa-token', variable: 'FOSSA_API_KEY')]) {
+                  sh 'bob foss-analyze'
+                }
+              }
+            }
+            stage('Check Prim numbers') {
+              steps {
+                sh 'bob foss-helper:check-all-prim-number-filled'
+              }
+            }
+            stage('Merge manual & auto dependencies') {
+              steps {
+                sh 'bob foss-helper:merge-dependencies'
+              }
+            }
+            stage('Check Munin sync status') {
+              steps {
+                withCredentials([string(credentialsId: 'mimer-token-production', variable: 'MUNIN_TOKEN')]) {
+                  sh 'bob foss-helper:check-munin-sync-status'
+                }
+              }
+            }
+            stage('Generate License Agreements') {
+              steps {
+                sh 'bob license-agreement'
+              }
+            }
+            stage('Validate FOSS') {
+              steps {
+                sh 'bob munin:validate-product-structure'
+              }
+            }
+          }
+        }
+        stage('Validation') {
+          stages {
+            stage('Unit tests') {
+              steps {
+                ansiColor('css') {
+                  sh 'bob test-ui test-ws'
+                }
+              }
+            }
+            stage('Sonar scanner') {
+              steps {
+                  withCredentials([string(credentialsId: 'platform-sonar-token', variable: 'SONAR_LOGIN_TOKEN')]) {
+                  ansiColor('xterm') {
+                    sh 'bob sonar-scanner'
+                    sh 'bob sonar-gate-check'
+                  }
+              }
+              }
+            }
+            stage('Selenium tests') {
+              steps {
+                ansiColor('css') {
+                  sh 'bob run-selenium-tests-frontend'
+                }
+              }
+            }
+          }
+        }
+        stage('K8S Build & Test') {
+          stages {
+            stage('Docker image') {
+              steps {
+                withCredentials([
+                  usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+                ]) {
+                  sh 'bob image'
+                }
+              }
+            }
+            stage('Helm package') {
+              steps {
+                withCredentials([
+                  usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+                ]) {
+                  ansiColor('xterm') {
+                    sh 'bob package'
+                  }
+                }
+              }
+            }
+            stage('K8S Test') {
+              steps {
+                lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+                  withCredentials([
+                    usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+                    usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+                    file(credentialsId: env.system, variable: 'KUBECONFIG')
+                  ]) {
+                    ansiColor('xterm') {
+                      sh 'bob k8s-test-pcr'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    stage('Documentations') {
+      stages {
+        stage('Generate documentations') {
+          steps {
+            withCredentials([
+              usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI')
+            ]) {
+              ansiColor('xterm') {
+                sh 'bob generate-docs'
+              }
+            }
+          }
+        }
+        stage('Dry-run Eridoc') {
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'eridoc-username-password', usernameVariable: 'ERIDOC_USERNAME', passwordVariable: 'ERIDOC_PASSWORD')]) {
+              sh 'bob eridoc-dryrun'
+            }
+          }
+        }
+        stage('Validate structured data') {
+          steps {
+            withCredentials([
+              usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI')
+            ]) {
+              sh 'bob test-structured-data'
+            }
+          }
+        }
+      }
+    }
+  }
+  post {
+    always {
+      archiveArtifacts artifacts: '.bob/munin-sync-status-files/*.json', allowEmptyArchive: true
+      archiveArtifacts artifacts: '.bob/structured-data/eric-adp-gui-aggregator-service-structured-data.json', allowEmptyArchive: true
+      archiveArtifacts artifacts: '.bob/api-linter-check/api-check-reports.tar.gz', allowEmptyArchive: true
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: '.bob/check-charts/',
+        reportFiles: 'design-rule-check-report.html',
+        reportName: 'Helm Design Rule Chart Check'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: '.bob/check-image/',
+        reportFiles: 'image-design-rule-check-report.html',
+        reportName: 'Helm Design Rule Image Check'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'backend/test/reports/mochawesome/',
+        reportFiles: 'mochawesome.html',
+        reportName: 'WS Endpoint Test Report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'frontend/test_js/allure-report/',
+        reportFiles: 'index.html',
+        reportName: 'Frontend Selenium Test Report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'frontend/coverage/lcov-report',
+        reportFiles: 'index.html',
+        reportName: 'Frontend Component Test Coverage Report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'frontend/testReport/Chromium',
+        reportFiles: 'mochawesome.html',
+        reportName: 'Frontend Chromium Unit Test Report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'frontend/testReport/Firefox',
+        reportFiles: 'mochawesome.html',
+        reportName: 'Frontend Firefox Unit Test Report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: '.bob/structured-data/',
+        reportFiles: 'artifact_dr_check_report.html',
+        reportName: 'Artifactory DR Checker Report'
+      ])
+    }
+    cleanup {
+      sh "docker ps -a -q --filter label=$BUILD_TAG | xargs --no-run-if-empty  docker stop"
+      sh "docker ps -a -q --filter label=$BUILD_TAG | xargs --no-run-if-empty  docker rm"
+    }
+  }
+}

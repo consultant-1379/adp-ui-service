@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-serviceConfig-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "endpoints": {
+      "$id": "urn:adp:helm:schemas:v1:gas-serviceConfig-conditional:v1/endpoints",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "service": {
+      "$id": "urn:adp:helm:schemas:v1:gas-serviceConfig-conditional:v1/service",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    }
+  }
+}

@@ -1,0 +1,85 @@
+global:
+  security:
+    tls:
+      enabled: false
+  networkPolicy:
+    enabled: false
+
+eric-sec-sip-tls:
+  enabled: false
+
+eric-tm-ingress-controller-cr:
+  enabled: false
+
+demo-ui-service-ecm:
+  enabled: true
+
+demo-ui-service-eea:
+  enabled: true
+
+demo-ui-service-enm:
+  enabled: true
+
+demo-ui-service-esma:
+  enabled: true
+
+demo-ui-service-esmc:
+  enabled: true
+
+demo-ui-service-3pp:
+  enabled: true
+
+demo-ui-service-esmb:
+  enabled: true
+  resources:
+    main:
+      limits:
+        cpu: 2000m
+        memory: 512Mi
+      requests:
+        cpu: 1000m
+        memory: 256Mi
+
+demo-ui-service-eui1:
+  enabled: true
+  resources:
+    main:
+      limits:
+        cpu: 2000m
+        memory: 512Mi
+      requests:
+        cpu: 1000m
+        memory: 256Mi
+
+demo-ui-service-eui2:
+  enabled: true
+  resources:
+    main:
+      limits:
+        cpu: 2000m
+        memory: 512Mi
+      requests:
+        cpu: 1000m
+        memory: 256Mi
+
+demo-ui-service-action-consumer:
+  enabled: true
+  resources:
+    main:
+      limits:
+        cpu: 2000m
+        memory: 512Mi
+      requests:
+        cpu: 1000m
+        memory: 256Mi
+
+demo-ui-service-action-provider:
+  enabled: true
+  resources:
+    main:
+      limits:
+        cpu: 2000m
+        memory: 512Mi
+      requests:
+        cpu: 1000m
+        memory: 256Mi

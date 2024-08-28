@@ -1,0 +1,13 @@
+{
+  "apps": [
+    {
+      "name": "action-consumer",
+      "module": "action-consumer",
+      "displayName": "Action Consumer",
+      "type": "euisdk",
+      "route": "action-consumer",
+      "version": "1.0.0",
+      "groupNames": ["action-framework-apps"]
+    }
+  ]
+}

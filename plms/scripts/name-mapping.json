@@ -1,0 +1,5 @@
+{
+  "@types/http-proxy": "@types/http-proxy, DefinitelyTyped",
+  "psl": "psl (Public Suffix List)",
+  "ws": "ws, websockets"
+}

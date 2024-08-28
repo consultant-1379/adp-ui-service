@@ -1,0 +1,21 @@
+{{- if eq (include "domain-ui-generic.serviceMeshEnabled" .) "true" }}
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: {{ include "domain-ui-generic.name" . }}-ingress-traffic-gateway
+spec:
+  selector:
+    app: service-mesh-ingress-gateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - {{ .Values.serviceMesh.ingress.hostname | quote }}
+      # tls:
+      #   mode: MUTUAL
+      #   credentialName: domain-ui-generic-server-cert # must be the same as secret
+      #   minProtocolVersion: TLSV1_1
+      #   maxProtocolVersion: TLSV1_3
+{{- end }}

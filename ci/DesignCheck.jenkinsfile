@@ -1,0 +1,112 @@
+pipeline {
+  agent {
+    node('presentation')
+  }
+  options {
+    ansiColor('xterm')
+    timeout(time: 1, unit: 'HOURS')
+    buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '30'))
+  }
+  stages {
+    stage('Clean') {
+      steps {
+        sh 'bob clean'
+      }
+    }
+    stage('Init') {
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+          usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO')
+        ]) {
+          sh 'bob init-design-check'
+        }
+      }
+    }
+    stage('Design Rule Chart Check') {
+      steps {
+        script {
+          env.CHART_CHECK_RESULT = sh(
+            script:'bob -r ci/rulesets/misc-job-rules.yaml design-rule-chart-check',
+            returnStatus:true
+          )
+          echo 'Chart Check result:'
+          echo env.CHART_CHECK_RESULT
+        }
+      }
+    }
+    stage('Prepare Image') {
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI')
+        ]) {
+          sh 'bob npm-install'
+          sh 'bob image'
+          sh 'bob package-local:image-push-internal'
+        }
+      }
+    }
+    stage('Design Rule Image Check') {
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI')
+        ]) {
+          script {
+            env.IMAGE_CHECK_RESULT = sh(
+              script:'bob -r ci/rulesets/misc-job-rules.yaml design-rule-image-check',
+              returnStatus:true
+            )
+          }
+        }
+        echo 'Image Check result:'
+        echo env.IMAGE_CHECK_RESULT
+      }
+    }
+    stage('Evaluate') {
+      when {
+        anyOf {
+          expression { env.CHART_CHECK_RESULT != '0' }
+          expression { env.IMAGE_CHECK_RESULT != '0' }
+        }
+      }
+      steps {
+        withCredentials([string(credentialsId: 'JIRA_token_eceaproj', variable: 'JIRA_TOKEN')]) {
+          echo('Chart Check and/or Image Check failed! Check HTML reports for more information.')
+          sh 'bob -r ci/rulesets/misc-job-rules.yaml create-design-rule-checker-jira-card'
+        }
+      }
+    }
+  }
+  post {
+    always {
+      archiveArtifacts '**/design-rule-check-report.html'
+      archiveArtifacts '**/image-design-rule-check-report.html'
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: '.bob/check-charts/',
+        reportFiles: 'design-rule-check-report.html',
+        reportName: 'Helm Design Rule Chart Check'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: '.bob/check-image/',
+        reportFiles: 'image-design-rule-check-report.html',
+        reportName: 'Helm Design Rule Image Check'
+      ])
+    }
+    failure {
+      mail to: 'f98b007c.ericsson.onmicrosoft.com@emea.teams.ms',
+      subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+      body: "Failure on ${env.BUILD_URL}"
+      archiveArtifacts 'jira_**'
+    }
+    cleanup {
+      sh "docker ps -a -q --filter label=$BUILD_TAG | xargs --no-run-if-empty  docker stop"
+      sh "docker ps -a -q --filter label=$BUILD_TAG | xargs --no-run-if-empty  docker rm"
+    }
+  }
+}

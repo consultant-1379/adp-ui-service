@@ -1,0 +1,25 @@
+{
+  "name": "e-ui-app-2",
+  "version": "0.0.1",
+  "description": "Donutchart",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "build:dev": "rollup -c",
+    "start:watch": "node_modules/.bin/nodemon server.js --watch ."
+  },
+  "devDependencies": {
+    "@eui/rollup-config-generator": "^1.2.0",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-node-polyfills": "^0.2.1"
+  },
+  "dependencies": {
+    "@eds/vanilla": "3.10.x",
+    "@eui/app": "^1.0.0",
+    "@eui/base": "^1.0.2",
+    "@eui/layout": "^1.1.1",
+    "@eui/lit-component": "^1.0.0",
+    "@eui/theme": "^1.0.1",
+    "nodemon": "^2.0.4"
+  }
+}

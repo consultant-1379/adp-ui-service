@@ -1,0 +1,127 @@
+modelVersion: '2.0'
+flavor: 'ADP 2.0'
+service:
+  name: 'Lightweight GUI Aggregator Service'
+  design_countries:
+    - HU
+  sw_compilation_country: SE
+  release_responsible: BCSDSCKA
+  design_responsible: BCSDSCKD
+  documents:
+    import: ../.bob/documents.yaml
+  top_product:
+    number: APR 201 088
+    description: 'Abstract product of the Lightweight GUI Aggregator Service'
+    alias:
+      - eric-adp-gui-aggregator-service
+      - GAS Light
+      - lightweight-ui-service
+      - GUI Aggregator Lightweight
+      - adp-ui-service
+    # Included documents and products
+    # If the order is changed in this file, then should be changed in the release ruleset.yaml too
+    includes:
+      # PRI
+      - eridoc: ##PRIDOC##
+        step_strategy: generate
+      # Service User Guide
+      - eridoc: 1/1553-APR 201 088/2
+        step_strategy: highest revision letter
+      # App Developer Guide
+      - eridoc: 1/198 17-APR 201 088/2
+        step_strategy: highest revision letter
+      # Risk Assessment
+      - eridoc: 1/006 64-APR 201 088/2
+        step_strategy: highest revision letter
+      # Vulnerability Analysis Report
+      - eridoc: 1/1597-APR 201 088/2
+        step_strategy: highest ordinal number
+      # Test Specification
+      - eridoc: 1/152 41-APR 201 088/2
+        step_strategy: highest revision letter
+      # Test Report
+      - eridoc: 1/152 83-APR 201 088/2
+        step_strategy: highest ordinal number
+      # Characteristics Report
+      - eridoc: 2/152 83-APR 201 088/2
+        step_strategy: highest ordinal number
+      # K8s Robustness Report
+      - eridoc: 3/152 83-APR 201 088/2
+        step_strategy: highest ordinal number
+      # Secure Coding Report
+      - eridoc: 1/0360-APR 201 088/2
+        step_strategy: highest revision letter
+  src_products:
+    - label: Lightweight GUI Aggregator API
+      description: API to Lightweight GUI Aggregator Service (GAS Light)
+      number: CAF 101 105
+      includes:
+        # Interface Description
+        - eridoc: 1/155 19-CAF 101 105/2
+          step_strategy: highest revision letter
+      alias:
+        - eric-adp-gui-aggregator-service
+        - GAS Light
+        - lightweight-ui-service
+        - GUI Aggregator Lightweight
+        - adp-ui-service
+    - label: Lightweight GUI Aggregator Service Source Code
+      description: Source code to Lightweight GUI Aggregator Service (GAS Light)
+      number: CAV 101 328
+      provides:
+        # API
+        - munin: CAF 101 105
+      alias:
+        - eric-adp-gui-aggregator-service
+        - GAS Light
+        - lightweight-ui-service
+        - GUI Aggregator Lightweight
+        - adp-ui-service
+  derivative_products:
+    # Label describing the product, must be unique per list item
+    - label: Lightweight GUI Aggregator Service HELM
+      description: Helm chart to Lightweight GUI Aggregator Service (GAS Light)
+      number: CXD 101 0395
+      alias:
+        - eric-adp-gui-aggregator-service
+        - GAS Light
+        - lightweight-ui-service
+        - GUI Aggregator Lightweight
+        - adp-ui-service
+      derivedFrom:
+        # Source code
+        munin: CAV 101 328
+      includes:
+        # Authorization Proxy OAuth2 image
+        - munin: CXU 101 0038
+          version: 2.6.0
+          secondPartyProduct: 'True'
+        # Authorization Proxy OAuth2 SAP image
+        - munin: CXU 101 0039
+          version: 2.6.0
+          secondPartyProduct: 'True'
+    - label: Lightweight GUI Aggregator Service Image
+      description: Image to Lightweight GUI Aggregator Service (GAS Light)
+      number: CXU 101 0218
+      alias:
+        - eric-adp-gui-aggregator-service
+        - GAS Light
+        - lightweight-ui-service
+        - GUI Aggregator Lightweight
+        - adp-ui-service
+      includes:
+        # Common Base OS
+        - munin: CXC 201 2032
+          version: 6.17.0
+          secondPartyProduct: 'True'
+        # EUI SDK
+        # See PRI under each table for RSTATE of a version: https://euisdk.seli.wh.rnd.internal.ericsson.com/euisdk/#release
+        - prim: CNA 403 3599
+          rstate: R2K # 2.9.0
+      derivedFrom:
+        # Source code
+        munin: CAV 101 328
+      uses_foss:
+        - dependencies_file: ../.bob/dependency_merged_full.yaml
+      uses_encryption:
+        - import: encryptions.yaml

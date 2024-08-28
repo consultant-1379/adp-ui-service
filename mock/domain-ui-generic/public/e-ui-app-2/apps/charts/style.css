@@ -1,0 +1,21 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+h2 {
+  color: var(--text, #242424);
+}
+
+.main-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  background-color: var(--layer1, --gray-92);
+  gap: var(--space-small, 4px);
+}
+
+.absolute-switch {
+  display: flex;
+  gap: 8px;
+}

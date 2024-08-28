@@ -1,0 +1,138 @@
+global:
+  uid:
+  registry:
+    url: armdocker.rnd.ericsson.se
+  # pullSecret:
+  security:
+    tls:
+      enabled: true
+      trustedInternalRootCa:
+        secret: eric-sec-sip-tls-trusted-root-cert
+  serviceMesh:
+    enabled: false
+
+ingress:
+  enabled: false
+  useContour: false
+  path: /domain-ui
+  hostname:
+  ingressClass:
+  adpIccrCaSecret:
+  adpIccrServiceName: eric-tm-ingress-controller-cr
+  iccrIP:
+  tls:
+    passthrough: false
+    enabled:
+    existingSecret: eric-adp-gui-aggregator-service-ingress-external-server-cert
+
+productInfo:
+  rstate: RSTATE
+  version: 1.0.0-0
+
+imageCredentials:
+  repoPath: REPO_PATH
+  # pullSecret:
+  registry:
+    url:
+
+images:
+  main:
+    name: IMAGE_NAME
+    tag: VERSION
+
+podDisruptionBudget:
+  minAvailable: 1
+
+service:
+  type: ClusterIP
+  port: 4000
+  targetPort: 4000
+
+replicaCount: 1
+
+## Using RollingUpdate, specify the update strategy for statefulset
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable:
+    maxSurge:
+
+# medium.com/faun/java-application-optimization-on-kubernetes-on-the-example-of-a-spring-boot-microservice-cf3737a2219c
+# Monitor the deployed pod, to set these resource limits more accurately
+# Currently not set by default, but can be defined during Helm install/upgrade if needed.
+# resources:
+#   main:
+#     limits:
+#       cpu: 2000m
+#       memory: 128Mi
+#     requests:
+#       cpu: 500m
+#       memory: 128Mi
+
+labels:
+  ui.ericsson.com/part-of: workspace-gui
+
+serviceMesh:
+  # Enable service to use service mesh (inject sidecars and add SM configuration)
+  # If enabled, service must disable TLS in business logic since sidecar will perform mTLS
+  # Will only take effect in case service mesh is globally enabled
+  enabled: true
+  ingress:
+    hostname:
+  tls:
+    enabled: false # might be used to set service specific mtls mode
+    mode: PERMISSIVE
+  authz:
+    enabled: false
+    rules:
+      - allowPrincipals:
+          - client-sa # list of serviceAccounts allowed to access via HTTP
+          - namespace/client2-sa
+        paths:
+          - /* # list of paths allowed
+        methods:
+          - "GET" # list of methods allowed
+  settingsVS:
+    enabled: false
+    # The overall timeout for requests to this service
+    # Optional
+    overallTimeout: 10s
+    # Client retry settings (use Istio syntax)
+    # Optional
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+  settingsDR:
+    enabled: false
+    # Circuit breaker settings (use Istio syntax)
+    # Optional
+    outlierDetection: # many more parameters available
+      consecutive5xxErrors: 5
+    # Connection pool settings (use Istio syntax)
+    # Optional
+    #connectionPool: # example settings for TCP
+    #  tcp:
+    #    maxConnections: 100
+    #    connectTimeout: 30ms
+dst:
+  enabled: false
+  collector:
+    host: eric-dst-collector
+    otlpHttpPort: 4318
+    samplingConfigMap: eric-dst-collector-remote-sampling
+  sampler:
+    samplingRate: 0 # default value when initializing Telemetry service at startup
+  labels: { eric-dst-collector-access: "true", eric-dst-query-access: "true" }
+  span:
+    attributeValueLengthLimit: 128 # range="0..max"
+    attributePerSpanCountLimit: 128 # range="0..max"
+    attributePerEventCountLimit: 128 # range="0..max"
+    attributePerLinkCountLimit: 128 # range="0..max"
+    eventCountLimit: 128 # range="0..max"
+    linkCountLimit: 128 # range="0..max"
+  propagator: b3 # ["b3", "propagator"]
+  processor:
+    exportTimeoutMillis: 30000
+    maxExportBatchSize: 512
+    maxQueueSize: 2048
+    scheduledDelayMillis: 5000

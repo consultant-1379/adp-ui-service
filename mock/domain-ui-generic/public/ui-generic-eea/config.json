@@ -1,0 +1,158 @@
+{
+  "apps": [
+    {
+      "displayName": "Call Browser",
+      "url": "/callbrowser/#callbrowser",
+      "version": "1.0.0",
+      "name": "call_browser",
+      "descriptionLong": "Provides insight into call sessions.",
+      "descriptionShort": "CB",
+      "groupNames": ["eea:eea", "subscriber_troubleshooting"],
+      "tags": ["call analysis"]
+    },
+    {
+      "displayName": "Session Browser",
+      "url": "/sessionbrowser/#aggregated",
+      "version": "1.0.0",
+      "name": "session_browser",
+      "descriptionLong": "Provides insight into subscriber sessions (except VoLTE calls).",
+      "descriptionShort": "SB",
+      "groupNames": ["eea:eea", "subscriber_troubleshooting"]
+    },
+    {
+      "displayName": "Subscriber Insights",
+      "url": "/subscriber-insights-exploration/#voice",
+      "version": "1.0.0",
+      "name": "subscriber_insights",
+      "descriptionLong": "Provides a fully automated subscriber-based analysis for problem detection and resolution.",
+      "descriptionShort": "SI",
+      "groupNames": ["eea:eea", "subscriber_troubleshooting"]
+    },
+    {
+      "displayName": "Expert Insights Studio",
+      "url": "/engineering-insights/#ei-editor",
+      "version": "1.0.0",
+      "name": "ei-studio",
+      "descriptionLong": "Provides a platform for in-depth ad-hoc queries for experienced system engineers with deep telecom knowledge.",
+      "descriptionShort": "EI Studio",
+      "groupNames": ["eea:eea", "network_analytics"],
+      "tags": ["ad hoc queries"]
+    },
+    {
+      "displayName": "Expert Insights Dashboard",
+      "url": "/engineering-insights/#ei-dashboard",
+      "version": "1.0.0",
+      "name": "ei_dashboard",
+      "descriptionLong": "Provides a configurable dashboard.",
+      "descriptionShort": "EI Dashboard",
+      "groupNames": ["eea:eea", "network_analytics"],
+      "tags": ["advanced dashboards"],
+      "childNames": ["dashboard_manager", "dashboard_creator"]
+    },
+    {
+      "displayName": "Dashboard Manager",
+      "url": "/engineering-insights/#dashboard-manager",
+      "version": "1.0.0",
+      "name": "dashboard_manager",
+      "descriptionLong": "Management platform for Dashboards.",
+      "descriptionShort": "Dashboard Manager",
+      "groupNames": ["eea:eea", "network_analytics"]
+    },
+    {
+      "displayName": "Dashboard Creator",
+      "url": "/engineering-insights/#dashboard-creator",
+      "version": "1.0.0",
+      "name": "dashboard_creator",
+      "descriptionLong": "Dashboard creator.",
+      "descriptionShort": "Dashboard Creator",
+      "groupNames": ["eea:eea", "network_analytics"]
+    },
+    {
+      "displayName": "Automated Insights - Operations",
+      "url": "/automated-expert-insights/#aei",
+      "version": "1.0.0",
+      "name": "aio",
+      "descriptionLong": "Provides network insights, based on machine learning.",
+      "descriptionShort": "AIO",
+      "groupNames": ["eea:eea", "network_analytics"]
+    },
+    {
+      "displayName": "Service Quality Manager",
+      "url": "/sqm/#sqm",
+      "version": "1.0.0",
+      "name": "sqm",
+      "descriptionLong": "Provides an interface for Network Specialists to track and monitor the performance on an entire telecommunication network.",
+      "descriptionShort": "SQM",
+      "groupNames": ["eea:eea", "network_analytics"]
+    },
+    {
+      "displayName": "Config Store Editor",
+      "url": "/configstore-editor/#configstoreviewer",
+      "version": "1.0.0",
+      "name": "config_store_editor",
+      "descriptionShort": "CSM",
+      "groupNames": ["eea:eea"]
+    },
+    {
+      "displayName": "Nova Explorer",
+      "url": "http://localhost:9999/nova-explorer",
+      "type": "external",
+      "version": "1.0.0",
+      "descriptionLong": "Dummy external app for testing purposes.",
+      "name": "nova1",
+      "groupNames": ["eea:eea"],
+      "descriptionShort": "NE"
+    },
+    {
+      "displayName": "Dimensioning Tool",
+      "url": "/dimensioning-tool",
+      "version": "1.0.0",
+      "descriptionLong": "UI for the Dimensioning Tool.",
+      "name": "dimensioning-tool",
+      "descriptionShort": "DT"
+    },
+    {
+      "displayName": "App in Hidden Groups",
+      "url": "/hidden",
+      "version": "1.0.0",
+      "name": "hidden_app",
+      "groupNames": ["hidden_product", "hidden_category"]
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Ericsson Expert Analytics",
+      "version": "1.0.0",
+      "name": "eea:eea",
+      "type": "product",
+      "descriptionLong": "Ericsson Expert Analytics (EEA) is a multi-vendor, customer-centric analytics product for mobile operators who want to capitalize on their network data.",
+      "descriptionShort": "EEA"
+    },
+    {
+      "displayName": "Subscriber Troubleshooting",
+      "version": "1.0.0",
+      "name": "subscriber_troubleshooting",
+      "type": "category"
+    },
+    {
+      "displayName": "Network Analytics",
+      "version": "1.0.0",
+      "name": "network_analytics",
+      "type": "category"
+    },
+    {
+      "displayName": "Hidden system",
+      "version": "1.0.0",
+      "name": "hidden_product",
+      "type": "product",
+      "hidden": true
+    },
+    {
+      "displayName": "Hidden category",
+      "version": "1.0.0",
+      "name": "hidden_category",
+      "type": "category",
+      "hidden": true
+    }
+  ]
+}

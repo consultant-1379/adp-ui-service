@@ -1,0 +1,53 @@
+{
+  "ADP-Microservice-Characteristics-Report": {
+    "model_version": "1.0.0",
+    "service": {
+      "name": "ADP GUI Aggregator Lightweight",
+      "version": "$SERVICE_VERSION"
+    },
+    "resource-configuration": [
+      {
+        "flavor": "minimum",
+        "resources": [
+          {
+            "pod": "eric-adp-gui-aggregator-service",
+            "instances": 2,
+            "containers": [
+              {
+                "name": "main",
+                "cpu-req": "250m",
+                "cpu-limit": "500m",
+                "mem-req": "300Mi",
+                "mem-limit": "300Mi"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "results": [
+      {
+        "use-case": "gas-light-characteristics-report",
+        "description": "Characteristics report",
+        "labels": ["CHARACTERISTICS_REPORT"],
+        "duration": 4432,
+        "metrics": [],
+        "additional-results": {}
+      }
+    ],
+    "test-environment": {
+      "cluster": "hoff-03-adp",
+      "cpu": {
+        "model": "Xeon_Phi-31S1P",
+        "CPU-MHz": 2400,
+        "bogomips": 4589.37
+      },
+      "memory": "2981Gi",
+      "kaas": "CCD-2.15.1",
+      "kubernetes-version": "1.19.3",
+      "other-info": {
+        "description_url": "http://url"
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "LOG_TRANSFORMER_ERROR": {
+    "faultName": "log_transformer_error",
+    "serviceName": "eric-adp-gui-aggregator-service",
+    "severity": "Major",
+    "description": "Error writing to the socket. Please check Log Transformer Service.",
+    "expiration": 5000
+  },
+  "SERVER_ERROR": {
+    "faultName": "adp_ui_service_server_error",
+    "serviceName": "eric-adp-gui-aggregator-service",
+    "severity": "Critical",
+    "description": "GAS UI service internal server error",
+    "expiration": 5000
+  },
+  "CERTIFICATE_ERROR": {
+    "faultName": "certificate_error",
+    "serviceName": "eric-adp-gui-aggregator-service",
+    "severity": "Major",
+    "description": "Error reading certificate files.",
+    "expiration": 5000
+  },
+  "K8S_ERROR": {
+    "faultName": "K8S_api_error",
+    "serviceName": "eric-adp-gui-aggregator-service",
+    "severity": "Major",
+    "description": "K8S api not available.",
+    "expiration": 5000
+  }
+}

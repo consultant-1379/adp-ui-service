@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "$id": "http://adp.ericsson.com/ui.entity.json",
+  "description": "Base UI Entity Definition.",
+  "type": "object",
+  "required": ["name", "displayName", "version"],
+  "properties": {
+    "name": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/name",
+      "description": "Unique name of the UI entity.",
+      "type": "string"
+    },
+    "displayName": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/displayName",
+      "description": "Name of an UI entity. This will be used as display name in the launcher.",
+      "type": "string"
+    },
+    "version": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/version",
+      "description": "Version of an UI application. Should be in semantic version.",
+      "type": "string"
+    },
+    "descriptionLong": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/descriptionLong",
+      "description": "Long detailed description of an UI entity.",
+      "type": "string"
+    },
+    "descriptionShort": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/descriptionShort",
+      "description": "A short description of an UI entity.",
+      "type": "string"
+    },
+    "type": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/type",
+      "description": "Classification of an UI entity.",
+      "type": "string"
+    },
+    "priority": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/priority",
+      "description": "Display priority order.",
+      "type": "integer"
+    },
+    "tags": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/tags",
+      "description": "Tags associated.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "color": {
+      "$id": "http://adp.ericsson.com/ui.app.json#/properties/color",
+      "description": "Color of the application.",
+      "type": "string"
+    },
+    "acronym": {
+      "$id": "http://adp.ericsson.com/ui.app.json#/properties/acronym",
+      "description": "Acronym of the application.",
+      "type": "string"
+    },
+    "hidden": {
+      "$id": "http://adp.ericsson.com/ui.entity.json#/properties/hidden",
+      "description": "Default: false. Set to true to hide the group form the menu.",
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "name": "adp-oam-ui-tools",
+      "displayName": "OAM Tools",
+      "descriptionLong": "ADP.OAM.UI.TOOLS.DESC",
+      "descriptionShort": "ADP.OAM",
+      "version": "0.1.0",
+      "type": "internal",
+      "priority": 1,
+      "tags": ["tools"],
+      "color": "purple",
+      "acronym": "OAM"
+    },
+    {
+      "id": "adp-tools",
+      "name": "ADP.TOOLS.NAME",
+      "descriptionLong": "Collection of tools application",
+      "type": "domain",
+      "priority": 10,
+      "tags": ["tools"]
+    },
+    {
+      "id": "adp-latest-entities",
+      "version": "0.1.0",
+      "descriptionLong": "Latest Entities",
+      "type": "json",
+      "priority": 10
+    }
+  ]
+}

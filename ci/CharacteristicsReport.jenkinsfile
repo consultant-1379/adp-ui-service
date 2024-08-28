@@ -1,0 +1,119 @@
+pipeline {
+  agent {
+    node('presentation')
+  }
+  options {
+    ansiColor('xterm')
+    timeout(time: 1, unit: 'HOURS')
+    buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '30'))
+  }
+  parameters {
+    string(name: 'GAS_VERSION', description: 'The drop which is to be measured')
+    string(name: 'MAX_VUS', defaultValue: '100', description: 'Max number of virtual users in K6 tests')
+    string(name: 'RESPONSE_TIME_THRESHOLD', defaultValue: '500', description: 'Response time threshold (ms) of which 95% of responses has to be below')
+    string(name: 'SLEEP_UNIT', defaultValue: '2', description: 'Configure sleep time unit (in seconds), which is used between and during virtual user iterations.')
+    booleanParam(name: 'INCLUDE_STATIC_ASSETS', defaultValue: false, description: 'Include downloading static assets in K6 test cycles')
+    booleanParam(name: 'ABORT_ON_THRESHOLD_BREACH', defaultValue: false, description: 'Abort current K6 test case (not the Jenkins stage) as soon as a threshold is breached')
+    booleanParam(name: 'PUBLISH_ATHENA_REPORT', defaultValue: false, description: 'Publish the created Athena characteristics report')
+    booleanParam(name: 'SAVE_DETAILED_REPORT', defaultValue: false, description: 'Preserve detailed output of K6')
+    booleanParam(name: 'MAIL_ON_FAILURE', defaultValue: true, description: 'Send mail if the job fails')
+  }
+  stages {
+    stage('Cleanup') {
+      steps {
+        sh 'bob clean'
+      }
+    }
+    stage('Init') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            ansiColor('xterm') {
+              sh 'bob init-ci-test'
+            }
+          }
+        }
+      }
+    }
+    stage('Install') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/characteristics-report-rules.yaml install-ci-mocks-gas'
+            sh 'bob -r ci/rulesets/characteristics-report-rules.yaml install-characteristics-chart'
+          }
+        }
+      }
+    }
+    stage('Run load tests') {
+      steps {
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          script {
+            try {
+              sh 'bob -r ci/rulesets/characteristics-report-rules.yaml wait-to-prometheus-cadvisor-ready'
+              sh 'bob -r ci/rulesets/characteristics-report-rules.yaml run-load-tests ' +
+                '-p maxVus=${MAX_VUS} -p responseTimeThreshold=${RESPONSE_TIME_THRESHOLD} -p includeStaticAssets=${INCLUDE_STATIC_ASSETS} ' +
+                '-p failOnThreshold=${ABORT_ON_THRESHOLD_BREACH} -p sleepUnit=${SLEEP_UNIT}'
+              sh 'bob -r ci/rulesets/characteristics-report-rules.yaml run-load-tests:save-loadtests-end-time'
+            } catch (e) {
+              sh 'bob -r ci/rulesets/characteristics-report-rules.yaml run-load-tests:save-loadtests-end-time'
+            }
+          }
+        }
+      }
+    }
+    stage('Generate Athena report') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([file(credentialsId: env.system, variable: 'KUBECONFIG')]) {
+            sh 'bob -r ci/rulesets/characteristics-report-rules.yaml forward-pm-port &'
+            sh 'bob -r ci/rulesets/characteristics-report-rules.yaml generate-athena-report'
+          }
+        }
+      }
+    }
+    stage('Publish Athena report') {
+      when { expression { env.PUBLISH_ATHENA_REPORT == 'true' } }
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI')]) {
+          sh 'bob -r ci/rulesets/characteristics-report-rules.yaml publish-report'
+        }
+      }
+    }
+    stage('Cleanup namespace') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([file(credentialsId: env.system, variable: 'KUBECONFIG')]) {
+            ansiColor('xterm') {
+              sh 'bob namespace-cleanup'
+            }
+          }
+        }
+      }
+    }
+  }
+  post {
+    always {
+      archiveArtifacts 'load-test/report/load-test-report.json'
+      archiveArtifacts 'load-test/output/updated_adp_char_report.json'
+      archiveArtifacts artifacts: '.bob/test_detailed_results.json', allowEmptyArchive: true
+    }
+    failure {
+      script {
+        if (params.MAIL_ON_FAILURE == 'true') {
+          mail to: 'f98b007c.ericsson.onmicrosoft.com@emea.teams.ms',
+          subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+          body: "Failure on ${env.BUILD_URL}"
+        }
+      }
+    }
+  }
+}

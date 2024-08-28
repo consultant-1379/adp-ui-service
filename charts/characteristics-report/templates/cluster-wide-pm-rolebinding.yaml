@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-wide-pm-rolebinding-{{ randAlphaNum 5 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: eric-pm-server-kube-state-metrics
+subjects:
+  - kind: ServiceAccount
+    name: cluster-wide-pm-sa
+    namespace: {{ .Release.Namespace }}

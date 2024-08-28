@@ -1,0 +1,34 @@
+documents:
+  - name: service-user-guide
+    files:
+      - ./../../content/service_user_guide.md
+      - ./../../content/architecture_overview.drawio.svg
+      - ./../../content/deployment_overview.drawio.svg
+      - ./../../content/load-test-results.png
+      - ./../../content/cpu_load_test.svg
+      - ./../../content/memory_load_test.svg
+  - name: release-notes
+    files:
+      - ./../../content/release_notes.md
+  - name: ui-integration-guide
+    files:
+      - ./../../content/ui_integration_guide.md
+  - name: api-documentation
+    files:
+      - ../../../api/aggregated-api-specs.md
+  - name: application-developers-guide
+    files:
+      - ./../../content/application_developers_guide.md
+  - name: test-specification
+    files:
+      - ./../../content/test-specification.md
+  - name: microfrontend
+    files:
+      - ./../../content/microfrontend.md
+      - ./../../content/mf_app_shell.drawio.svg
+      - ./../../content/mf_client_side_composition.drawio.svg
+      - ./../../content/mf_service_discovery.drawio.svg
+      - ./../../content/mf_ui_serve.drawio.svg
+  - name: contributing-guideline
+    files:
+      - ./../../../../CONTRIBUTING.md

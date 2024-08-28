@@ -1,0 +1,34 @@
+pipeline {
+  agent {
+    node('presentation')
+  }
+  options {
+    ansiColor('xterm')
+    timeout(time: 1, unit: 'HOURS')
+    buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '30'))
+  }
+  stages {
+    stage('Prepare') {
+      steps {
+        sh 'bob --help'
+      }
+    }
+    stage('Update Munin credential for production') {
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'jenkins-api-token', usernameVariable: 'JENKINS_USERNAME', passwordVariable: 'JENKINS_PASSWORD'),
+          string(credentialsId: 'mimer-token-production', variable: 'MUNIN_TOKEN')
+        ]) {
+          sh 'bob -r ci/rulesets/misc-job-rules.yaml jenkins-munin-secret-update:munin-production-secret-update'
+        }
+      }
+    }
+  }
+  post {
+    failure {
+      mail to: 'f98b007c.ericsson.onmicrosoft.com@emea.teams.ms',
+      subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+      body: "Failure on ${env.BUILD_URL}"
+    }
+  }
+}

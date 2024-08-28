@@ -1,0 +1,37 @@
+diff --git a/node_modules/@eui/container/src/container/container.js b/node_modules/@eui/container/src/container/container.js
+index b1fb3bb..944de00 100644
+--- a/node_modules/@eui/container/src/container/container.js
++++ b/node_modules/@eui/container/src/container/container.js
+@@ -366,6 +366,12 @@ class Container extends TemplateComponent {
+    */
+   didConnect() {
+     this._addListeners();
++
++    // Load app for current url
++    if (this.metaData) {
++      this.loadApp(this.context.getLocation());
++    }
++
+     if (this.navigationSlot.assignedElements().length > 0) {
+       [this.navigationMenu] = this.navigationSlot.assignedElements();
+       this.appBar.singleApp = false;
+@@ -409,9 +415,6 @@ class Container extends TemplateComponent {
+       this.handleNavigationMenu(event),
+     );
+     document.addEventListener('location:change', this);
+-
+-    // Load app for current url
+-    this.loadApp(this.context.getLocation());
+   };
+ 
+   /**
+@@ -769,6 +772,9 @@ class Container extends TemplateComponent {
+       // meta data updated so route map needs updating
+       this.context.metaData = this.metaData;
+       this.context.generateRouteMap();
++
++      // Load app for current url
++      this.loadApp(this.context.getLocation());
+     }
+   }
+ }

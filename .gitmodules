@@ -1,0 +1,4 @@
+[submodule "tools/helm-extensions"]
+	path = tools/helm-extensions
+	url = ssh://gerrit-gamma.gic.ericsson.se:29418/adp-common-src/helm-extensions
+	branch = master

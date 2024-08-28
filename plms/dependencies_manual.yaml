@@ -1,0 +1,68 @@
+# This file contains all of the 3PPs, 2PPs, which are not scanned by FOSSA correctly,
+# or we have to create a hack because of the inconsistency between the FOSSA and SCAS and MUNIN.
+
+# All of these entries should be checked manually periodically, because FOSSA scan is ignored to all of them.
+# So delete or modify them in case the GUI Aggregator Service has another version from them, or the dependency is deleted.
+modelVersion: '3.0'
+dependencies:
+- ID: nodejs-node+20.12.2
+  bazaar:
+    register: 'no'
+    prim: 5/CTX1041107
+    community_link: https://nodejs.org
+    community_name: https://nodejs.org
+    community_url: https://nodejs.org
+    component_comment: ''
+    component_highlevel_description: Node.js is a JavaScript runtime built on Chrome's
+      V8 JavaScript engine.
+    component_name: Node.js
+    component_platform: linux
+    component_programing_language: JavaScript
+    component_version: V20.12.2
+    licenses:
+    - ''
+    src_download_link: https://nodejs.org/dist/v20.12.2/node-v20.12.2.tar.gz
+    stako_decision_reason: manual
+    stako: ESW3
+    stako_comment: Low community activity
+    bazaarurl: https://scas.internal.ericsson.com/search3pp?id=1089382&id-filter=equals&rowDisplay=Card-Simple
+    recode: ''
+    retext: ''
+    country: Undefined
+    crypto: No Encryption
+    programming_language: JavaScript
+  encryptions:
+    used:
+    - ''
+  evms:
+    product_name: Node.js
+    register: 'yes'
+    target_sw: linux
+    vendor: git
+    version: 20.12.2
+    web_url: https://github.com/nodejs/node
+  licenses:
+  - MIT
+  name: nodejs-node
+  primary:
+  - this
+  selected_licenses:
+  - MIT
+  subcomponent: false
+  type: FOSS
+  versions:
+  - 20.12.2
+  mimer:
+    product_number: CTX1041107
+    product_version_label: v20.12.2
+    linking: Not Linked
+    obligation: Including the full license text in a prominent place with the software
+      when the FOSS is distributed
+    usage: Node.js is an open-source, cross-platform, JavaScript runtime environment.
+      It executes JavaScript code outside of a browser.
+    primary: 'True'
+    selected_licenses:
+    - MIT
+  alerts:
+  - '''Node.js'': Manual set stako_decision_reason: ''manual'' for stako: ''ESW3'',
+    team takes the risk!'

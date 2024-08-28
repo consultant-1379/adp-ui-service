@@ -1,0 +1,50 @@
+# General
+logs
+
+# Bob
+.bob
+.bob.env
+
+# Tests
+.nyc_output
+test-output/**
+
+# Dependencies
+node_modules
+
+# VA
+acnhore_metadata.properties
+trivy_metadata.properties
+
+# Artifacts
+mock/domain-ui-generic/**/artifacts
+
+# Builds
+target
+**/build/**
+**/out/**
+
+# Packages & content related files
+*.tgz
+*.zip
+frontend/public/help-content-metadata.json
+
+# SonarQube
+.scannerwork/**
+backend/.scannerwork/**
+frontend/.scannerwork/**
+
+# Tilt
+.tilt
+tilt.iccr.ip.txt
+tilt.nodeport.hostname.txt
+tilt.option.user.json
+tilt_modules
+
+# Helm
+Chart.lock
+charts/eric-adp-gui-aggregator-service/values.schema.json
+requirements.lock
+
+# IDE specific
+.idea

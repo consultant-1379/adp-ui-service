@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "http://example.com/example.json",
+  "description": "This schema describes the required schema of the logcontrol config",
+  "type": "array",
+  "default": [],
+  "title": "Root Schema",
+  "items": {
+    "type": "object",
+    "properties": {
+      "container": {
+        "description": "Name of the container",
+        "type": "string"
+      },
+      "severity": {
+        "description": "Log severity",
+        "type": "string"
+      }
+    }
+  },
+
+  "examples": [
+    [
+      {
+        "container": "main",
+        "severity": "debug"
+      }
+    ]
+  ]
+}

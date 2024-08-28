@@ -1,0 +1,45 @@
+{
+  "apps": [
+    {
+      "displayName": "Dashboard",
+      "route": "/dashboard",
+      "version": "1.0.0",
+      "name": "dashboard",
+      "groupNames": ["ecm"]
+    },
+    {
+      "displayName": "Orders",
+      "route": "/orders",
+      "version": "1.0.0",
+      "name": "orders",
+      "groupNames": ["ecm"]
+    },
+    {
+      "displayName": "Alarms",
+      "route": "/alarms",
+      "version": "1.0.0",
+      "name": "alarms",
+      "groupNames": ["ecm"]
+    },
+    {
+      "displayName": "Nova Explorer Standalone - Very Long External Application Name",
+      "url": "http://localhost:9999/nova-explorer-standalone",
+      "version": "1.0.0",
+      "descriptionShort": "Lorem ipsum dolor sit amet, no his quod constituto, ei qui constituto percipitur dissentias.",
+      "descriptionLong": "Lorem ipsum dolor sit amet, no his quod constituto, ei qui constituto percipitur dissentias. Utamur gubergren moderatius usu eu, usu iudicabit maiestatis an, cu iusto cetero pri. Vis ubique postea regione te, mel et soleat alterum petentium, et vis tempor sensibus vituperata. Propriae detracto delicatissimi sit te, per facete appetere ea. Nam choro libris singulis ea, vel te dico ridens latine, ius in idque aeterno perpetua.",
+      "name": "dummy_external_app",
+      "groupNames": ["ecm"],
+      "type": "external"
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Ericsson Cloud Manager",
+      "version": "1.0.0",
+      "name": "ecm",
+      "type": "product",
+      "descriptionShort": "ECM",
+      "descriptionLong": "Ericsson Cloud Manager provides an integrated platform for managing lifecycle of NFV and IT workloads in a geographically distributed cloud infrastructure, and enables secure and hierarchical multi-tenancy for this cloud infrastructure."
+    }
+  ]
+}

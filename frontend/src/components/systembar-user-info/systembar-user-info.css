@@ -1,0 +1,13 @@
+:host {
+  display: block;
+  cursor: pointer;
+  opacity: 0.7;
+}
+:host(:hover) {
+  opacity: 1;
+}
+.system-action {
+  display: flex;
+  gap: var(--space-small, 4px);
+  --text: var(--white);
+}

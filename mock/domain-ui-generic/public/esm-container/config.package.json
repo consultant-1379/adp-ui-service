@@ -1,0 +1,10 @@
+{
+  "modules": [
+    {
+      "name": "module-1",
+      "version": "1.0.0",
+      "path": "./modules",
+      "main": "utility.js"
+    }
+  ]
+}

@@ -1,0 +1,340 @@
+# Global settings
+# global:
+#   log:
+#     streamingMethod: "direct" # can be overridden by 'log.streamingMethod'
+#     outputs: # Used by the APO2 Sidecar
+#       - "applicationLevel"
+#       - "k8sLevel"
+#   security:
+#     tls:
+#       enabled: true
+#     policyBinding:
+#       create: false
+#     policyReferenceMap:
+#       default-restricted-security-policy: customer-z-restricted
+#   securityPolicy:
+#     rolekind: "" # { choice='Role, "", ClusterRole' } [ default="" ]
+#   registry:
+#     repoPath:
+#     url: armdocker.rnd.ericsson.se # see default in eric-product-info.yaml
+#   nodeSelector: {}
+#   pullSecret:
+#   timezone: UTC
+#   hosts:
+#     iam: "iam.ericsson.com"
+#   iam:
+#    cacert:
+#      secretName: iam-cacert-secret
+#      key: tls.crt
+
+# Generic Service settings enforced by Desing Rules
+annotations: {}
+
+labels: {}
+
+nodeSelector: {}
+
+podDisruptionBudget:
+  minAvailable: 1
+
+affinity:
+  podAntiAffinity: "soft"
+  topologyKey: "kubernetes.io/hostname"
+
+terminationGracePeriodSeconds: 30
+
+tolerations: []
+
+topologySpreadConstraints: []
+
+log:
+  streamingMethod:
+
+appArmorProfile:
+  main:
+    type: "" # { choice='unconfined, runtime/default, localhost, "" '  } [ default="" ]
+    localhostProfile:
+  ericsecoauthsap:
+    type: "" # { choice='unconfined, runtime/default, localhost, "" '  } [ default="" ]
+    localhostProfile:
+  ericsecoauthproxy:
+    type: "" # { choice='unconfined, runtime/default, localhost, "" '  } [ default="" ]
+    localhostProfile:
+
+seccompProfile:
+  pod:
+    type: "" # { choice='Unconfined, RuntimeDefault, Localhost, "" ' } [ default="" ]
+    localhostProfile:
+  main:
+    type: "" # { choice='Unconfined, RuntimeDefault, Localhost, "" ' } [ default="" ]
+    localhostProfile:
+  ericsecoauthsap:
+    type: "" # { choice='Unconfined, RuntimeDefault, Localhost, "" ' } [ default="" ]
+    localhostProfile:
+  ericsecoauthproxy:
+    type: "" # { choice='Unconfined, RuntimeDefault, Localhost, "" ' } [ default="" ]
+    localhostProfile:
+
+securityPolicy:
+  rolename: eric-adp-gui-aggregator-service
+
+# Ingress configuration
+ingress:
+  enabled: false
+  useContour: false
+  path: /
+  hostname:
+  ingressClass:
+  adpIccrCaSecret:
+  adpIccrServiceName: eric-tm-ingress-controller-cr
+  tls:
+    passthrough: false
+    enabled: true
+    existingSecret:
+  certificates:
+    asymmetricKeyCertificateName: gas-http-server
+    crlEnabled: false
+  timeoutPolicy:
+    response: infinity
+    idle: infinity
+
+networkPolicy:
+  enabled: true
+
+productInfo:
+  rstate: RSTATE
+
+imageCredentials:
+  repoPath: # overrides repoPath from eric-product-info.yaml
+  main:
+    repoPath: # see default in eric-product-info.yaml
+    registry:
+      url: # see default in eric-product-info.yaml
+  # secret must be manually created in the namespace, no default value
+  # pullSecret:
+
+# Performance Monitoring
+metrics:
+  enabled: true
+  enableNewScrapePattern: false
+  port: 3888
+
+# Service config
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+  endpoints:
+    http:
+      tls:
+        # Currently it is not supported to use https without enforcing it.
+        enforced: required
+        # Global TLS must be enabled if this is set to required.
+        verifyClientCertificate: required
+
+# Deployment options
+replicaCount: 2
+
+# Using RollingUpdate, specify the update strategy for statefulset
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 25%
+    maxSurge: 25%
+
+# Dimensioning + auth resources
+resources:
+  main:
+    limits:
+      cpu: 500m
+      memory: 300Mi
+      ephemeral-storage: "100Mi"
+    requests:
+      cpu: 250m
+      memory: 300Mi
+      ephemeral-storage: "100Mi"
+  ericsecoauthsap:
+    requests:
+      cpu: "50m"
+      memory: "130Mi"
+      ephemeral-storage: "100Mi"
+    limits:
+      cpu: "50m"
+      memory: "130Mi"
+      ephemeral-storage: "100Mi"
+  ericsecoauthproxy:
+    limits:
+      cpu: 2000m
+      memory: 500Mi
+      ephemeral-storage: "100Mi"
+    requests:
+      cpu: 500m
+      memory: 500Mi
+      ephemeral-storage: "100Mi"
+
+podPriority:
+  main:
+    priorityClassName: ""
+
+probes:
+  main:
+    livenessProbe:
+      initialDelaySeconds: 20
+      timeoutSeconds: 1
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 3
+    readinessProbe:
+      initialDelaySeconds: 30
+      timeoutSeconds: 1
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 3
+
+# GUI Aggregator Specific configuration
+configuration:
+  # In case of the authz proxy is disabled,
+  # then this parameter could be used to set the whole logout url
+  logoutURL:
+  # In case of the authz proxy is disabled,
+  # then this parameter could be used to set the whole url to the User Account editor
+  userAccountURL:
+  guiContext: /ui
+  k8sLabelValue: workspace-gui
+  nodeJsRuntimeReservedMemory: 150
+  logging:
+    defaultLogLevel: info
+    stdoutLogFormat: text # { choice='text, json' } [ default="text" ]
+    logLevelCategories:
+      requests: info
+    serviceName: eric-adp-gui-aggregator-service
+    logCollector:
+      facility: local0
+
+  helpAggregator:
+    enabled: true
+    label: { help.ericsson.com/part-of: workspace-gui }
+    serviceName: eric-oss-help-aggregator
+
+  faultIndications:
+    enabled: false
+
+  cnom:
+    defaultDashboards:
+      enabled: false
+    dashboardTopology:
+      enabled: true
+    dashboardTreeView:
+      enabled: false
+
+  discoverIngress: false
+  dependencies:
+    prometheus:
+      appName: eric-adp-gas-light
+      pmServiceName: eric-pm-server
+    faultHandler:
+      hostname: eric-fh-alarm-handler
+      tlsPort: 6006
+      httpPort: 6005
+      serviceName: eric-adp-gui-aggregator-service
+    logTransformer:
+      hostname: eric-log-transformer
+
+  userPermission:
+    enabled: false
+    nonTLSMode: false
+    iamServiceName: eric-sec-access-mgmt
+    realmName: oam
+    audience: adp-iam-aa-client
+    userInfo:
+      fieldMappings:
+        username:
+          - upn
+        lastLoginTime:
+          - last-login-time
+        userId:
+          - sub
+
+# Portal (UI) specific configs
+uiconfig:
+  logging:
+    logLevel: info
+  hostname: # to be filled, if the ingress is not used
+  path: # to be filled, if the ingress is not used
+  protocol: http # if not set, ingress tls settings will be used
+  uiSettings:
+    storageMode: localStorage # { choice='localStorage, uiSettingsService' } [ default="localStorage" ]
+    baseUrl: #to be filled with UI Settings base URL, if DB mode is used
+
+# Manual UI Meta and Domain service config
+manualconfig:
+  apps:
+  groups:
+  actions: []
+  services:
+  overrides:
+    apps:
+    groups:
+    components:
+  groupMappings:
+
+# Auth Proxy
+authorizationProxy:
+  enabled: false
+  sipoauth2:
+    enabled: true
+  authnProxyFQDN:
+  keycloakFQDN:
+  localSpPort: 3000
+  adpIamServiceName: eric-sec-access-mgmt
+  adpIamServicePort: 8443
+  adpIamRealm: oam
+  numOfWebServerWorkers: 10
+  adpIamAdminSecret: eric-eea-iam-pg-usersecrets
+  localSpClientCertVolumeName: authz-client-cert
+  # In case of own ICCR and mTLS, overwrite this:
+  adpIccrServiceName: eric-tm-ingress-controller-cr
+  protectedPaths:
+    - /ui
+    - /ui-meta
+    - /ui-serve
+    - /ui-logging
+    - /gas-internal
+    - /metrics
+    - /userpermission
+  authorizationRules: |
+    roles:
+    - name: all-in-one-gas
+    resources:
+    - name: all-in-one-gas
+      uris:
+      - /**
+    permissions:
+    - name: all-in-one-permission
+      config:
+        resources:        ["all-in-one-gas"]
+        operations:       ["GET","HEAD","POST","PUT","DELETE","CONNECT","OPTIONS","TRACE"]
+        roles:            ["all-in-one-gas"]
+
+dst:
+  enabled: false
+  collector:
+    host: eric-dst-collector
+    otlpHttpPort: 4318
+    samplingConfigMap: eric-dst-collector-remote-sampling
+  sampler:
+    samplingRate: 0 # default value when initializing Telemetry service at startup
+  labels: { eric-dst-collector-access: "true", eric-dst-query-access: "true" }
+  span:
+    attributeValueLengthLimit: 128 # range="0..max"
+    attributePerSpanCountLimit: 128 # range="0..max"
+    attributePerEventCountLimit: 128 # range="0..max"
+    attributePerLinkCountLimit: 128 # range="0..max"
+    eventCountLimit: 128 # range="0..max"
+    linkCountLimit: 128 # range="0..max"
+  propagator: b3 # ["b3", "tracecontext"]
+  processor:
+    exportTimeoutMillis: 30000
+    maxExportBatchSize: 512
+    maxQueueSize: 2048
+    scheduledDelayMillis: 5000

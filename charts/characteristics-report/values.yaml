@@ -1,0 +1,33 @@
+global:
+  security:
+    tls:
+      enabled: false
+
+eric-pm-server:
+  enabled: true
+  resources:
+    eric-pm-server:
+      limits:
+        cpu: 5
+        memory: 30Gi
+        ephemeral-storage:
+      requests:
+        cpu: 5
+        memory: 30Gi
+        ephemeral-storage:
+  rbac:
+    appMonitoring:
+      configFileCreate: true
+      enabled: false
+  server:
+    serviceAccountName: cluster-wide-pm-sa
+    persistentVolume:
+      enabled: true
+      size: 10Gi
+      storageClass: ""
+
+eric-pm-node-exporter:
+  enabled: true
+  security:
+    tls:
+      enabled: false

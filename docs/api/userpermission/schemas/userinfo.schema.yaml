@@ -1,0 +1,19 @@
+type: object
+description: |
+  Normalized response returned by IAM's `/userinfo` endpoint. Besides the below properties,
+  extra properties may show up in the response which depend on the response returned by
+  IAM's `/userinfo` endpoint.
+required:
+  - username
+  - userId
+  - lastLoginTime
+properties:
+  userId:
+    type: string
+    description: The subject claim of the user.
+  username:
+    type: string
+    description: The username of the user.
+  lastLoginTime:
+    type: string
+    description: The last login time returned as ISO string formatted text.

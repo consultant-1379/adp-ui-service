@@ -1,0 +1,3 @@
+{
+  "reject": ["@open-wc/eslint-config", "eslint"]
+}

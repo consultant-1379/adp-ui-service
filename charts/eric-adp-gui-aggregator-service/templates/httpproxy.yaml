@@ -1,0 +1,82 @@
+{{- if and (.Values.ingress.enabled) (.Values.ingress.useContour) -}}
+{{- $authorizationProxy := fromJson (include "eric-adp-gui-aggregator-service.authz-proxy-values" .) -}}
+{{- $global := fromJson (include "eric-adp-gui-aggregator-service.global" .) -}}
+{{- $ingressPath := include "eric-adp-gui-aggregator-service.ingressPath" . -}}
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+  annotations:
+    {{- $ingressClassAnn := dict -}}
+    {{- if .Values.ingress.ingressClass -}}
+      {{- $_ := set $ingressClassAnn "kubernetes.io/ingress.class" (.Values.ingress.ingressClass | toString) -}}
+    {{- end -}}
+    {{- $commonAnn := include "eric-adp-gui-aggregator-service.annotations" . | fromYaml -}}
+    {{- include "eric-adp-gui-aggregator-service.mergeAnnotations" (dict "location" .Template.Name "sources" (list $ingressClassAnn $commonAnn)) | trim | nindent 4 }}
+{{- if .Values.ingress.tls.passthrough }}
+spec:
+  virtualhost:
+    fqdn: {{ .Values.ingress.hostname | quote }}
+    tls:
+      passthrough: true
+  tcpproxy:
+    services:
+      - name: {{ include "eric-adp-gui-aggregator-service.name" . }}-http
+        port: {{ .Values.service.port }}
+{{- else }}
+spec:
+  virtualhost:
+  {{- if $authorizationProxy.enabled }}
+    # CORS policy is required because of the fetch requests from the Single page application.
+    # In case of the CORS policy is not set and the iam is on another origin and the first JWT token is expired,
+    # then every fetch request will fail from the GUI with CORS policy error.
+    corsPolicy:
+      allowCredentials: true
+      allowMethods:
+      - GET
+      - POST
+      - OPTIONS
+      allowOrigin:
+      - '*'
+    {{- end }}
+    {{- if .Values.ingress.hostname }}
+    fqdn: {{ .Values.ingress.hostname | quote }}
+    {{- end }}
+    {{- if .Values.ingress.tls.enabled }}
+    tls:
+      minimumProtocolVersion: "1.2"
+      {{- if .Values.ingress.tls.existingSecret }}
+      secretName: {{ .Values.ingress.tls.existingSecret }}
+      {{- else }}
+      secretName: {{ include "eric-adp-gui-aggregator-service.name" . }}-ingress-external-server-cert
+      {{- end }}
+    {{- end }}
+  routes:
+{{- if $authorizationProxy.enabled }}
+{{ include "eric-adp-gui-aggregator-service.authz-proxy-ingress-routes" .  | indent 2 }}
+{{- end }}
+  - conditions:
+      - prefix: {{ $ingressPath }}
+    services:
+      - name: {{ include "eric-adp-gui-aggregator-service.name" . }}-http
+        port: {{ .Values.service.port }}
+        {{- if $global.security.tls.enabled }}
+        protocol: tls
+        validation:
+          caSecret: {{ include "eric-adp-gui-aggregator-service.rootSecretName" . }}
+        {{- if .Values.ingress.certificates.crlEnabled }}
+          crlSecret: {{ include "eric-adp-gui-aggregator-service.rootSecretName" . }}
+        {{- end }}
+          subjectName: {{ include "eric-adp-gui-aggregator-service.name" . }}
+        {{- end }}
+    pathRewritePolicy:
+      replacePrefix:
+      - prefix: {{ $ingressPath }}
+        replacement: /
+    timeoutPolicy:
+      response: {{ .Values.ingress.timeoutPolicy.response }}
+      idle: {{ .Values.ingress.timeoutPolicy.idle }}
+{{- end -}}
+{{ end }}

@@ -1,0 +1,4 @@
+# This file collects all dependencies which are wrongly found by Fossa bugs.
+# This is a list of package names or package+version ID of the dependencies to be excluded from the auto file.
+dependencies:
+  - '@eui/base'

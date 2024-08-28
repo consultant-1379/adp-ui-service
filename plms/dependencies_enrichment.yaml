@@ -1,0 +1,10 @@
+# This file contains enrichment for automatically discovered 3pps
+# Normally the dependencies enrich command could be used, however it does not enrich all fields.
+# So there is a generic script 'enrich.js', which takes all attributes here to override the original ones.
+modelVersion: '1.1'
+dependencies:
+  - ID: kuler+2.0.0
+    # Version in SCAS is '2.0'. WA is to have '2.0' as first item in the list.
+    versions:
+      - '2.0'
+      - '2.0.0'

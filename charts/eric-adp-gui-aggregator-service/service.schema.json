@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "urn:adp:helm:schemas:v1:gas-global:v1"
+    },
+    {
+      "$ref": "urn:adp:helm:schemas:v1:gas-general:v1"
+    },
+    {
+      "$ref": "urn:adp:helm:schemas:v1:gas-ingress:v1"
+    },
+    {
+      "$ref": "urn:adp:helm:schemas:v1:gas-serviceConfig:v1"
+    },
+    {
+      "$ref": "urn:adp:helm:schemas:v1:gas-configuration:v1"
+    },
+    {
+      "$ref": "urn:adp:helm:schemas:v1:gas-uiconfig:v1"
+    },
+    {
+      "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig:v1"
+    },
+    {
+      "$ref": "urn:adp:helm:schemas:v1:gas-authorizationProxy:v1"
+    },
+    {
+      "$ref": "urn:adp:helm:schemas:v1:gas-dst:v1"
+    },
+    {
+      "$ref": "urn:adp:helm:schemas:v1:gas-service-conditional:v1/rootValues"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{{- if .Values.global -}}
+{{- if and .Values.global.networkPolicy .Values.networkPolicy -}}
+{{- if and .Values.global.networkPolicy.enabled .Values.networkPolicy.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ template "eric-adp-gui-aggregator-service.name" . }}-iam-networkpolicy
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Values.configuration.userPermission.iamServiceName }}
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ template "eric-adp-gui-aggregator-service.name" . }}
+  policyTypes:
+    - Ingress
+{{- end -}}
+{{- end -}}
+{{- end -}}

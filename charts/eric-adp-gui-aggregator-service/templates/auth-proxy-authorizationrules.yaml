@@ -1,0 +1,16 @@
+{{- $authorizationProxy := fromJson (include "eric-adp-gui-aggregator-service.authz-proxy-values" .) -}}
+{{- if $authorizationProxy.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "eric-adp-gui-aggregator-service.authz-proxy-service-name" . }}-authorizationrules
+  labels:
+    {{- $authProxyLabels := include "eric-adp-gui-aggregator-service.authz-proxy-labels" . | fromYaml -}}
+    {{- $commonLabels := include "eric-adp-gui-aggregator-service.labels" . | fromYaml -}}
+    {{- include "eric-adp-gui-aggregator-service.mergeLabels" (dict "location" .Template.Name "sources" (list $authProxyLabels $commonLabels)) | trim | nindent 4 }}
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+data:
+  authz-proxy-authorizationrules.yaml: |
+{{ .Values.authorizationProxy.authorizationRules | indent 4 }}
+{{- end -}}

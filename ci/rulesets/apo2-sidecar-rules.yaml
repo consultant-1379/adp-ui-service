@@ -1,0 +1,119 @@
+modelVersion: 2.0
+import:
+  common: ../../ruleset2.0.yaml
+
+properties:
+  - helm-chart-released-repo: https://arm.sero.gic.ericsson.se/artifactory/proj-adp-sec-helm-dev-generic-local/oauthpxy-lib/released/
+  - tag-name: eric-adp-gui-aggregator-service
+  - apo2-name: eric-sec-authorization-proxy-oauth2
+  - oauth-proxy-lib: ${apo2-name}-helmlibauth-cxa30108
+  - eric-adp-gui-aggregator-service-path: charts/${tag-name}
+  - templates-path: ${eric-adp-gui-aggregator-service-path}/templates/
+  - temp-apo2-interfaces-file-path: build/apo2/${apo2-name}/models/interfaces.json
+  - final-apo2-interfaces-file-path: charts/${tag-name}/models/${apo2-name}_interfaces.json
+  - temp-auth-proxy-helpers-path: build/apo2/templates/_auth-proxy-helpers.tpl
+  - eric-product-info-path: ${eric-adp-gui-aggregator-service-path}/eric-product-info.yaml
+  - product-structure-path: plms/product_structure.yaml
+  - auth-proxy-helpers-path: ${eric-adp-gui-aggregator-service-path}/templates/_auth-proxy-helpers.tpl
+  - eric-product-info-path: ${eric-adp-gui-aggregator-service-path}/eric-product-info.yaml
+  - ericsecoauthsap-tag: '/name: "${apo2-name}-sap"'
+  - ericsecoauthproxy-tag: '/name: "${apo2-name}"'
+  - authproxy-tag: "/munin: CXU 101 0038"
+  - authproxysap-tag: "/munin: CXU 101 0039"
+
+env:
+  - APO2_RELEASE_VERSION (default=notset)
+  - ARM_TOKEN_SERO (default=notset)
+
+var:
+  - apo2-current-full-version
+  - apo2-current-crop-version
+  - apo2-new-full-version
+  - apo2-new-crop-version
+  - submit-flag
+
+rules:
+  create-new-apo2-sidecar-patch:
+    - task: get-apo2-current-full-version
+      docker-image: common.adp-release-auto
+      cmd:
+        - grep -w ${auth-proxy-helpers-path} -e Version > .bob/var.apo2-current-full-version
+        - echo ${var.apo2-current-full-version} | sed -e 's/.*2-//' > .bob/var.apo2-current-full-version
+    - task: get-apo2-current-crop-version
+      cmd:
+        - echo ${var.apo2-current-full-version} | sed -e 's/[-].*//' > .bob/var.apo2-current-crop-version
+    - task: get-apo2-latest-release
+      cmd:
+        - curl -H "X-JFrog-Art-Api:${env.ARM_TOKEN_SERO}" ${helm-chart-released-repo} -o .bob/var.apo2-sidecar-all-releases
+        - sed -i 's/[a-zA-Z]\+//g;s/.*108-//g;s/<.*$//g;s/.$//g;/^$/d;s/[.][0-9]*$//g;s/\.$//g' .bob/var.apo2-sidecar-all-releases
+        - sort -V -u -b -o .bob/var.apo2-sidecar-all-releases .bob/var.apo2-sidecar-all-releases
+        - cut -d" " -f1 .bob/var.apo2-sidecar-all-releases | sed -n '$s/^//p' > .bob/var.apo2-new-full-version
+    - task: download-released-oauth-proxy-lib
+      cmd: bash -c '
+        mkdir -p ./build/apo2;
+        if [ "${env.APO2_RELEASE_VERSION}" = "notset" ]; then
+        curl -H "X-JFrog-Art-Api:${env.ARM_TOKEN_SERO}" ${helm-chart-released-repo}${oauth-proxy-lib}-${var.apo2-new-full-version}.tar  -o ./build/apo2/${oauth-proxy-lib}-${var.apo2-new-full-version}.tar;
+        else
+        curl -H "X-JFrog-Art-Api:${env.ARM_TOKEN_SERO}" ${helm-chart-released-repo}${oauth-proxy-lib}-${env.APO2_RELEASE_VERSION}.tar -o ./build/apo2/${oauth-proxy-lib}-${env.APO2_RELEASE_VERSION}.tar;
+        fi'
+    - task: unzip-oauth-proxy-lib
+      cmd:
+        - tar -xvf ./build/apo2/*.tar -C ./build/apo2
+    - task: copy-oauth-proxy-lib
+      cmd:
+        - cp ./${temp-auth-proxy-helpers-path} ${templates-path}
+    - task: update-apo2-interfaces-file
+      cmd:
+        - cp ./${temp-apo2-interfaces-file-path} ${final-apo2-interfaces-file-path}
+    - task: get-apo2-new-full-version
+      cmd:
+        - grep -w ./${temp-auth-proxy-helpers-path} -e Version > .bob/var.apo2-new-full-version
+        - echo ${var.apo2-new-full-version} | sed -e 's/.*2-//'  > .bob/var.apo2-new-full-version
+    - task: get-apo2-new-crop-version
+      cmd:
+        - echo ${var.apo2-new-full-version} | sed -e 's/[-].*//' > .bob/var.apo2-new-crop-version
+    - task: replace-tag-name
+      cmd:
+        - sed -i 's/@@authz-proxy-replace-me-tag@@/${tag-name}/g' ${auth-proxy-helpers-path}
+    - task: replace-version-info-into-eric-product-info
+      cmd:
+        - sed -i '${ericsecoauthsap-tag}/{N;s/${var.apo2-current-full-version}/${var.apo2-new-full-version}/;}' ./${eric-product-info-path}
+        - sed -i '${ericsecoauthproxy-tag}/{N;s/${var.apo2-current-full-version}/${var.apo2-new-full-version}/;}' ./${eric-product-info-path}
+    - task: replace-version-info-into-product-structure
+      cmd:
+        - sed -i '${authproxy-tag}/{N;s/${var.apo2-current-crop-version}/${var.apo2-new-crop-version}/;}' ./${product-structure-path}
+        - sed -i '${authproxysap-tag}/{N;s/${var.apo2-current-crop-version}/${var.apo2-new-crop-version}/;}' ./${product-structure-path}
+    - task: set-submit-flag
+      cmd: >
+        bash -c '
+          if [[ $(cut -b 1 .bob/var.apo2-current-full-version) == $(cut -b 1 .bob/var.apo2-new-full-version) ]]; then
+            echo '--submit' > .bob/var.submit-flag;
+          else
+            echo '' > .bob/var.submit-flag;
+          fi'
+    - task: create-new-apo2-sidecar-patch
+      docker-image: common.adp-release-auto
+      docker-flags:
+        - "--env GERRIT_USERNAME"
+        - "--env GERRIT_PASSWORD"
+      cmd: >
+        /bin/bash -c '
+        if [[ "${var.apo2-current-full-version}" != "${var.apo2-new-full-version}" ]]; then
+          gerrit create-patch \
+          --file ${auth-proxy-helpers-path} ${eric-product-info-path} ${product-structure-path} ${final-apo2-interfaces-file-path} \
+          --message "Update APO2 sidecar to ${var.apo2-new-full-version}" \
+          --message "Requirement: no-jira" \
+          --git-repo-local . \
+          --wait-label "Verified"="+1" \
+          --debug \
+          ${var.submit-flag}
+        else
+          echo "The versions are the same. Commit is not needed."
+        fi'
+    - task: fail-if-major-changed
+      cmd: >
+        bash -c '
+          if [[ $(cut -b 1 .bob/var.apo2-current-full-version) != $(cut -b 1 .bob/var.apo2-new-full-version) ]]; then
+            echo "Major version change of APO requires manual validation. Change is not merged and pipeline is failed."
+            exit 1
+          fi'

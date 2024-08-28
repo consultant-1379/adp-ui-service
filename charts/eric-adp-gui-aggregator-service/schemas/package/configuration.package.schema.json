@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "logging": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/logging",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "loggingLogCollector": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/logging/logCollector",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "helpAggregator": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/helpAggregator",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "faultIndications": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/faultIndications",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "cnomDefaultDashboards": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/cnomDefaultDashboards",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "cnomDashboardTopology": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/cnomDashboardTopology",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "cnomDashboardTreeView": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/cnomDashboardTreeView",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "cnom": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/cnom",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "depsPrometheus": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/depsPrometheus",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "depsFaultHandler": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/depsFaultHandler",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "depsLogTransformer": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/depsLogTransformer",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "configurationDependencies": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/configurationDependencies",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "userPermission": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/userPermission",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "userInfo": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/userPermission/userInfo",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "fieldMappings": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/userInfo/fieldMappings",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "configuration": {
+      "$id": "urn:adp:helm:schemas:v1:gas-configuration-conditional:v1/configuration",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    }
+  }
+}

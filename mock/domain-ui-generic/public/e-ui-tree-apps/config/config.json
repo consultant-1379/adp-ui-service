@@ -1,0 +1,89 @@
+{
+  "apps": [
+    {
+      "name": "parent-a",
+      "module": "parent-a",
+      "displayName": "Parent A",
+      "type": "euisdk",
+      "route": "parent-a",
+      "version": "0.0.1",
+      "childNames": ["child-1", "child-2"],
+      "groupNames": ["tree-apps"]
+    },
+    {
+      "name": "parent-b",
+      "module": "parent-b",
+      "displayName": "Parent B",
+      "type": "euisdk",
+      "route": "parent-b",
+      "version": "0.0.1",
+      "groupNames": ["tree-apps"]
+    },
+    {
+      "name": "child-1",
+      "module": "child-1",
+      "displayName": "Child 1",
+      "type": "euisdk",
+      "route": "child-1",
+      "version": "0.0.1",
+      "childNames": ["grandchild-alpha", "grandchild-beta"],
+      "groupNames": ["tree-apps"]
+    },
+    {
+      "name": "child-2",
+      "module": "child-2",
+      "displayName": "Child 2",
+      "type": "euisdk",
+      "route": "child-2",
+      "version": "0.0.1",
+      "childNames": ["grandchild-gamma", "grandchild-delta"],
+      "groupNames": ["tree-apps"]
+    },
+    {
+      "name": "grandchild-alpha",
+      "module": "grandchild-alpha",
+      "displayName": "Grandchild α",
+      "type": "euisdk",
+      "route": "grandchild-alpha",
+      "version": "0.0.1",
+      "groupNames": ["tree-apps"]
+    },
+    {
+      "name": "grandchild-beta",
+      "module": "grandchild-beta",
+      "displayName": "Grandchild β",
+      "type": "euisdk",
+      "route": "grandchild-beta",
+      "version": "0.0.1",
+      "groupNames": ["tree-apps"]
+    },
+    {
+      "name": "grandchild-gamma",
+      "module": "grandchild-gamma",
+      "displayName": "Grandchild γ",
+      "type": "euisdk",
+      "route": "grandchild-gamma",
+      "version": "0.0.1",
+      "groupNames": ["tree-apps"]
+    },
+    {
+      "name": "grandchild-delta",
+      "module": "grandchild-delta",
+      "displayName": "Grandchild δ",
+      "type": "euisdk",
+      "route": "grandchild-delta",
+      "version": "0.0.1",
+      "groupNames": ["tree-apps"]
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Tree Applications",
+      "version": "0.0.1",
+      "name": "tree-apps",
+      "type": "product",
+      "descriptionLong": "Demo applications with E-UI SDK v2 frontend.",
+      "descriptionShort": "E-UI demo apps"
+    }
+  ]
+}

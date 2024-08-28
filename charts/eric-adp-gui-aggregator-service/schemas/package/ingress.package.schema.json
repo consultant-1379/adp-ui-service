@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "tls": {
+      "$id": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1/tls",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "certificates": {
+      "$id": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1/certificates",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "timeoutPolicy": {
+      "$id": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1/timeoutPolicy",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "ingress": {
+      "$id": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1/ingress",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    }
+  }
+}

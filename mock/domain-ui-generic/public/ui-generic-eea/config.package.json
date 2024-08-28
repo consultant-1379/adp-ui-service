@@ -1,0 +1,41 @@
+{
+  "modules": [
+    {
+      "name": "app-1",
+      "version": "1.0.0",
+      "path": "/apps",
+      "main": "app-1.js"
+    },
+    {
+      "name": "comp-a",
+      "version": "1.0.0",
+      "path": "/components",
+      "main": "comp-a.js",
+      "dependencies": {
+        "utility": "1.x.x"
+      }
+    },
+    {
+      "name": "comp-b",
+      "version": "1.0.0",
+      "path": "/components",
+      "main": "comp-b.js",
+      "dependencies": {
+        "utility": "2.0.0",
+        "semver": "1.5.0"
+      }
+    },
+    {
+      "name": "utility",
+      "version": "2.0.0",
+      "path": "/utils/utility/2.0.0/",
+      "main": "utility.js"
+    },
+    {
+      "name": "semver",
+      "version": "1.5.0",
+      "path": "/node_modules/semver/1.5.0/",
+      "main": "semver.js"
+    }
+  ]
+}

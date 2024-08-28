@@ -1,0 +1,106 @@
+{
+  "modules": [
+    {
+      "name": "e-custom-user-settings-panel",
+      "version": "1.0.0",
+      "path": "./src/panels/custom-user-settings-panel",
+      "main": "custom-user-settings-panel.js"
+    },
+    {
+      "name": "gas-settings-plugin",
+      "version": "1.0.0",
+      "path": "./src/plugins/settings-plugin/src",
+      "main": "gas-settings-plugin.js"
+    },
+    {
+      "name": "authentication",
+      "version": "1.0.0",
+      "path": "./src/plugins/authentication/src",
+      "main": "authentication.js"
+    },
+    {
+      "name": "navigation-plugin",
+      "version": "1.0.0",
+      "path": "./src/plugins/navigation-plugin/src",
+      "main": "navigation-plugin.js"
+    },
+    {
+      "name": "appstate-plugin",
+      "version": "1.0.0",
+      "path": "./src/plugins/appstate-plugin/src",
+      "main": "appstate-plugin.js"
+    },
+    {
+      "name": "ui-settings-plugin",
+      "version": "1.0.0",
+      "path": "./src/plugins/ui-settings-plugin/src",
+      "main": "ui-settings-plugin.js"
+    },
+    {
+      "name": "launcher",
+      "version": "1.0.0",
+      "path": "./src/apps/launcher",
+      "main": "launcher.js"
+    },
+    {
+      "name": "error-app",
+      "version": "1.0.0",
+      "path": "./src/apps/error-app",
+      "main": "error-app.js"
+    },
+    {
+      "name": "@eui/theme",
+      "version": "1.0.1",
+      "path": "./node_modules/@eui/theme",
+      "main": "index.js"
+    },
+    {
+      "name": "@eui/theme/icon",
+      "version": "1.0.1",
+      "path": "./node_modules/@eui/theme",
+      "main": "index.js"
+    },
+    {
+      "name": "@eui/container",
+      "version": "1.0.4",
+      "path": "./node_modules/@eui/container",
+      "main": "index.js"
+    },
+    {
+      "name": "@eui/component",
+      "version": "1.0.2",
+      "path": "./node_modules/@eui/component",
+      "main": "index.js"
+    },
+    {
+      "name": "@eui/navigation-menu",
+      "version": "1.1.1",
+      "path": "./node_modules/@eui/navigation-menu",
+      "main": "index.js"
+    },
+    {
+      "name": "@eui/action-framework",
+      "version": "0.1.1",
+      "path": "./node_modules/@eui/action-framework/",
+      "main": "index.js"
+    },
+    {
+      "name": "e-systembar-global-navigation",
+      "version": "1.0.0",
+      "path": "./src/components/systembar-global-navigation",
+      "main": "systembar-global-navigation.js"
+    },
+    {
+      "name": "e-systembar-user-info",
+      "version": "1.0.0",
+      "path": "./src/components/systembar-user-info",
+      "main": "systembar-user-info.js"
+    },
+    {
+      "name": "wrapper-app",
+      "version": "1.0.0",
+      "path": "./src/apps/wrapper-app",
+      "main": "wrapper-app.js"
+    }
+  ]
+}

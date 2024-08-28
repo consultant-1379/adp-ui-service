@@ -1,0 +1,13 @@
+repository: eridoca
+folderId: 0b004cffc6b574c3
+documents:
+  - file: ../../../../build/performance-report.zip
+    title: "Characteristics Report for version {semver}"
+    decimal-class: "15283"
+    class-prefix: "2"
+    individual-number: "APR 201 088/2"
+    strategy: "ordinal"
+    eri_document_type: "Test Report"
+    format: "zip"
+    lang: "en"
+    eri_doc_responsible: "BCSDSCKD"

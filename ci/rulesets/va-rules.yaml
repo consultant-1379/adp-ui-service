@@ -1,0 +1,169 @@
+modelVersion: 2.0
+import:
+  common: ../../ruleset2.0.yaml
+  functions: ../../ruleset-functions.yaml
+  va-scan-functions: va-scan-functions.yaml
+
+properties:
+  - zap-config: ci/va/zap_config.yaml
+  - va-mitigation-config: ci/va/va-mitigation-config.yaml
+  - nmap-config: ci/va/nmap-config.yaml
+  - fuzz-testplan-dir: ci/va/defensics/test-plan
+  - fuzz-homedir: ${env.common.PWD}/ci/va/defensics
+  - aggregated-vulns-path: ci/va/aggregated-vulnerabilities.jinja2
+  - jira-project-name: ADPRS
+  - cis-cat-report-prefix: cis-cat-report
+  - cis-cat-applicability-spec: ci/va/cis-cat/cis-cat-applicability-spec.json
+  - cis-cat-target-image-dockerfile: ci/va/cis-cat/cis-cat-scanner-target.dockerfile
+  - cis-cat-target-image-dockerfile-context: ci/va/cis-cat
+  - cis-cat-benchmark: "CIS_SUSE_Linux_Enterprise_15_Benchmark_v1.1.1-xccdf.xml 'Level 2 - Server'"
+  - kubesec-config-path: ${env.common.PWD}/ci/va
+  - kubeaudit-config-path: ${env.common.PWD}/ci/va
+
+env:
+  - KUBECONFIG (default=notset)
+  - HELM_VERSION (default=notset)
+  - ARM_USER_SELI (default=notset)
+  - ARM_TOKEN_SELI (default=notset)
+  - JIRA_API_TOKEN (default=notset)
+  - BUILD_TAG (default=proj-eea-app-local)
+
+rules:
+  init:
+    - rule: functions.init-selected-version
+      properties:
+        - arm-api-user: ${env.ARM_USER_SELI}
+        - arm-api-token: ${env.ARM_TOKEN_SELI}
+        - helm-version: ${env.HELM_VERSION}
+    - task: set-k8s-namespace
+      cmd: bash -c 'echo ${env.BUILD_TAG} > .bob/var.k8s-namespace'
+    - task: functions.init:version # set var.semver for VA report (version is in title due to Eridoc ordinal strategy)
+      properties:
+        - is-release: "false"
+
+  deploy-chart:
+    - rule: common.k8-cluster-prepare
+    - task: helm-default-drop-deploy
+      docker-image: common.k8-test
+      docker-flags:
+        - --network=host
+        - --env KUBECONFIG=${env.KUBECONFIG}
+        - --volume ${env.KUBECONFIG}:${env.KUBECONFIG}:ro
+      cmd: helm install eric-adp-gui-aggregator-service ${common.helm-chart-name}
+        --wait
+        --repo ${common.helm-chart-repo-server}/${common.helm-chart-ci-repo-path}
+        --username ${env.ARM_USER_SELI}
+        --password ${env.ARM_TOKEN_SELI}
+        --version ${var.functions.selected-version}
+        --set global.pullSecret=arm-pullsecret
+        --set log.streamingMethod=indirect
+        --set global.security.tls.enabled=false
+        --namespace=${var.common.k8s-namespace}
+
+  anchore-scan:
+    - rule: va-scan-functions.anchore-scan
+      properties:
+        - version: ${var.functions.selected-version}
+        - helm-chart-name: ${common.helm-chart-name}
+        - image-name: ${common.docker-image-name}
+
+  fetch-xray-report:
+    - rule: va-scan-functions.xray-report
+      properties:
+        - version: ${var.functions.selected-version}
+        - helm-chart-name: ${common.helm-chart-name}
+        - image-name: ${common.docker-image-name}
+
+  trivy-scan:
+    - rule: va-scan-functions.trivy-scan
+      properties:
+        - version: ${var.functions.selected-version}
+        - helm-chart-name: ${common.helm-chart-name}
+        - image-name: ${common.docker-image-name}
+
+  cleanup:
+    - rule: va-scan-functions.cleanup
+    - task: delete-self-fetched-images
+      cmd:
+        - docker image rm -f ${common.image-internal-name}:${var.functions.selected-version}
+
+  zap-scan:
+    - rule: va-scan-functions.zap-scan
+      properties:
+        - k8-namespace: ${var.common.k8s-namespace}
+        - zap-config-path: ${zap-config}
+
+  fuzz-test:
+    - rule: va-scan-functions.fuzz-test
+      properties:
+        - k8-namespace: ${var.common.k8s-namespace}
+        - fuzz-testplan-path: ${fuzz-testplan-dir}
+        - defensics-home: ${fuzz-homedir}
+        - helm-chart-name: ${common.helm-chart-name}
+
+  nmap-scan:
+    - rule: va-scan-functions.nmap-scan
+      properties:
+        - k8-namespace: ${var.common.k8s-namespace}
+        - nmap-config-path: ${nmap-config}
+
+  cis-cat-scan:
+    - rule: va-scan-functions.cis-cat-scan
+      properties:
+        - version: ${var.functions.selected-version}
+        - image-name: ${common.docker-image-name}
+        - cis-cat-benchmark: ${cis-cat-benchmark}
+        - cis-cat-report-prefix: ${cis-cat-report-prefix}
+        - cis-cat-applicability-spec: ${cis-cat-applicability-spec}
+        - cis-cat-target-image-dockerfile: ${cis-cat-target-image-dockerfile}
+        - cis-cat-target-image-dockerfile-context: ${cis-cat-target-image-dockerfile-context}
+
+  kubesec-scan:
+    - rule: va-scan-functions.kubesec-scan
+      properties:
+        - helm-chart-name: ${common.helm-chart-name}
+        - kubesec-config: ${kubesec-config-path}
+
+  kubeaudit-scan:
+    - rule: va-scan-functions.kubeaudit-scan
+      properties:
+        - helm-chart-name: ${common.helm-chart-name}
+        - kubeaudit-config: ${kubeaudit-config-path}
+
+  generate-upload-VA-report:
+    - rule: va-scan-functions.generate-upload-VA-report
+      properties:
+        - mitigation-config-path: ${va-mitigation-config}
+        - version: ${var.functions.selected-version}
+        - helm-chart-name: ${common.helm-chart-name}
+
+  generate-aggregated-vuln-list:
+    - rule: va-scan-functions.generate-aggregated-vuln-list
+      properties:
+        - mitigation-config-path: ${va-mitigation-config}
+        - version: ${var.functions.selected-version}
+        - helm-chart-name: ${common.helm-chart-name}
+        - aggregated-vulns-template: ${aggregated-vulns-path}
+
+  upload-reports-to-arm:
+    - rule: va-scan-functions.publish-reports-to-arm
+      properties:
+        - helm-chart-name: ${common.helm-chart-name}
+        - version: ${var.functions.selected-version}
+
+  upload-va-report-to-eridoc:
+    - rule: va-scan-functions.publish-va-report-to-eridoc
+      properties:
+        - eridoc-config-path: ./docs/release/config/eridoc/release-security-documents.yaml
+        - version: ${var.functions.selected-version}
+        - helm-chart-name: ${common.helm-chart-name}
+
+  manage-jira-cards:
+    - rule: va-scan-functions.manage-jira-cards
+      properties:
+        - jira-project-name: ${jira-project-name}
+        - jira-token: ${env.JIRA_API_TOKEN}
+        - jira-component-name: ${common.jira-component-name}
+        - helm-chart-name: ${common.helm-chart-name}
+        - version: ${var.functions.selected-version}
+        - mitigation-config-path: ${va-mitigation-config}

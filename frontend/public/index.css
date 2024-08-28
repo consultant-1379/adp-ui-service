@@ -1,0 +1,35 @@
+body {
+  background-color: var(--layer2, #fafafa);
+  color: var(--text);
+}
+
+eui-container eui-icon {
+  --icon-color: var(--white, #ffffff);
+  --icon-size: 21px;
+}
+
+@keyframes rotateAnimation {
+  0%,
+  100% {
+    -webkit-transform: rotate(0);
+    transform: rotate(0);
+  }
+
+  25% {
+    -webkit-transform: rotate(300deg);
+    transform: rotate(300deg);
+  }
+}
+
+#loader {
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
+#loaderIcon {
+  --icon-size: 32px;
+  display: inline-block;
+  animation: rotateAnimation 2s infinite ease-in-out;
+  animation-play-state: running;
+  transform-origin: 50% 50%;
+}

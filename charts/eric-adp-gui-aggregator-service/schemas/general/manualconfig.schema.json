@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-manualconfig:v1",
+  "type": "object",
+  "properties": {
+    "manualconfig": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "apps": {
+              "type": ["null", "array"],
+              "items": {
+                "allOf": [
+                  { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-app:v1" },
+                  { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/app" },
+                  { "required": ["name", "displayName", "version"] }
+                ]
+              }
+            },
+            "groups": {
+              "type": ["null", "array"],
+              "items": {
+                "allOf": [
+                  { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-app:v1" },
+                  { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/group" },
+                  { "required": ["name", "displayName", "version"] }
+                ]
+              }
+            },
+            "actions": {
+              "type": ["null", "array"],
+              "items": {
+                "allOf": [
+                  { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-uiAction:v1" },
+                  { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/actions" }
+                ]
+              }
+            },
+            "services": {
+              "type": ["null", "array"],
+              "items": {
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": ["string", "number"]
+                      },
+                      "URL": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/service" }
+                ]
+              }
+            },
+            "overrides": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "apps": {
+                      "type": ["null", "array"],
+                      "items": {
+                        "allOf": [
+                          { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-app:v1" },
+                          { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/app" },
+                          { "required": ["name"] }
+                        ]
+                      }
+                    },
+                    "groups": {
+                      "type": ["null", "array"],
+                      "items": {
+                        "allOf": [
+                          { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-group:v1" },
+                          {
+                            "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/group"
+                          },
+                          { "required": ["name"] }
+                        ]
+                      }
+                    },
+                    "components": {
+                      "type": ["null", "array"],
+                      "items": {
+                        "allOf": [
+                          { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-component:v1" },
+                          {
+                            "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/components"
+                          },
+                          { "required": ["name"] }
+                        ]
+                      }
+                    }
+                  }
+                },
+                { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/overrides" }
+              ]
+            },
+            "groupMappings": {
+              "type": ["null", "array"],
+              "items": {
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "group": {
+                        "type": "string"
+                      },
+                      "apps": {
+                        "type": ["array"],
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/groupMapping" }
+                ]
+              }
+            }
+          }
+        },
+        { "$ref": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/manualconfig" }
+      ]
+    }
+  }
+}

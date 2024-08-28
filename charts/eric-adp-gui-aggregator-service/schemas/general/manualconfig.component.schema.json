@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-component:v1",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "displayName": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "module": {
+      "type": "string"
+    },
+    "specification": {
+      "type": "string"
+    },
+    "options": {
+      "type": "object"
+    },
+    "descriptionLong": {
+      "type": "string"
+    },
+    "descriptionShort": {
+      "type": "string"
+    },
+    "color": {
+      "type": "string"
+    },
+    "acronym": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "integer"
+    },
+    "service": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

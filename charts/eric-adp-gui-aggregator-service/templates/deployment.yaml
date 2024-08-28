@@ -1,0 +1,412 @@
+{{- $authorizationProxy := fromJson (include "eric-adp-gui-aggregator-service.authz-proxy-values" .) -}}
+{{- $global := fromJson (include "eric-adp-gui-aggregator-service.global" .) -}}
+{{- $directLoggingEnabled := eq "true" (include "eric-adp-gui-aggregator-service.directLoggingEnabled" .) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "eric-adp-gui-aggregator-service.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+    type: {{ .Values.updateStrategy.type }}
+{{- if and (eq .Values.updateStrategy.type "RollingUpdate") .Values.updateStrategy.rollingUpdate }}
+    rollingUpdate:
+{{- if .Values.updateStrategy.rollingUpdate.maxUnavailable }}
+      maxUnavailable: {{ .Values.updateStrategy.rollingUpdate.maxUnavailable }}
+{{- end }}
+{{- if .Values.updateStrategy.rollingUpdate.maxSurge }}
+      maxSurge: {{ .Values.updateStrategy.rollingUpdate.maxSurge }}
+{{- end }}
+{{- end }}
+  template:
+    metadata:
+      labels:
+        {{- $commonLabels := include "eric-adp-gui-aggregator-service.labels" . | fromYaml -}}
+        {{- $logTransformerLabel := include "eric-adp-gui-aggregator-service.logtransformer.label" . | fromYaml -}}
+        {{- $serviceMeshLabel := include "eric-adp-gui-aggregator-service.service-mesh.label" . | fromYaml -}}
+        {{- include "eric-adp-gui-aggregator-service.mergeLabels" (dict "location" .Template.Name "sources" (list $commonLabels $logTransformerLabel $serviceMeshLabel)) | trim | nindent 8 }}
+      annotations:
+        {{- $annotations := include "eric-adp-gui-aggregator-service.annotations" . | fromYaml -}}
+        {{- $appArmorMain := include "eric-adp-gui-aggregator-service.main-container.appArmorAnnotations" . | fromYaml -}}
+        {{- $seccompPod := include "eric-adp-gui-aggregator-service.pod.seccompAnnotations" . | fromYaml -}}
+        {{- if $authorizationProxy.enabled }}
+        {{- $appArmorAuthzProxySap := include "eric-adp-gui-aggregator-service.authz-proxy-sap-container.appArmorAnnotations" . | fromYaml -}}
+        {{- $appArmorAuthzProxy := include "eric-adp-gui-aggregator-service.authz-proxy-container.appArmorAnnotations" . | fromYaml -}}
+        {{- include "eric-adp-gui-aggregator-service.mergeAnnotations" (dict "location" .Template.Name "sources" (list $annotations $appArmorMain $appArmorAuthzProxySap $appArmorAuthzProxy $seccompPod)) | trim | nindent 8 -}}
+        {{- else -}}
+        {{- include "eric-adp-gui-aggregator-service.mergeAnnotations" (dict "location" .Template.Name "sources" (list $annotations $appArmorMain $seccompPod)) | trim | nindent 8 }}
+        {{- end }}
+    spec:
+    {{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "eric-adp-gui-aggregator-service.topologySpreadConstraints" . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "eric-adp-gui-aggregator-service.name" . }}-serviceaccount
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+{{- if .Values.podPriority.main.priorityClassName }}
+      priorityClassName: {{ .Values.podPriority.main.priorityClassName | quote }}
+{{- end }}
+{{- if $authorizationProxy.enabled }}
+      initContainers:
+{{ include "eric-adp-gui-aggregator-service.authz-proxy-sap-container.spec" . | indent 6 }}
+{{- end }}
+      containers:
+{{- if $authorizationProxy.enabled }}
+{{ include "eric-adp-gui-aggregator-service.authz-proxy-container.spec" . | indent 6 }}
+{{- end }}
+      - name: main
+        image: {{ template "eric-adp-gui-aggregator-service.mainImagePath" . }}
+        imagePullPolicy: {{ template "eric-adp-gui-aggregator-service.registryImagePullPolicy" . }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          {{- include "eric-adp-gui-aggregator-service.main-container.seccompProfile" . | indent 10 }}
+          capabilities:
+            drop:
+              - all
+        env:
+        - name: GAS_SERVICE_PORT
+          value: {{ .Values.service.port | quote}}
+        - name: GAS_METRICS_PORT
+          value: {{ .Values.metrics.port | quote}}
+        - name: K8S_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: K8S_CONTAINER
+          value: {{ .Chart.Name }}
+        - name: K8S_POD
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: K8S_CHART_VERSION
+          value: {{ include "eric-adp-gui-aggregator-service.chart" . | quote}}
+        - name: K8S_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: K8S_SERVICE_INSTANCE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['app.kubernetes.io/instance']
+        - name: OTEL_SERVICE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['app.kubernetes.io/name']
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: {{ template "eric-adp-gui-aggregator-service.otelExporterOtlpEndpoint" . }}
+        - name: OTEL_TRACES_SAMPLER_ARG
+          value: {{ .Values.dst.sampler.samplingRate | quote }}
+        - name: OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT
+          value:  {{ .Values.dst.span.attributeValueLengthLimit | quote }}
+        - name: OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT
+          value: {{ .Values.dst.span.attributePerSpanCountLimit | quote }}
+        - name: OTEL_SPAN_ATTRIBUTE_PER_EVENT_COUNT_LIMIT
+          value:  {{ .Values.dst.span.attributePerEventCountLimit | quote }}
+        - name: OTEL_SPAN_ATTRIBUTE_PER_LINK_COUNT_LIMIT
+          value:  {{ .Values.dst.span.attributePerLinkCountLimit | quote }}
+        - name: OTEL_SPAN_EVENT_COUNT_LIMIT
+          value: {{ .Values.dst.span.eventCountLimit | quote }}
+        - name: OTEL_SPAN_LINK_COUNT_LIMIT
+          value:  {{ .Values.dst.span.linkCountLimit | quote }}
+        - name: PROPAGATOR
+          value: {{ .Values.dst.propagator | quote }}
+        - name: OTEL_BSP_EXPORT_TIMEOUT
+          value: {{ .Values.dst.processor.exportTimeoutMillis | quote }}
+        - name: OTEL_BSP_MAX_EXPORT_BATCH_SIZE
+          value: {{ .Values.dst.processor.maxExportBatchSize | quote }}
+        - name: OTEL_BSP_MAX_QUEUE_SIZE
+          value: {{ .Values.dst.processor.maxQueueSize | quote }}
+        - name: OTEL_BSP_SCHEDULE_DELAY
+          value: {{ .Values.dst.processor.scheduledDelayMillis | quote }}
+        - name: KUBERNETES_SERVICE_HOST
+          value: kubernetes.default.svc
+          # Workaround for: [ADPPRG-50848]. To support ipv6 environment, using DNS name instead of IP address
+          # More info: docs/development/3pp-libraries.md
+        - name: K8S_MEMORY_LIMIT
+          valueFrom:
+            resourceFieldRef:
+              containerName: main
+              resource: limits.memory
+        - name: NODEJS_RUNTIME_RESERVED_MEMORY
+          value: {{ .Values.configuration.nodeJsRuntimeReservedMemory | quote}}
+        - name: TZ
+          value: {{ $global.timezone | quote }}
+        ports:
+        - name: adp-ui-port
+          containerPort: {{ .Values.service.port }}
+          protocol: TCP
+        - name: adp-metric-port
+          containerPort: {{ .Values.metrics.port }}
+          protocol: TCP
+        resources:
+          {{- include "eric-adp-gui-aggregator-service.mainResources" . | indent 10 }}
+        livenessProbe:
+          {{- if and $global.security.tls.enabled (eq .Values.service.endpoints.http.tls.verifyClientCertificate "required") }}
+          exec:
+            command:
+              - /runtime/probe.sh
+              - live
+          {{- else }}
+          httpGet:
+            path: /status/live
+            port: adp-ui-port
+            {{- if $global.security.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
+          {{- end }}
+          initialDelaySeconds: {{ .Values.probes.main.livenessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.probes.main.livenessProbe.timeoutSeconds }}
+          periodSeconds: {{ .Values.probes.main.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.probes.main.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.probes.main.livenessProbe.failureThreshold }}
+        readinessProbe:
+          {{- if and $global.security.tls.enabled (eq .Values.service.endpoints.http.tls.verifyClientCertificate "required") }}
+          exec:
+            command:
+              - /runtime/probe.sh
+              - ready
+          {{- else }}
+          httpGet:
+            path: /status/ready
+            port: adp-ui-port
+            {{- if $global.security.tls.enabled }}
+            scheme: HTTPS
+            {{- end }}
+          {{- end }}
+          initialDelaySeconds: {{ .Values.probes.main.readinessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.probes.main.readinessProbe.timeoutSeconds }}
+          periodSeconds: {{ .Values.probes.main.readinessProbe.periodSeconds }}
+          successThreshold: {{ .Values.probes.main.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.probes.main.readinessProbe.failureThreshold }}
+        volumeMounts:
+        - name: log-control-config
+          mountPath: /runtime/server/config/log-control
+        - name: config-volume
+          mountPath: /runtime/server/config/backend-service-config
+        - name: ui-config-volume
+          mountPath: /runtime/frontend/deployment-config
+        {{- if .Values.dst.enabled }}
+        - name: dst-collector-config-volume
+          mountPath: /runtime/server/config/dst-collector-config
+        {{- end }}
+        {{- if $global.security.tls.enabled }}
+        - name: http-client-cert-volume
+          mountPath: /run/secrets/httpClient
+          readOnly: true
+        - name: http-client-ca-volume
+          mountPath: /run/secrets/httpCa
+          readOnly: true
+        - name: http-server-cert-volume
+          mountPath: /run/secrets/httpServer
+          readOnly: true
+        - name: internal-ui-client-cert-volume
+          mountPath: /run/secrets/internalUi
+          readOnly: true
+        - name: internal-ui-client-ca-volume
+          mountPath: /run/secrets/internalUiCa
+          readOnly: true
+        {{- if .Values.metrics.enabled }}
+        - name: pm-ca-volume
+          mountPath: /run/secrets/pm
+          readOnly: true
+        {{- end }}
+        {{- if .Values.configuration.helpAggregator.enabled }}
+        - name: ha-ca-volume
+          mountPath: /run/secrets/ha
+          readOnly: true
+        {{- end }}
+        {{- if or (and .Values.ingress.enabled .Values.ingress.useContour) .Values.ingress.adpIccrCaSecret }}
+        - name: ingress-ca-volume
+          mountPath: /run/secrets/ingress
+          readOnly: true
+        {{- end }}
+        - name: root-ca-volume
+          mountPath: /run/secrets/root
+          readOnly: true
+        {{- if $directLoggingEnabled }}
+        - name: lt-client-cert-volume
+          mountPath: /run/secrets/logtransformer
+          readOnly: true
+        {{- end }}
+        {{- if .Values.configuration.faultIndications.enabled }}
+        - name: fm-client-cert-volume
+          mountPath: /run/secrets/faultHandler
+          readOnly: true
+        {{- end }}
+        {{- if .Values.dst.enabled }}
+        - name: dst-collector-client-cert-volume
+          mountPath: /run/secrets/dstCollector
+          readOnly: true
+        {{- end }}
+        {{- if .Values.configuration.userPermission.enabled }}
+        - name: gas-iam-client-cert-volume
+          mountPath: /run/secrets/gasIam
+          readOnly: true
+        {{- end }}
+        {{- end }}
+        {{- if and (not $global.security.tls.enabled) (.Values.configuration.userPermission.nonTLSMode) }}
+        - name: iam-server-cert-volume
+          mountPath: /run/secrets/iamServerCert
+          readOnly: true
+        {{- end }}
+      volumes:
+{{- if $authorizationProxy.enabled }}
+{{ include "eric-adp-gui-aggregator-service.authz-proxy-volume.spec" . | indent 6 }}
+{{- end }}
+      {{- if $global.security.tls.enabled }}
+      {{- if $authorizationProxy.enabled }}
+      - name: {{ .Values.authorizationProxy.localSpClientCertVolumeName }}
+        secret:
+          secretName: {{ include "eric-adp-gui-aggregator-service.name" . }}-authz-client-cert
+      {{- end }}
+      - name: http-client-cert-volume
+        projected:
+          sources:
+          - secret:
+              name: {{ include "eric-adp-gui-aggregator-service.name" . }}-http-client-cert
+      - name: http-client-ca-volume
+        projected:
+          sources:
+          - secret:
+              name: {{ include "eric-adp-gui-aggregator-service.name" . }}-http-client-ca
+      - name: http-server-cert-volume
+        projected:
+          sources:
+          - secret:
+              name: {{ include "eric-adp-gui-aggregator-service.name" . }}-http-server-cert
+      - name: internal-ui-client-cert-volume
+        projected:
+          sources:
+          - secret:
+              name: {{ include "eric-adp-gui-aggregator-service.name" . }}-internal-ui-client-cert
+      - name: internal-ui-client-ca-volume
+        projected:
+          sources:
+          - secret:
+              name: {{ include "eric-adp-gui-aggregator-service.name" . }}-internal-ui-client-ca
+      {{- if .Values.metrics.enabled }}
+      - name: pm-ca-volume
+        projected:
+          sources:
+          - secret:
+              name: {{ .Values.configuration.dependencies.prometheus.pmServiceName }}-ca
+              optional: true
+      {{- end }}
+      {{- if .Values.configuration.helpAggregator.enabled }}
+      - name: ha-ca-volume
+        projected:
+          sources:
+          - secret:
+              name: {{ .Values.configuration.helpAggregator.serviceName }}-internal-help-client-ca
+              optional: true
+      {{- end }}
+      {{- if or (and .Values.ingress.enabled .Values.ingress.useContour) .Values.ingress.adpIccrCaSecret }}
+      - name: ingress-ca-volume
+        projected:
+          sources:
+          - secret:
+            {{- if .Values.ingress.adpIccrCaSecret }}
+              name: {{ .Values.ingress.adpIccrCaSecret }}
+            {{- else }}
+              name: {{ .Values.ingress.adpIccrServiceName }}-client-ca
+            {{- end }}
+              optional: true
+      {{- end }}
+      {{- if .Values.dst.enabled }}
+      - name: dst-collector-client-cert-volume
+        projected:
+          sources:
+          - secret:
+              name: {{ include "eric-adp-gui-aggregator-service.name" . }}-dst-client-cert
+              optional: true
+      {{- end }}
+      - name: root-ca-volume
+        secret:
+          secretName: {{ include "eric-adp-gui-aggregator-service.rootSecretName" . }}
+      {{- if $directLoggingEnabled }}
+      - name: lt-client-cert-volume
+        secret:
+          secretName: {{ include "eric-adp-gui-aggregator-service.name" . }}-lt-client-cert
+      {{- end }}
+      {{- if .Values.configuration.faultIndications.enabled }}
+      - name: fm-client-cert-volume
+        secret:
+          secretName: {{ include "eric-adp-gui-aggregator-service.name" . }}-fi-api-client-cert
+      {{- end }}
+      {{- if .Values.configuration.userPermission.enabled }}
+      - name: gas-iam-client-cert-volume
+        projected:
+          sources:
+          - secret:
+              name: {{ include "eric-adp-gui-aggregator-service.name" . }}-gas-iam-client-cert
+              optional: true
+      {{- end }}
+      {{- end }}
+      {{- if and (not $global.security.tls.enabled) (.Values.configuration.userPermission.nonTLSMode) }}
+      - name: iam-server-cert-volume
+        projected:
+          sources:
+          - secret:
+              name: {{ $global.iam.cacert.secretName }}
+              optional: true
+      {{- end }}
+      - name: log-control-config
+        configMap:
+          name: {{ include "eric-adp-gui-aggregator-service.name" . }}-log-config
+      - name: config-volume
+        configMap:
+          name: {{ include "eric-adp-gui-aggregator-service.name" . }}-configmap
+      - name: ui-config-volume
+        configMap:
+          name: {{ include "eric-adp-gui-aggregator-service.name" . }}-ui-configmap
+      {{- if .Values.dst.enabled }}
+      - name: dst-collector-config-volume
+        configMap:
+          name: {{ .Values.dst.collector.samplingConfigMap }}
+          optional: true
+      {{- end }}
+      {{- if include "eric-adp-gui-aggregator-service.pullSecrets" . }}
+      imagePullSecrets:
+        - name: {{ template "eric-adp-gui-aggregator-service.pullSecrets" . }}
+      {{- end }}
+      {{- if include "eric-adp-gui-aggregator-service.nodeSelector" . }}
+      nodeSelector: {{- include "eric-adp-gui-aggregator-service.nodeSelector" . | nindent 8 }}
+      {{- end }}
+{{- if eq .Values.affinity.podAntiAffinity "hard" }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - {{ include "eric-adp-gui-aggregator-service.name" . }}
+            topologyKey: {{ .Values.affinity.topologyKey }}
+{{- else if eq .Values.affinity.podAntiAffinity  "soft" }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                  - {{ include "eric-adp-gui-aggregator-service.name" . }}
+              topologyKey: {{ .Values.affinity.topologyKey }}
+{{- end }}
+    {{- if include "eric-adp-gui-aggregator-service.tolerations" . }}
+      tolerations: {{- include "eric-adp-gui-aggregator-service.tolerations" . | nindent 8 }}
+    {{- end }}

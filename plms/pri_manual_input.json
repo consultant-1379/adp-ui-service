@@ -1,0 +1,41 @@
+[
+  {
+    "Impact_on_Users_Deprecation": ["No User impact.", "No APIs were deprecated in this version."],
+    "Exemptions": ["No specific exemption is created for this release."],
+    "New_and_Updated_2PP_3PP": [],
+    "Repository_helm_link": [
+      {
+        "Title": "Lightweight GUI Aggregator Service HELM",
+        "Folder_Link": "https://arm.seli.gic.ericsson.se/artifactory/proj-eea-released-helm/eric-adp-gui-aggregator-service",
+        "Chart_Name": "eric-adp-gui-aggregator-service"
+      }
+    ],
+    "Upgrade_Information": ["Upgrade is supported from the previous released version"],
+    "Marketplace": {
+      "service_url": "https://adp.ericsson.se/marketplace/gui-aggregator-lightweight"
+    },
+    "PRA_Checklist": [
+      {
+        "document_number": "15311-FCP1322463",
+        "revision": "F"
+      }
+    ],
+    "SW_Library": [],
+    "Release_criteria_unfulfillments": [],
+    "CPI": [],
+    "API": [
+      {
+        "Title": "Interface Description",
+        "Document_Number": "1/15519-CAF101105/1",
+        "Document_Revision": "A",
+        "Support_Other": "EriDoc",
+        "Changes": []
+      }
+    ],
+    "Product_Description": [
+      "The Lightweight GUI Aggregator service (GAS Light) contains the Launcher (aka Portal) web client (EUISDK) and the UI Service backend (node.js). The Launcher displays web apps, provides navigation between them, and further user functions (grouping, filtering, searching and more in the future). UI Service backend provides auto-discovery of deployed web apps in a K8S cluster, fetching meta-data, option to statically configure external apps (and more in the future)."
+    ],
+    "Reusable_Images": [],
+    "Unsupported_Upgrade_Rollback_Path": []
+  }
+]

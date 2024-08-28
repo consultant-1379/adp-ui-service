@@ -1,0 +1,113 @@
+{
+  "$id": "http://adp.ericsson.com/ui.actions.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Action Schema",
+  "description": "UI Action",
+  "type": "object",
+  "default": {
+    "id": "service-name.action",
+    "meta": {
+      "displayName": "My Action"
+    }
+  },
+  "properties": {
+    "id": {
+      "title": "Action ID",
+      "description": "Unique ID of the Action. Must be in the form of 'service-name.action-name'",
+      "pattern": "^\\S+\\.\\S+$",
+      "type": "string",
+      "minLength": 3,
+      "default": "<service-name>.<action-name>"
+    },
+    "displayName": {
+      "description": "Action/Task name, used in for example, a button or a menu item. This should be a task-orientated name such as Add, Create, Delete, etc.",
+      "type": "string"
+    },
+    "shortDescription": {
+      "description": "Action/Task name, used for a button/tooltip text",
+      "type": "string"
+    },
+    "longDescription": {
+      "description": "A detailed description of the the Action/Task",
+      "type": "string"
+    },
+    "icon": {
+      "$ref": "ui.actions.meta.icon.json"
+    },
+    "group": {
+      "description": "List of group names (reference name) this action is a member of",
+      "type": "array",
+      "items": {
+        "description": "Group name",
+        "type": "string"
+      }
+    },
+    "tags": {
+      "description": "List of tags for the Action/Task. Only used in Action lookups",
+      "type": "array",
+      "items": {
+        "description": "Tag name",
+        "type": "string"
+      }
+    },
+    "module": {
+      "description": "Name of the module to load for this Action/Task. This must match the name of the module exported in config.package.json",
+      "type": "string",
+      "anyOf": [
+        {
+          "const": "uri-template",
+          "description": "Built in module that takes a uri-template parameter in order to perform a jump to action"
+        },
+        {
+          "description": "Custom module which is not listed as part of the built in modules",
+          "minLength": 1,
+          "pattern": "^[\\w\\-]+$"
+        }
+      ]
+    },
+    "version": {
+      "description": "Version of the Action/Task",
+      "type": "string",
+      "pattern": "^(\\d+)\\.(\\d+)\\.(\\d+)-?([a-zA-Z-\\d\\.]*)\\+?([a-zA-Z-\\d\\.]*)$"
+    },
+    "parameters": {
+      "description": "Actions/Task parameters",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Name of the property",
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^\\w+$"
+          },
+          "type": {
+            "description": "Type of the parameter",
+            "type": "string",
+            "anyOf": [
+              {
+                "const": "uri-template",
+                "description": "Type is a URI Template"
+              },
+              {
+                "description": "Custom parameter type which is not listed as part of the built in types",
+                "minLength": 1,
+                "pattern": "^[\\w\\-]+$"
+              }
+            ]
+          },
+          "value": {
+            "description": "The value of the parameter"
+          }
+        },
+        "required": ["name", "type"]
+      }
+    }
+  },
+  "additionalProperties": true,
+  "propertyNames": {
+    "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+  },
+  "required": ["id", "displayName", "module", "version"]
+}

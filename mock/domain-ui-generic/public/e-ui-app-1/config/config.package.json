@@ -1,0 +1,10 @@
+{
+  "modules": [
+    {
+      "name": "checkboxes",
+      "version": "0.0.1",
+      "path": "apps/checkboxes",
+      "main": "checkboxes.js"
+    }
+  ]
+}

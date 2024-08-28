@@ -1,0 +1,15 @@
+type: object
+description: User Permission Internal Error Response
+required:
+  - code
+  - message
+properties:
+  code:
+    description: Application specific error code.
+    type: string
+  message:
+    description: Short error description.
+    type: string
+  details:
+    description: Detailed error message.
+    type: string

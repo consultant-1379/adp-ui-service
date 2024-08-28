@@ -1,0 +1,31 @@
+{
+  "modules": [
+    {
+      "name": "app-1",
+      "version": "1.0.0",
+      "path": "/apps",
+      "main": "app-1.js"
+    },
+    {
+      "name": "comp-a",
+      "version": "1.0.0",
+      "path": "/components",
+      "main": "comp-a.js",
+      "dependencies": {
+        "utility": "1.x.x"
+      }
+    },
+    {
+      "name": "utility",
+      "version": "1.0.0",
+      "path": "/utils/utility/1.0.0/",
+      "main": "utility.js"
+    },
+    {
+      "name": "semver",
+      "version": "1.5.1",
+      "path": "/node_modules/semver/1.5.1/",
+      "main": "semver.js"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{{- if .Values.configuration.userPermission.enabled }}
+apiVersion: siptls.sec.ericsson.com/v1
+kind: InternalCertificate
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-gas-iam-client-cert
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+spec:
+  kubernetes:
+    generatedSecretName: {{ include "eric-adp-gui-aggregator-service.name" . }}-gas-iam-client-cert
+  certificate:
+    subject:
+      cn: {{ include "eric-adp-gui-aggregator-service.name" . }}
+    extendedKeyUsage:
+      tlsServerAuth: false
+      tlsClientAuth: true
+    issuer:
+      reference: {{ .Values.configuration.userPermission.iamServiceName }}-iam-internal-client-ca
+{{- end }}

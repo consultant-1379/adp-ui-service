@@ -1,0 +1,41 @@
+{{- $global := fromJson (include "eric-adp-gui-aggregator-service.global" .) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-ui-configmap
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+data:
+  frontend-config.json: |
+    {
+      "rest": {
+        {{- if or .Values.uiconfig.hostname .Values.uiconfig.path }}
+        "hostname": "{{ .Values.uiconfig.hostname }}",
+        "path": "{{ .Values.uiconfig.path  }}",
+        "protocol": {{ .Values.uiconfig.protocol | quote }}
+        {{ else if .Values.ingress.enabled }}
+        "hostname": "{{ .Values.ingress.hostname }}",
+        "path": "{{ include "eric-adp-gui-aggregator-service.ingressPath" .  }}",
+        "protocol": {{ .Values.ingress.tls.enabled | ternary "https" "http" | quote }}
+        {{ else }}
+        "hostname": "",
+        "path": "",
+        "protocol": ""
+        {{- end }}
+      },
+      "logging": {
+          "logLevel":  "{{ .Values.uiconfig.logging.logLevel }}"
+      },
+      "logoutURL": {{ include "eric-adp-gui-aggregator-service.logoutURL" . | quote }},
+      "userAccountURL": {{ include "eric-adp-gui-aggregator-service.userAccountURL" . | quote }},
+      "userPermission": {
+        "enabled": {{ .Values.configuration.userPermission.enabled }}
+      },
+      "uiSettings": {
+        "storageMode": "{{ .Values.uiconfig.uiSettings.storageMode }}",
+        "baseUrl": "{{ .Values.uiconfig.uiSettings.baseUrl }}"
+      }
+    }
+

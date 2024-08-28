@@ -1,0 +1,59 @@
+openapi: 3.0.1
+info:
+  title: User Interface Static API Documentation
+  description: |
+    ```
+      Ericsson   |   DocNo <DOC NUMBER>   |   Rev PA1   |   Interwork Description
+    ```
+    ## Introduction
+    This document describes the User Interface identified in the ADP GUI FA.
+    ### Terms
+    - **UI Interface**: static web interface serving the static assets.
+
+  contact:
+    name: Smart Insights Team
+    email: PDLSCRUMNW@pdl.internal.ericsson.com
+  version: "1.0.0"
+  x-api-id: 853f3980-74d1-4d71-a4cb-0249be34dcbd
+  x-audience: company-internal
+servers:
+  - url: /ui/
+    description: Base
+tags:
+  - name: IF.GUI.SERVE.WEB
+    description: Static web interface which serves the static assets.
+    x-displayName: UI interface
+paths:
+  /:
+    get:
+      operationId: getMainHtml
+      summary: Get main html
+      description: |
+        Returns the main HTML for the Single Page Application.
+      tags:
+        - IF.GUI.SERVE.WEB
+      responses:
+        "200":
+          description: OK - The requested HTML returned successfully
+        "404":
+          description: Not Found - The requested HTML is not found
+  /{pathToAsset}:
+    get:
+      operationId: getAsset
+      summary: Get static assets
+      description: |
+        The web server returns the static assets of the Portal.
+      tags:
+        - IF.GUI.SERVE.WEB
+      parameters:
+        - in: path
+          name: pathToAsset
+          required: true
+          schema:
+            type: string
+          description: The asset to fetch.
+      responses:
+        "200":
+          description: OK - The resource is found
+        "404":
+          description: Not Found - The resource is not found

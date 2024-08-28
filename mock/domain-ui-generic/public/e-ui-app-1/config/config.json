@@ -1,0 +1,13 @@
+{
+  "apps": [
+    {
+      "name": "checkboxes",
+      "module": "checkboxes",
+      "displayName": "CheckBoxes",
+      "type": "euisdk",
+      "route": "checkboxes",
+      "version": "0.0.1",
+      "groupNames": ["mockapps"]
+    }
+  ]
+}

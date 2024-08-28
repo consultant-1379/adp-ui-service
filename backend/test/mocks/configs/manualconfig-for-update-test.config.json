@@ -1,0 +1,57 @@
+{
+  "apps": [
+    {
+      "name": "domain-app-1",
+      "displayName": "This should be updated",
+      "version": "0.1.0",
+      "descriptionLong": "This should be updated",
+      "route": "/some/route"
+    }
+  ],
+  "groups": [
+    {
+      "name": "domain-group-1",
+      "displayName": "This should be updated",
+      "version": "0.1.0",
+      "descriptionLong": "This should be updated"
+    }
+  ],
+  "actions": [
+    {
+      "id": "eric-fh-alarm-handler.clear-alarm-action",
+      "displayName": "Clear Alarm",
+      "shortDescription": "Change the Alarm to Cleared state",
+      "longDescription": "Change the Alarm to Cleared state. If the Alarm is already Cleared, throw error message.",
+      "icon": "trashcan",
+      "version": "1.0.0",
+      "module": "clear-alarm-action",
+      "group": ["fault-management-group-ID", "group2"],
+      "tags": ["alarm"]
+    },
+    {
+      "id": "eric-eo-usermgmt-ui.view-user-profile-action",
+      "displayName": "View User Profile",
+      "version": "1.0.0",
+      "module": "view-user-action"
+    },
+    {
+      "id": "eric-eea-call-browser-service.list-calls-action",
+      "displayName": "View Subscriber's Call List",
+      "version": "1.0.0",
+      "module": "view-subscriber-action",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "url_template",
+          "value": "https://eea.internal.ericsson.local/callbrowser/query?subscriberimsi={imsi}&startime={timeInterval.start_time}&endtime={timeInterval.end_time}"
+        }
+      ]
+    },
+    {
+      "id": "eric-eea-call-browser-service.compare-calls-action",
+      "displayName": "Compare Multiple Calls",
+      "version": "1.0.0",
+      "module": "compare-calls-action"
+    }
+  ]
+}

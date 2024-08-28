@@ -1,0 +1,23 @@
+repository: eridoca
+folderId: 0b004cffc6b574c3
+documents:
+  # TODO replace the file path with the generated one
+  - file: ../../../../build/doc-archive/pdf/test-specification/test-specification.pdf
+    title: "Test Specification"
+    decimal-class: "15241"
+    individual-number: "APR 201 088/2"
+    eri_document_type: "Test Specification"
+    format: "pdf"
+    lang: "en"
+    class-prefix: "1"
+    eri_doc_responsible: "BCSDSCKD"
+  - file: ../../../../build/doc-archive/test-report.zip
+    title: "Test Report for version {semver}"
+    decimal-class: "15283"
+    class-prefix: "1"
+    individual-number: "APR 201 088/2"
+    strategy: "ordinal"
+    eri_document_type: "Test Report"
+    format: "zip"
+    lang: "en"
+    eri_doc_responsible: "BCSDSCKD"

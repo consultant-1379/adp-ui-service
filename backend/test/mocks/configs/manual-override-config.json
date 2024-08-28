@@ -1,0 +1,12 @@
+{
+  "overrides": {
+    "groups": [
+      {
+        "name": "lotr",
+        "displayName": "Lord of the Rings",
+        "type": "category"
+      }
+    ]
+  },
+  "groupMappings": []
+}

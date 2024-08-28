@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-authorizationProxy:v1",
+  "type": "object",
+  "properties": {
+    "authorizationProxy": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "sipoauth2": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["enabled"]
+                },
+                { "$ref": "urn:adp:helm:schemas:v1:gas-authorizationProxy-conditional:v1/sipoauth2" }
+              ]
+            },
+            "authnProxyFQDN": {
+              "type": ["null", "string"]
+            },
+            "keycloakFQDN": {
+              "type": ["null", "string"]
+            },
+            "localSpPort": {
+              "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/port"
+            },
+            "adpIamServiceName": {
+              "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/serviceName"
+            },
+            "adpIamServicePort": {
+              "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/port"
+            },
+            "adpIamRealm": {
+              "type": "string"
+            },
+            "numOfWebServerWorkers": {
+              "type": "number"
+            },
+            "adpIamAdminSecret": {
+              "type": "string"
+            },
+            "localSpClientCertVolumeName": {
+              "type": "string"
+            },
+            "adpIccrServiceName": {
+              "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/serviceName"
+            },
+            "protectedPaths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "authorizationRules": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "sipoauth2",
+            "localSpPort",
+            "adpIamServiceName",
+            "adpIamServicePort",
+            "adpIamRealm",
+            "numOfWebServerWorkers",
+            "adpIamAdminSecret",
+            "localSpClientCertVolumeName",
+            "adpIccrServiceName",
+            "protectedPaths",
+            "authorizationRules"
+          ]
+        },
+        {
+          "$ref": "urn:adp:helm:schemas:v1:gas-authorizationProxy-conditional:v1/authorizationProxy"
+        }
+      ]
+    }
+  },
+  "required": ["authorizationProxy"]
+}

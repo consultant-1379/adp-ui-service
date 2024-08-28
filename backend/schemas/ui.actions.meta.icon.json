@@ -1,0 +1,1061 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "$id": "http://adp.ericsson.com/ui.actions.meta.icon.json",
+  "title": "Icon",
+  "description": "Name of the icon. Only valid names should be used. Icon names can be found on the E-UI SDK Documentation",
+  "type": "string",
+  "anyOf": [
+    {
+      "const": "abs-brakes"
+    },
+    {
+      "const": "airbag"
+    },
+    {
+      "const": "alarm"
+    },
+    {
+      "const": "alarm-level1"
+    },
+    {
+      "const": "alarm-level2"
+    },
+    {
+      "const": "alarm-level3"
+    },
+    {
+      "const": "alarm-level4"
+    },
+    {
+      "const": "alarm-level5"
+    },
+    {
+      "const": "alarm-level6"
+    },
+    {
+      "const": "alarm-off"
+    },
+    {
+      "const": "alarm-on"
+    },
+    {
+      "const": "antenna"
+    },
+    {
+      "const": "antenna-microwave"
+    },
+    {
+      "const": "app-launcher"
+    },
+    {
+      "const": "arrow-down"
+    },
+    {
+      "const": "arrow-left"
+    },
+    {
+      "const": "arrow-right"
+    },
+    {
+      "const": "arrow-rotate-horizontal"
+    },
+    {
+      "const": "arrow-rotate-vertical"
+    },
+    {
+      "const": "arrow-up"
+    },
+    {
+      "const": "attach"
+    },
+    {
+      "const": "automotive-battery"
+    },
+    {
+      "const": "avatar"
+    },
+    {
+      "const": "bank"
+    },
+    {
+      "const": "bar-code"
+    },
+    {
+      "const": "battery-charging"
+    },
+    {
+      "const": "battery-empty"
+    },
+    {
+      "const": "battery-full"
+    },
+    {
+      "const": "brain"
+    },
+    {
+      "const": "block"
+    },
+    {
+      "const": "blog"
+    },
+    {
+      "const": "bluetooth"
+    },
+    {
+      "const": "bookmark"
+    },
+    {
+      "const": "bookmark-solid"
+    },
+    {
+      "const": "brakes"
+    },
+    {
+      "const": "bug"
+    },
+    {
+      "const": "calculator"
+    },
+    {
+      "const": "calendar"
+    },
+    {
+      "const": "calendar-off"
+    },
+    {
+      "const": "camera-cctv"
+    },
+    {
+      "const": "camera-classic"
+    },
+    {
+      "const": "camera-photo"
+    },
+    {
+      "const": "certificate"
+    },
+    {
+      "const": "change-user"
+    },
+    {
+      "const": "check"
+    },
+    {
+      "const": "check-small"
+    },
+    {
+      "const": "chevron-down"
+    },
+    {
+      "const": "chevron-left"
+    },
+    {
+      "const": "chevron-right"
+    },
+    {
+      "const": "chevron-up"
+    },
+    {
+      "const": "circle"
+    },
+    {
+      "const": "circle-dashed"
+    },
+    {
+      "const": "cloud"
+    },
+    {
+      "const": "code"
+    },
+    {
+      "const": "code-scan"
+    },
+    {
+      "const": "collapse-all"
+    },
+    {
+      "const": "compare"
+    },
+    {
+      "const": "copy"
+    },
+    {
+      "const": "core"
+    },
+    {
+      "const": "counter-summary"
+    },
+    {
+      "const": "cpu"
+    },
+    {
+      "const": "creditcard"
+    },
+    {
+      "const": "crop"
+    },
+    {
+      "const": "cross"
+    },
+    {
+      "const": "cross-small"
+    },
+    {
+      "const": "crown"
+    },
+    {
+      "const": "dashboard"
+    },
+    {
+      "const": "database"
+    },
+    {
+      "const": "degree"
+    },
+    {
+      "const": "diagnose"
+    },
+    {
+      "const": "dial"
+    },
+    {
+      "const": "dialpad"
+    },
+    {
+      "const": "diamond"
+    },
+    {
+      "const": "document"
+    },
+    {
+      "const": "door"
+    },
+    {
+      "const": "download-save"
+    },
+    {
+      "const": "drag-handle"
+    },
+    {
+      "const": "duplicate"
+    },
+    {
+      "const": "eSIM"
+    },
+    {
+      "const": "econ"
+    },
+    {
+      "const": "edit"
+    },
+    {
+      "const": "electric-charging-station"
+    },
+    {
+      "const": "ellipsis"
+    },
+    {
+      "const": "email"
+    },
+    {
+      "const": "email-open"
+    },
+    {
+      "const": "emotion-disappointed"
+    },
+    {
+      "const": "emotion-excellent"
+    },
+    {
+      "const": "emotion-happy"
+    },
+    {
+      "const": "emotion-neutral"
+    },
+    {
+      "const": "emotion-sad"
+    },
+    {
+      "const": "end-point"
+    },
+    {
+      "const": "engine"
+    },
+    {
+      "const": "enterprises"
+    },
+    {
+      "const": "eraser"
+    },
+    {
+      "const": "eula"
+    },
+    {
+      "const": "expand"
+    },
+    {
+      "const": "expand-all"
+    },
+    {
+      "const": "eye"
+    },
+    {
+      "const": "eye-solid"
+    },
+    {
+      "const": "failed"
+    },
+    {
+      "const": "fault"
+    },
+    {
+      "const": "favorite"
+    },
+    {
+      "const": "favorite-solid"
+    },
+    {
+      "const": "feedback"
+    },
+    {
+      "const": "fibre-hub"
+    },
+    {
+      "const": "fika"
+    },
+    {
+      "const": "file"
+    },
+    {
+      "const": "file-add"
+    },
+    {
+      "const": "file-approved"
+    },
+    {
+      "const": "filter"
+    },
+    {
+      "const": "filter-clear"
+    },
+    {
+      "const": "filter-off"
+    },
+    {
+      "const": "flag"
+    },
+    {
+      "const": "flag-solid"
+    },
+    {
+      "const": "flash"
+    },
+    {
+      "const": "floor"
+    },
+    {
+      "const": "flow"
+    },
+    {
+      "const": "folder"
+    },
+    {
+      "const": "forward"
+    },
+    {
+      "const": "font-bold"
+    },
+    {
+      "const": "font-italic"
+    },
+    {
+      "const": "font-strikethrough"
+    },
+    {
+      "const": "font-underline"
+    },
+    {
+      "const": "fuel"
+    },
+    {
+      "const": "gateway-function"
+    },
+    {
+      "const": "gateway-function-small"
+    },
+    {
+      "const": "globe"
+    },
+    {
+      "const": "graph-circle"
+    },
+    {
+      "const": "graph-line"
+    },
+    {
+      "const": "graph-plot"
+    },
+    {
+      "const": "group"
+    },
+    {
+      "const": "hardware-platform"
+    },
+    {
+      "const": "heart"
+    },
+    {
+      "const": "heart-solid"
+    },
+    {
+      "const": "heatmap"
+    },
+    {
+      "const": "help"
+    },
+    {
+      "const": "hierarchy-chart"
+    },
+    {
+      "const": "highest-value"
+    },
+    {
+      "const": "home"
+    },
+    {
+      "const": "iSIM"
+    },
+    {
+      "const": "image"
+    },
+    {
+      "const": "info"
+    },
+    {
+      "const": "info-solid"
+    },
+    {
+      "const": "infrastructure"
+    },
+    {
+      "const": "infrastructure-small"
+    },
+    {
+      "const": "invisible"
+    },
+    {
+      "const": "invoice"
+    },
+    {
+      "const": "keyboard"
+    },
+    {
+      "const": "language"
+    },
+    {
+      "const": "laptop-devices"
+    },
+    {
+      "const": "launch"
+    },
+    {
+      "const": "layers"
+    },
+    {
+      "const": "lightbulb"
+    },
+    {
+      "const": "lightbulb-off"
+    },
+    {
+      "const": "link"
+    },
+    {
+      "const": "list"
+    },
+    {
+      "const": "lock-locked"
+    },
+    {
+      "const": "lock-unlocked"
+    },
+    {
+      "const": "login"
+    },
+    {
+      "const": "logout"
+    },
+    {
+      "const": "loudspeaker"
+    },
+    {
+      "const": "lowest-value"
+    },
+    {
+      "const": "magnet"
+    },
+    {
+      "const": "manual"
+    },
+    {
+      "const": "manufacturing"
+    },
+    {
+      "const": "map"
+    },
+    {
+      "const": "map-directions"
+    },
+    {
+      "const": "map-important-building"
+    },
+    {
+      "const": "map-location"
+    },
+    {
+      "const": "map-location-filled"
+    },
+    {
+      "const": "map-navigation"
+    },
+    {
+      "const": "map-terrain"
+    },
+    {
+      "const": "maximize"
+    },
+    {
+      "const": "medal"
+    },
+    {
+      "const": "message-contact-us"
+    },
+    {
+      "const": "message-double"
+    },
+    {
+      "const": "message-single"
+    },
+    {
+      "const": "message-smiley"
+    },
+    {
+      "const": "mic"
+    },
+    {
+      "const": "mic-off"
+    },
+    {
+      "const": "microwave"
+    },
+    {
+      "const": "microwave-small"
+    },
+    {
+      "const": "minihub"
+    },
+    {
+      "const": "minimize"
+    },
+    {
+      "const": "minus"
+    },
+    {
+      "const": "minus-small"
+    },
+    {
+      "const": "mobile"
+    },
+    {
+      "const": "mobile-devices"
+    },
+    {
+      "const": "money"
+    },
+    {
+      "const": "money-transaction"
+    },
+    {
+      "const": "more"
+    },
+    {
+      "const": "nav"
+    },
+    {
+      "const": "network"
+    },
+    {
+      "const": "network-element"
+    },
+    {
+      "const": "no-invoice"
+    },
+    {
+      "const": "no-maintenance"
+    },
+    {
+      "const": "no-task"
+    },
+    {
+      "const": "node"
+    },
+    {
+      "const": "node-network"
+    },
+    {
+      "const": "notification"
+    },
+    {
+      "const": "notification-off"
+    },
+    {
+      "const": "notification-ring"
+    },
+    {
+      "const": "oil"
+    },
+    {
+      "const": "options"
+    },
+    {
+      "const": "paint"
+    },
+    {
+      "const": "phone-classic"
+    },
+    {
+      "const": "phone-cobra"
+    },
+    {
+      "const": "phone-hangup"
+    },
+    {
+      "const": "pin"
+    },
+    {
+      "const": "pin-solid"
+    },
+    {
+      "const": "ping-ip"
+    },
+    {
+      "const": "plane-landing"
+    },
+    {
+      "const": "plane-take-off"
+    },
+    {
+      "const": "plus"
+    },
+    {
+      "const": "plus-small"
+    },
+    {
+      "const": "podium"
+    },
+    {
+      "const": "polygon"
+    },
+    {
+      "const": "polygon-dashed"
+    },
+    {
+      "const": "position"
+    },
+    {
+      "const": "print"
+    },
+    {
+      "const": "profile"
+    },
+    {
+      "const": "profile-suspended"
+    },
+    {
+      "const": "projects"
+    },
+    {
+      "const": "qr-code"
+    },
+    {
+      "const": "radio-base-antenna"
+    },
+    {
+      "const": "redo"
+    },
+    {
+      "const": "reload"
+    },
+    {
+      "const": "reply"
+    },
+    {
+      "const": "reply-all"
+    },
+    {
+      "const": "request-access"
+    },
+    {
+      "const": "reset-password"
+    },
+    {
+      "const": "resize-down"
+    },
+    {
+      "const": "resize-up"
+    },
+    {
+      "const": "restore"
+    },
+    {
+      "const": "robot-head"
+    },
+    {
+      "const": "robotic-arm"
+    },
+    {
+      "const": "room"
+    },
+    {
+      "const": "routing"
+    },
+    {
+      "const": "rss"
+    },
+    {
+      "const": "ruler"
+    },
+    {
+      "const": "satellite"
+    },
+    {
+      "const": "satellite-gateway"
+    },
+    {
+      "const": "save"
+    },
+    {
+      "const": "scan"
+    },
+    {
+      "const": "scan-bar-code"
+    },
+    {
+      "const": "scan-qr-code"
+    },
+    {
+      "const": "screen-desktop"
+    },
+    {
+      "const": "search"
+    },
+    {
+      "const": "select"
+    },
+    {
+      "const": "send"
+    },
+    {
+      "const": "server"
+    },
+    {
+      "const": "settings"
+    },
+    {
+      "const": "severity-cleared"
+    },
+    {
+      "const": "severity-critical"
+    },
+    {
+      "const": "severity-indeterminate"
+    },
+    {
+      "const": "severity-major"
+    },
+    {
+      "const": "severity-minor"
+    },
+    {
+      "const": "severity-warning"
+    },
+    {
+      "const": "shapes"
+    },
+    {
+      "const": "share"
+    },
+    {
+      "const": "shopping-cart"
+    },
+    {
+      "const": "sidemenu-left-close"
+    },
+    {
+      "const": "sidemenu-left-open"
+    },
+    {
+      "const": "sidemenu-right-close"
+    },
+    {
+      "const": "sidemenu-right-open"
+    },
+    {
+      "const": "signal"
+    },
+    {
+      "const": "simcard"
+    },
+    {
+      "const": "sizes"
+    },
+    {
+      "const": "smartwatch-devices"
+    },
+    {
+      "const": "sort-down"
+    },
+    {
+      "const": "sort-up"
+    },
+    {
+      "const": "sorting"
+    },
+    {
+      "const": "spectrum"
+    },
+    {
+      "const": "square"
+    },
+    {
+      "const": "square-dashed"
+    },
+    {
+      "const": "step-back"
+    },
+    {
+      "const": "step-forward"
+    },
+    {
+      "const": "stroke-curved"
+    },
+    {
+      "const": "stroke-dashed"
+    },
+    {
+      "const": "stroke-straight"
+    },
+    {
+      "const": "subtitles"
+    },
+    {
+      "const": "success"
+    },
+    {
+      "const": "swap"
+    },
+    {
+      "const": "switching"
+    },
+    {
+      "const": "table"
+    },
+    {
+      "const": "table-columns"
+    },
+    {
+      "const": "table-compact-row"
+    },
+    {
+      "const": "table-default-row"
+    },
+    {
+      "const": "table-row-group"
+    },
+    {
+      "const": "table-tiny-row"
+    },
+    {
+      "const": "tablet-devices"
+    },
+    {
+      "const": "tasks"
+    },
+    {
+      "const": "terminal"
+    },
+    {
+      "const": "text-bulletpoints"
+    },
+    {
+      "const": "text-numbering"
+    },
+    {
+      "const": "thumb-down"
+    },
+    {
+      "const": "thumb-up"
+    },
+    {
+      "const": "time"
+    },
+    {
+      "const": "traffic-lights"
+    },
+    {
+      "const": "trashcan"
+    },
+    {
+      "const": "tree-subcategories"
+    },
+    {
+      "const": "triangle"
+    },
+    {
+      "const": "triangle-dashed"
+    },
+    {
+      "const": "triangle-solid"
+    },
+    {
+      "const": "triangle-warning"
+    },
+    {
+      "const": "trophy"
+    },
+    {
+      "const": "trowel"
+    },
+    {
+      "const": "truck"
+    },
+    {
+      "const": "under-construction"
+    },
+    {
+      "const": "undo"
+    },
+    {
+      "const": "unlink"
+    },
+    {
+      "const": "upload"
+    },
+    {
+      "const": "vehicle-bus"
+    },
+    {
+      "const": "vehicle-car"
+    },
+    {
+      "const": "vehicle-parking"
+    },
+    {
+      "const": "vehicle-train"
+    },
+    {
+      "const": "vehicle-truck"
+    },
+    {
+      "const": "versions"
+    },
+    {
+      "const": "video-back"
+    },
+    {
+      "const": "video-forward"
+    },
+    {
+      "const": "video-pause"
+    },
+    {
+      "const": "video-play"
+    },
+    {
+      "const": "video-stop"
+    },
+    {
+      "const": "view-list"
+    },
+    {
+      "const": "view-tiles"
+    },
+    {
+      "const": "volume-high"
+    },
+    {
+      "const": "volume-low"
+    },
+    {
+      "const": "volume-mute"
+    },
+    {
+      "const": "walkie-talkie"
+    },
+    {
+      "const": "warehouse"
+    },
+    {
+      "const": "warning-circle"
+    },
+    {
+      "const": "washer-fluid"
+    },
+    {
+      "const": "weather-fog"
+    },
+    {
+      "const": "weather-humidity"
+    },
+    {
+      "const": "weather-moon"
+    },
+    {
+      "const": "weather-precipitation"
+    },
+    {
+      "const": "weather-rain"
+    },
+    {
+      "const": "weather-snow"
+    },
+    {
+      "const": "weather-storm"
+    },
+    {
+      "const": "weather-sun"
+    },
+    {
+      "const": "weather-sun-cloud"
+    },
+    {
+      "const": "weather-wind"
+    },
+    {
+      "const": "weather-windforce"
+    },
+    {
+      "const": "wifi"
+    },
+    {
+      "const": "wifi-modem"
+    },
+    {
+      "const": "wireline"
+    },
+    {
+      "const": "wireline-small"
+    },
+    {
+      "const": "zoom-in"
+    },
+    {
+      "const": "zoom-out"
+    },
+    {
+      "description": "Minimum length of one",
+      "minLength": 1,
+      "pattern": "^[\\w\\-]+$"
+    }
+  ]
+}

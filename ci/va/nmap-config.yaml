@@ -1,0 +1,21 @@
+nmapConfig:
+  services:
+    - name: "eric-adp-gui-aggregator-service"
+      protocol:
+        - "tcp"
+        - "udp"
+      additionalParams:
+        - "-sV"
+        - "-sC"
+        - "-p T:0-65535"
+        - "-T4"
+        - "-vv"
+        - "--stats-every 30s"
+      selector:
+        - eric-adp-gui-aggregator-service
+  enableUnicornscan:
+    additionalParams:
+      - "-r300"
+      - "-v"
+  enableServiceVersionDetection: true
+  reportDir: ".bob/reports/nmap"

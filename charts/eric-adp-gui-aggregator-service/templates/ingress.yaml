@@ -1,0 +1,66 @@
+{{- $global := fromJson (include "eric-adp-gui-aggregator-service.global" .) -}}
+{{- $path := include "eric-adp-gui-aggregator-service.ingressPath" . -}}
+{{- if and (.Values.ingress.enabled) (not .Values.ingress.useContour) -}}
+{{- $isApiNetworkingV1 := (.Capabilities.APIVersions.Has "networking.k8s.io/v1") -}}
+apiVersion: {{ $isApiNetworkingV1 | ternary "networking.k8s.io/v1" "networking.k8s.io/v1beta1" }}
+kind: Ingress
+metadata:
+  name: {{ template "eric-adp-gui-aggregator-service.name" . }}
+  annotations:
+    {{- $ingressAnn := dict -}}
+    {{- if .Values.ingress.ingressClass -}}
+      {{- $_ := set $ingressAnn "kubernetes.io/ingress.class" (.Values.ingress.ingressClass | toString) -}}
+    {{- end -}}
+
+    {{- if .Values.ingress.tls.passthrough -}}
+      {{- $_ := set $ingressAnn "nginx.ingress.kubernetes.io/ssl-passthrough" "true" -}}
+    {{- end -}}
+
+    {{- if $global.security.tls.enabled -}}
+      {{- $_ := set $ingressAnn "nginx.ingress.kubernetes.io/backend-protocol" "HTTPS" -}}
+    {{- end -}}
+
+    {{- $ingressAnnConfigSnippet := dict -}}
+    {{- if not (eq $path "/") -}}
+      {{- $_ := set $ingressAnn "nginx.ingress.kubernetes.io/rewrite-target" "/$2" -}}
+      {{- range $key, $value := include "eric-adp-gui-aggregator-service.get-config-snippet" (dict "root" $ "path" $path) | fromYaml -}}
+        {{- $_ := set $ingressAnnConfigSnippet $key $value -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $commonAnn := include "eric-adp-gui-aggregator-service.annotations" . | fromYaml -}}
+    {{- include "eric-adp-gui-aggregator-service.mergeAnnotations" (dict "location" .Template.Name "sources" (list $ingressAnn $ingressAnnConfigSnippet $commonAnn)) | trim | nindent 4 }}
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.ingress.tls.enabled }}
+  {{- if .Values.ingress.ingressClass }}
+  ingressClassName: {{ .Values.ingress.ingressClass | quote }}
+  {{- end }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.hostname | quote }}
+      {{- if .Values.ingress.tls.existingSecret }}
+      secretName: {{ .Values.ingress.tls.existingSecret }}
+      {{- else }}
+      secretName: {{ include "eric-adp-gui-aggregator-service.name" . }}-ingress-external-server-cert
+      {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.hostname | quote }}
+      http:
+        paths:
+          - path: {{ $path }}{{ if not (eq $path "/") }}(/|$){{ end }}(.*)
+            {{- if $isApiNetworkingV1 }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if $isApiNetworkingV1 }}
+              service:
+                name: {{ template "eric-adp-gui-aggregator-service.name" . }}-http
+                port:
+                  number: {{ .Values.service.port }}
+              {{- else }}
+              serviceName: {{ template "eric-adp-gui-aggregator-service.name" . }}-http
+              servicePort: {{ .Values.service.port }}
+              {{- end }}
+{{- end -}}

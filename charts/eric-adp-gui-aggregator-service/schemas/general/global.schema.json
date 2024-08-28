@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-global:v1",
+  "type": "object",
+  "allOf": [
+    { "$ref": "urn:adp:helm:schemas:v1:logging:v1/global/log/outputs" },
+    {
+      "$comment": "global.security.tls.enabled",
+      "$ref": "urn:adp:helm:schemas:v1:DR-D1123-113:v1/global"
+    },
+    {
+      "$comment": "global.security.policyBinding.create",
+      "$ref": "urn:adp:helm:schemas:v1:DR-D1123-124:v1"
+    },
+    {
+      "$comment": "global.securityPolicy",
+      "$ref": "urn:adp:helm:schemas:v1:DR-D1123-134:v1"
+    },
+    {
+      "$comment": "global.registry.repoPath",
+      "$ref": "urn:adp:helm:schemas:v1:DR-D1121-106:v1/global"
+    },
+    {
+      "$comment": "global.registry.url",
+      "$ref": "urn:adp:helm:schemas:v1:DR-D1121-104:v1/global"
+    },
+    {
+      "$comment": "global.nodeSelector",
+      "$ref": "urn:adp:helm:schemas:v1:DR-D1120-045-AD:v1/global"
+    },
+    {
+      "$comment": "global.timezone",
+      "$ref": "urn:adp:helm:schemas:v1:DR-D1126-050:v1"
+    },
+    {
+      "$comment": "global.internalIPFamily",
+      "$ref": "urn:adp:helm:schemas:v1:DR-D1125-018-AD:v1"
+    }
+  ]
+}

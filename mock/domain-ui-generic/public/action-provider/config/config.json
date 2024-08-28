@@ -1,0 +1,67 @@
+{
+  "apps": [
+    {
+      "name": "action-provider",
+      "module": "action-provider",
+      "displayName": "Action Provider",
+      "type": "euisdk",
+      "route": "action-provider",
+      "version": "1.0.0",
+      "groupNames": ["action-framework-apps"]
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Action Framework Apps",
+      "version": "1.0.0",
+      "name": "action-framework-apps",
+      "type": "product",
+      "descriptionLong": "Applications demoing the Action Framework.",
+      "descriptionShort": "Action Framework Apps"
+    }
+  ],
+  "actions": [
+    {
+      "id": "demo-ui-service-action-provider.apps",
+      "displayName": "Apps",
+      "version": "1.0.0",
+      "icon": "app-launcher",
+      "module": "action",
+      "parameters": [
+        {
+          "name": "endpoint",
+          "type": "String",
+          "value": "apps"
+        }
+      ]
+    },
+    {
+      "id": "demo-ui-service-action-provider.groups",
+      "displayName": "Groups",
+      "version": "1.0.0",
+      "icon": "group",
+      "module": "action",
+      "parameters": [
+        {
+          "name": "endpoint",
+          "type": "String",
+          "value": "groups"
+        }
+      ]
+    },
+    {
+      "id": "demo-ui-service-action-provider.components",
+      "displayName": "Components",
+      "version": "1.0.0",
+      "icon": "folder",
+      "module": "action",
+      "parameters": [
+        {
+          "name": "endpoint",
+          "type": "String",
+          "value": "components"
+        }
+      ]
+    }
+  ]
+}

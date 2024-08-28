@@ -1,0 +1,195 @@
+#
+# COPYRIGHT Ericsson 2024
+# The copyright to the computer program(s) herein is the property of Ericsson Inc.
+# The programs may be used and/or copied only with written permission from Ericsson Inc. or in accordance with the terms and
+# conditions stipulated in the agreement/contract under which the program(s) have been supplied.
+#
+# This file is used for integration towards NM Internal Develop Portal (IDP)
+# Information in this file will be visible in the IDP Catalog: https://developer-networkmanagement.internal.ericsson.com/catalog
+#
+# Notes:
+# - Pls always update approval.date below
+# - Validate this file with the IDP Validator manually if any change is made
+# - Note that the downloaded catalog-info.yaml from IDP won't exactly look like this file. This is normal.
+
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: gui-aggregator-lightweight
+  title: GUI Aggregator Lightweight (GAS Light)
+  description:
+    The Lightweight GUI Aggregator microservice (GAS Light, eric-adp-gui-aggregator-service) consists of
+    a frontend (called UI Portal using E-UISDK and EDS design) and a backend
+    (node.js). The UI Portal is an SPA displaying all GUI apps as a "single pane
+    of glass", providing navigation between them, and other user functions
+    (grouping, filtering, searching and more in the future). UI Service backend
+    provides auto-discovery of deployed web apps in a K8S cluster, fetching
+    meta-data, proxying static assets, option to statically configure external
+    apps (and more).
+  annotations:
+    backstage.io/source-location: url:https://gerrit-gamma.gic.ericsson.se/plugins/gitiles/EEA/adp-ui-service
+    gerrit/component: EEA/adp-ui-service
+    sonarqube.org/project-key: gas_light_ui_service
+    jira.com/project-keys: ADPRS
+    jira.com/filter-ids: 205528,205529,205851
+    jenkins: seliius27190.seli.gic.ericsson.se:8443/adp-ui-service-drop/, seliius27190.seli.gic.ericsson.se:8443/adp-ui-service-release/
+    backstage.io/kubernetes-label-selector: app.kubernetes.io/name=eric-adp-gui-aggregator-service
+    spinnaker.io/application-name: adp-e2e-cicd-reusable
+    spinnaker.io/pipelines: eric-adp-gui-aggregator-service-E2E-Flow
+  links:
+    - url: https://eteamspace.internal.ericsson.com/display/EIT/Home?src=sidebar
+      title: Team Smart Insights Team Space
+      icon: dashboard
+    - url: https://teams.microsoft.com/l/channel/19%3aa1d6b8f467eb49fd9694fb565a6b757a%40thread.tacv2/General?groupId=9dffa945-3fbb-48a6-b1d6-561a33bc75dd&tenantId=92e84ceb-fbfd-47ab-be52-080c6b87953f
+      title: GAS Light MS Teams support channel (General)
+      icon: dashboard
+    - url: https://adp.ericsson.se/marketplace/gui-aggregator-lightweight
+      title: GAS Light on ADP Marketplace
+      icon: dashboard
+    - url: https://mimer.internal.ericsson.com/productPage?activeView=productDetails&productNumber=APR201088
+      title: GAS Light (APR201088) in Mimer
+      icon: dashboard
+  tags:
+    - ready-for-commercial-use
+    - ericsson-intelligent-controller
+    - adp-reusable-service
+  roles:
+    scrum-master: egabkli # Gábor Klinda
+    product-owner: emalpei # Marcell Perényi
+    microservice-architect: egabkli # Gábor Klinda
+    security-master: elantib # Tibor Lantos
+    line-manager: ematszi # Szilárd Mátrai
+  productProperties:
+    definition:
+      $yaml: https://gerrit-gamma.gic.ericsson.se/plugins/gitiles/EEA/adp-ui-service/+/refs/heads/master/plms/product_structure.yaml
+  approval:
+    date: 09-04-2024 # Update with date of approval (format: DD-MM-YYYY)
+    approver: emalpei # Update with Signum of approver
+spec:
+  lifecycle: production
+  owner: eea-team-smart-insights
+  type: microservice
+  system: common-base
+  providesApis:
+    - IF.GUI.META.REST
+    - IF.GUI.SERVE.STATIC
+    - IF.GUI.LOG.REST
+    - IF.GUI.USERPERMISSION.REST
+  consumesApis:
+    - IF.HELP.DOMAIN.CONTENT.META # reference to IF provided by Help Aggregator service
+    - IF.GUI.DOMAIN.WEB
+    - IF.GUI.DOMAIN.PACKAGE
+    # other ADP services shall be added to the list once they are registered in IDP
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: IF.GUI.META.REST
+  title: GAS Light Meta REST API (IF.GUI.META.REST)
+  description: Provides aggregated UI Metadata on all accessible UI apps, groups, components,
+    and actions available to the current user in session (meant to be used between GAS Portal frontend and backend)
+    as well as a possibility to refresh UI Metadata of a given service (used by any party).
+  tags:
+    - internal-interface
+
+spec:
+  type: openapi
+  lifecycle: production
+  owner: eea-team-smart-insights
+  system: common-base
+  definition:
+    $text: https://gerrit-gamma.gic.ericsson.se/plugins/gitiles/EEA/adp-ui-service/+/refs/heads/master/docs/api/ui-meta/specs/ui.meta.spec.yaml
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: IF.GUI.SERVE.STATIC
+  title: UI packages (modules) Serve and Metadata REST API (IF.GUI.SERVE.STATIC)
+  description: Interface, provided by GAS backend for GAS frontend (Portal GUI), for exposing and serving UI packages (modules).
+  tags:
+    - internal-interface
+spec:
+  type: openapi
+  lifecycle: production
+  owner: eea-team-smart-insights
+  system: common-base
+  definition:
+    $text: https://gerrit-gamma.gic.ericsson.se/plugins/gitiles/EEA/adp-ui-service/+/refs/heads/master/docs/api/ui-serve/specs/ui.serve.spec.yaml
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: IF.GUI.DOMAIN.WEB
+  title: UI Metadata File Descriptor (IF.GUI.DOMAIN.WEB)
+  description: Describes the format of UI Metadata file descriptor and how it shall be exposed.
+    Every service exposing UIs must implement this interface to get them displayed on the OSS Portal.
+  tags:
+    - file-descriptor
+    - expected-interface
+spec:
+  type: openapi
+  lifecycle: production
+  owner: eea-team-smart-insights
+  system: common-base
+  definition:
+    $text: https://gerrit-gamma.gic.ericsson.se/plugins/gitiles/EEA/adp-ui-service/+/refs/heads/master/docs/api/ui-meta/specs/gui.domain.web.spec.yaml
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: IF.GUI.DOMAIN.PACKAGE
+  title: UI Package (modules) Config File Descriptor (IF.GUI.DOMAIN.PACKAGE)
+  description:
+    Describes the format of UI Package (modules) Config file descriptor and how it shall be exposed, as identified in the ADP GUI FA.
+    Every service exposing UI Package (modules) must implement this interface to make them available (runtime reusable) for other UIs on the OSS Portal.
+  tags:
+    - file-descriptor
+    - expected-interface
+spec:
+  type: openapi
+  lifecycle: production
+  owner: eea-team-smart-insights
+  system: common-base
+  definition:
+    $text: https://gerrit-gamma.gic.ericsson.se/plugins/gitiles/EEA/adp-ui-service/+/refs/heads/master/docs/api/ui-serve/specs/gui.domain.package.spec.yaml
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: IF.GUI.LOG.REST
+  title: UI Logging REST API (IF.GUI.LOG.REST)
+  description:
+    This specification describes the UI Logging REST API, which is meant to be used for collecting client-side logs.
+    This API enables UIs to push their logs captured on the client side (in the browser) to GAS service backend,
+    which receives and forwards these logs (transparently) for server-side log-aggregation towards the logging stack.
+spec:
+  type: openapi
+  lifecycle: production
+  owner: eea-team-smart-insights
+  system: common-base
+  definition:
+    $text: https://gerrit-gamma.gic.ericsson.se/plugins/gitiles/EEA/adp-ui-service/+/refs/heads/master/docs/api/ui-logging/specs/ui.logging.spec.yaml
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: IF.GUI.USERPERMISSION.REST
+  title: User Info and Permission REST API (IF.GUI.USERPERMISSION.REST)
+  description:
+    This specification describes the REST API (for GUIs) to retrieve user info and user permissions.
+    User Permission REST API can be used to retrieve information (e.g., username, user id) of the current user in session
+    as well as the permissions (what security resources it has access) of the user.
+    The source of the information returned by the API is ADP IAM (Keycloak).
+spec:
+  type: openapi
+  lifecycle: production
+  owner: eea-team-smart-insights
+  system: common-base
+  definition:
+    $text: https://gerrit-gamma.gic.ericsson.se/plugins/gitiles/EEA/adp-ui-service/+/refs/heads/master/docs/api/userpermission/specs/userpermission.spec.yaml

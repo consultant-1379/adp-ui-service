@@ -1,0 +1,32 @@
+repository: eridoca
+folderId: 0b004cffc6b574c2
+documents:
+  - file: ../../../../.bob/reports/va-report.md
+    title: "Vulnerability Analysis Report for version {semver}"
+    decimal-class: "1597"
+    class-prefix: "1"
+    individual-number: "APR 201 088/2"
+    strategy: "ordinal"
+    eri_document_type: "Analysis"
+    format: "md"
+    lang: "en"
+    eri_doc_responsible: "BCSDSCKD"
+# The following rows help only for manual upload, check these information when you create ERIDOC document
+#  - file: start_document.docx
+#    title: "Risk Assessment and Privacy Impact Assessment"
+#    decimal-class: "00664"
+#    class-prefix: "1"
+#    individual-number: "APR 201 088/2"
+#    eri_document_type: "Risk Analysis"
+#    format: "msw15"
+#    lang: "en"
+#    eri_doc_responsible: "BCSDSCKD"
+#  - file: start_document.docx
+#    title: "Secure Coding Report"
+#    decimal-class: "0360"
+#    class-prefix: "1"
+#    individual-number: "APR 201 088/2"
+#    eri_document_type: "Report"
+#    format: "msw15"
+#    lang: "en"
+#    eri_doc_responsible: "BCSDSCKD"

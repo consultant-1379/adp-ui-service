@@ -1,0 +1,7 @@
+{
+  "SESSION_EXPIRED": {
+    "LABEL": "Session expired",
+    "REASON": "Your session has timed out",
+    "ACTION": "Please login to continue"
+  }
+}

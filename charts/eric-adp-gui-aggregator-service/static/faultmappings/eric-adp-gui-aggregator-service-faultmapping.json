@@ -1,0 +1,38 @@
+[
+  {
+    "faultName": "log_transformer_error",
+    "code": 15007745,
+    "defaultDescription": "Log Transformer Service error",
+    "vendor": 193,
+    "defaultSeverity": "Critical",
+    "probableCause": 158,
+    "category": "ProcessingErrorAlarm"
+  },
+  {
+    "faultName": "adp_ui_service_server_error",
+    "code": 15007746,
+    "defaultDescription": "Internal GAS server error",
+    "vendor": 193,
+    "defaultSeverity": "Critical",
+    "probableCause": 158,
+    "category": "ProcessingErrorAlarm"
+  },
+  {
+    "faultName": "certificate_error",
+    "code": 15007747,
+    "defaultDescription": "Certificate Error",
+    "vendor": 193,
+    "defaultSeverity": "Critical",
+    "probableCause": 158,
+    "category": "ProcessingErrorAlarm"
+  },
+  {
+    "faultName": "K8S_api_error",
+    "code": 15007748,
+    "defaultDescription": "K8S api not available",
+    "vendor": 193,
+    "defaultSeverity": "Critical",
+    "probableCause": 158,
+    "category": "ProcessingErrorAlarm"
+  }
+]

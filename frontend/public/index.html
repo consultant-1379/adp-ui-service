@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Launcher</title>
+    <style>
+      eui-container:not(:defined) {
+        display: none;
+      }
+    </style>
+    <script type="module" src="./scripts/initImportmap.js"></script>
+    <script type="module-shim">
+      import { Theme, Icon } from '@eui/theme';
+      import { NavigationMenu } from '@eui/navigation-menu';
+      import { SystembarTitle } from './src/components/systembar-title/systembar-title.js'
+
+      Theme.register('eui-theme');
+      Icon.register('eui-icon');
+      NavigationMenu.register('eui-navigation-menu');
+      SystembarTitle.register();
+    </script>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+
+  <body>
+    <div id="loader">
+      <eui-icon name="dial" id="loaderIcon"></eui-icon>
+    </div>
+    <eui-theme theme="dark" font-path="./node_modules/@eui/theme/dist/fonts/"></eui-theme>
+    <eui-container default-app="launcher">
+      <eui-plugins></eui-plugins>
+      <e-systembar-title slot="system-left"></e-systembar-title>
+      <eui-navigation-menu slot="app-navigation"></eui-navigation-menu>
+      <eui-system-bar-actions></eui-system-bar-actions>
+    </eui-container>
+
+    <script type="module-shim">
+      import { getConfig, getActionsUrl } from './scripts/containerConfigLoader.js';
+      import { ActionFrameworkLib } from '@eui/action-framework';
+
+      // Theme change event handler
+      document.querySelector('body').addEventListener('eui-theme-change', (event) => {
+        document.querySelector('eui-theme').theme = event.detail.theme;
+      });
+
+      // App-config data event handler
+      document.documentElement.addEventListener('app-config-data-updated', (event) => {
+        document.querySelector('eui-navigation-menu').configData = event.detail;
+      });
+
+      // Get app, group and component config from GAS backend via REST API
+      getConfig()
+        .then((config) => {
+          document.querySelector('eui-system-bar-actions').metaData = config;
+          document.querySelector('eui-container').metaData = config;
+          document.querySelector('eui-plugins').pluginList = config.components.filter(
+            (component) => component.type === 'euisdk:plugin',
+          );
+        })
+        .catch((e) => {
+          // eui-container didn't get metadata, so displays "App not found" message
+          // backend seems to have issues, better to use console than REST logger
+          console.error('An error occurred while fetching metadata from backend:', e);
+        })
+        .finally(() => {
+          import('@eui/container');
+        });
+
+      window.customElements.whenDefined('eui-container').then(() => {
+        const loader = document.body.querySelector('#loader');
+        if (loader) {
+          loader.remove();
+        }
+      });
+
+      ActionFrameworkLib.setup(getActionsUrl());
+    </script>
+  </body>
+</html>

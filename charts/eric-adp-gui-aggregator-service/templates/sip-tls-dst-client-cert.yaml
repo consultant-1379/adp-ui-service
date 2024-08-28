@@ -1,0 +1,27 @@
+{{- $global := fromJson (include "eric-adp-gui-aggregator-service.global" .) -}}
+{{- if and $global.security.tls.enabled .Values.dst.enabled }}
+apiVersion: siptls.sec.ericsson.com/v1
+kind: InternalCertificate
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-dst-client-cert
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+spec:
+  kubernetes:
+    generatedSecretName: {{ include "eric-adp-gui-aggregator-service.name" . }}-dst-client-cert
+  certificate:
+    subject:
+      ## The Subject Common Name (CN) of the certificate.
+      ## This typically corresponds to the domain name of the service or a client identifier.
+      cn: {{ include "eric-adp-gui-aggregator-service.name" . }}
+    subjectAlternativeName:
+      populateKubernetesDns: false
+    issuer:
+      ## The identifier for the Issuer CA. Decides from which CA to request the certificate.
+      reference: {{ .Values.dst.collector.host }}-ca
+    extendedKeyUsage:
+      tlsClientAuth: true
+      tlsServerAuth: false
+{{- end }}

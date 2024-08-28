@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "app": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/app",
+      "properties": {
+        "name": true,
+        "displayName": true,
+        "version": true,
+        "descriptionLong": true,
+        "descriptionShort": true,
+        "type": true,
+        "priority": true,
+        "tags": true,
+        "route": true,
+        "module": true,
+        "url": true,
+        "specification": true,
+        "options": true,
+        "color": true,
+        "acronym": true,
+        "groupNames": true,
+        "childNames": true,
+        "hidden": true
+      },
+      "additionalProperties": false
+    },
+    "group": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/group",
+      "properties": {
+        "name": true,
+        "displayName": true,
+        "version": true,
+        "descriptionLong": true,
+        "descriptionShort": true,
+        "type": true,
+        "priority": true,
+        "tags": true,
+        "color": true,
+        "acronym": true,
+        "hidden": true
+      },
+      "additionalProperties": false
+    },
+    "actions": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/actions",
+      "properties": {
+        "id": true,
+        "meta": true,
+        "fixparameters": true
+      },
+      "additionalProperties": false
+    },
+    "uiActionMeta": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/uiAction/meta",
+      "properties": {
+        "displayName": true,
+        "shortDescription": true,
+        "longDescription": true,
+        "icon": true,
+        "version": true,
+        "private": true,
+        "group": true,
+        "tags": true
+      },
+      "additionalProperties": false
+    },
+    "uiActionFixparameters": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/uiAction/fixparameters",
+      "properties": {
+        "name": true,
+        "type": true,
+        "value": true
+      },
+      "additionalProperties": false
+    },
+    "service": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/service",
+      "properties": {
+        "name": true,
+        "version": true,
+        "URL": true
+      },
+      "additionalProperties": false
+    },
+    "components": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/components",
+      "properties": {
+        "name": true,
+        "displayName": true,
+        "version": true,
+        "module": true,
+        "specification": true,
+        "options": true,
+        "descriptionLong": true,
+        "descriptionShort": true,
+        "color": true,
+        "acronym": true,
+        "type": true,
+        "priority": true,
+        "service": true,
+        "tags": true
+      },
+      "additionalProperties": false
+    },
+    "overrides": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/overrides",
+      "properties": {
+        "apps": true,
+        "groups": true,
+        "components": true
+      },
+      "additionalProperties": false
+    },
+    "groupMapping": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/groupMapping",
+      "properties": {
+        "group": true,
+        "apps": true
+      },
+      "additionalProperties": false
+    },
+    "manualconfig": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/manualconfig",
+      "properties": {
+        "apps": true,
+        "groups": true,
+        "actions": true,
+        "services": true,
+        "overrides": true,
+        "groupMappings": true
+      },
+      "additionalProperties": false
+    }
+  }
+}

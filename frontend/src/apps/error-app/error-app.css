@@ -1,0 +1,9 @@
+.error-reason {
+  line-height: 2.5;
+}
+
+.action {
+  font-weight: bolder;
+  color: #00BFFF;
+  cursor: pointer;
+}

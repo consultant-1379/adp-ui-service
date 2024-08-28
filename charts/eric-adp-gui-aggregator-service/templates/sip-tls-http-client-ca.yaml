@@ -1,0 +1,17 @@
+{{- $global := fromJson (include "eric-adp-gui-aggregator-service.global" .) -}}
+{{- if $global.security.tls.enabled }}
+apiVersion: siptls.sec.ericsson.com/v1
+kind: InternalUserCA
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-http-client-ca
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+spec:
+  kubernetes:
+    generatedSecretName: {{ include "eric-adp-gui-aggregator-service.name" . }}-http-client-ca
+  certificate:
+    subject:
+      cn: {{ include "eric-adp-gui-aggregator-service.name" . }}-ca
+{{- end }}

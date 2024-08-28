@@ -1,0 +1,34 @@
+#config for the document generator, to assemble and zip the standalone md files and configs
+schema-version: 1.0.0
+packages:
+  - name: adp_gui_aggregator_service_user_guide
+    packageDescription: GUI Aggregator Lightweight Service User Guide
+    type: zip
+    sourceDocuments:
+      - format: markdown
+        docAsCodePath: docs/release/content/service_user_guide.md
+        assets:
+          - docs/release/content/architecture_overview.drawio.svg
+          - docs/release/content/deployment_overview.drawio.svg
+          - docs/release/content/cpu_load_test.svg
+          - docs/release/content/memory_load_test.svg
+        metadata:
+          name: 1/1553-APR201088/2
+          displayName: GUI Aggregator Service User Guide
+          descriptionLong: Contains the GUI Aggregator Service User Guide and corresponding assets
+          descriptionShort: Service User Guide Document
+          type: document
+          format: markdown
+          childNames: []
+          groupNames:
+            - generic_services
+          tags:
+            - generic-services
+    groups:
+      - name: generic_services
+        displayName: Generic Services
+        descriptionShort: Documentation for Generic Services
+        descriptionLong: Documentation for Generic Services
+        type: product
+        tags:
+          - generic-services

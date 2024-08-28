@@ -1,0 +1,11 @@
+{
+  "MENU": {
+    "LAUNCHER": "Apps",
+    "ALL": "All Apps"
+  },
+  "FAILED_TO_LOAD_LAUNCHER": "Launcher cannot be loaded",
+  "APP_METADATA_CANNOT_BE_LOADED": "Applications metadata cannot be fetched.",
+  "GROUP_METADATA_CANNOT_BE_LOADED": "Groups metadata cannot be fetched.",
+  "METADATA_CANNOT_BE_LOADED": "Applications and groups metadata cannot be fetched.",
+  "SERVER_UNAVAILABLE": "The server may be temporarily unavailable."
+}

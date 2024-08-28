@@ -1,0 +1,6 @@
+[gerrit]
+host=gerrit-gamma.gic.ericsson.se
+port=29418
+project=adp-ui-service
+defaultbranch=master
+defaultremote=origin

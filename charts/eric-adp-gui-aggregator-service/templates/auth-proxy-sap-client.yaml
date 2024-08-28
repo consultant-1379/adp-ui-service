@@ -1,0 +1,24 @@
+{{- $authorizationProxy := fromJson (include "eric-adp-gui-aggregator-service.authz-proxy-values" .) -}}
+{{- if $authorizationProxy.enabled }}
+{{- if include "eric-adp-gui-aggregator-service.sap-cli-used" . }}
+apiVersion: iam.sec.ericsson.com/v1beta1
+kind: InternalOAuth2Identity
+metadata:
+  # The resource name below works as is.
+  # *If* it is changed, then the same change must be done in
+  # SAP container's env variable IAM_AAPXY_SAP_CLIENT_NAME
+  # (IAM_AAPXY_SAP_CLIENT_NAME has to match with name of this resource).
+  name: {{ template "eric-adp-gui-aggregator-service.authz-proxy-sap-cli-name" . }}
+  labels:
+    # Include Service provider own labels here and add the below
+    # Authorization Proxy OAuth2 label template
+    {{- include "eric-adp-gui-aggregator-service.authz-proxy-labels" . | nindent 4 }}
+  annotations:
+    # Include Service Provider own annotations here.
+    # Replace the include below with suitable content that brings in the SP specific annotations
+    {{- include "eric-adp-gui-aggregator-service.product-info" . | nindent 4 }}
+# Include the sap client certificate specification from Authorization Proxy named template
+spec:
+  {{ include "eric-adp-gui-aggregator-service.authz-proxy-sap-cli-spec" . | nindent 2 }}
+{{- end }}
+{{- end }}

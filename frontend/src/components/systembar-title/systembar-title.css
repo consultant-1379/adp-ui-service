@@ -1,0 +1,34 @@
+* eui-icon {
+  --icon-color: var(--white, #ffffff);
+  --icon-size: 21px;
+}
+.title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  cursor: default;
+}
+.portal-action {
+  --text: var(--white);
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: baseline;
+}
+.portal-action-margin {
+  display: flex;
+  flex-direction: row;
+  margin-right: var(--space-large, 16px);
+}
+.product-action {
+  font-size: 14px;
+  font-weight: 400;
+  display: flex;
+  flex: none;
+  cursor: default;
+}
+.product-action:hover {
+  cursor: pointer;
+}

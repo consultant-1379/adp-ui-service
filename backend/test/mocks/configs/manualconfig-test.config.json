@@ -1,0 +1,46 @@
+{
+  "apps": [
+    {
+      "displayName": "Nova Explorer",
+      "version": "0.1.0",
+      "url": "http://localhost:9999/nova-explorer",
+      "descriptionLong": "Dummy external app for testing purposes.",
+      "name": "nova1",
+      "groupNames": ["eea", "nova"],
+      "type": "external"
+    },
+    {
+      "displayName": "Nova Explorer Standalone - Very Long External Application Name",
+      "version": "0.1.0",
+      "url": "http://localhost:9999/nova-explorer-standalone",
+      "descriptionLong": "Dummy external app for testing purposes.",
+      "name": "nova2",
+      "groupNames": ["ecm", "nova"],
+      "type": "external"
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Nova explorer",
+      "version": "0.1.0",
+      "name": "nova",
+      "type": "category",
+      "descriptionLong": "Dummy external category for testing purposes."
+    }
+  ],
+  "actions": [
+    {
+      "id": "eric-pc-configmgmt-ui.view-user-settins-action",
+      "displayName": "View User Settings",
+      "version": "1.0.0",
+      "module": "view-user-settings-action",
+      "group": ["performance-management-group-ID", "group3"]
+    },
+    {
+      "id": "eric-eea-session-browser-service.compare-session-action",
+      "displayName": "Compare Multiple Sessions",
+      "version": "1.0.0",
+      "module": "compare-sessions-action"
+    }
+  ]
+}

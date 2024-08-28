@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+build/
+.idea/
+*.tgz
+.DS_Store
+testReport/
+test_js/allure-*/

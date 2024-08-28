@@ -1,0 +1,86 @@
+{{- $accessMgmt := index .Values "eric-sec-access-mgmt" }}
+{{- if and  $accessMgmt.adpIamUserName $accessMgmt.adpIamUserPwd }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: create-iam-user-in-realm
+data:
+  createUser.sh: |
+    #!/usr/bin/bash
+
+    CACERT_FILE="/mnt/certs/iam/ca.crt"
+    TIMEOUT=5
+    ROLE_NAME='all-in-one-gas'
+    BASE_OS_REPO='arm.sero.gic.ericsson.se/artifactory/proj-ldc-repo-rpm-local/common_base_os/sles/'
+    BASE_OS_VERSION='5.6.0-11'
+
+    echo "* Adding curl to the system"
+    zypper addrepo -C -G -f https://${BASE_OS_REPO}${BASE_OS_VERSION} COMMON_BASE_OS_SLES_REPO \
+    && zypper --gpg-auto-import-keys refresh \
+    && zypper install -l -y curl \
+    && zypper clean --all
+
+    echo "* Getting access token from Keycloak"
+    ADMIN_TOKEN=''
+    while [ ${#ADMIN_TOKEN} -lt 500 ]
+    do
+    ADMIN_TOKEN=`curl --silent --cacert $CACERT_FILE --data "username=$IAM_ADMIN_USER&password=$IAM_ADMIN_PASSWORD&grant_type=password&client_id=admin-cli" https://$KEYCLOAK_HOSTNAME:$KEYCLOAK_PORT/auth/realms/master/protocol/openid-connect/token | sed 's/.*access_token":"//g' | sed 's/".*//g'`
+
+    if [ ${#ADMIN_TOKEN} -lt 500 ]
+    then
+    echo "* Access token is not retrieved, retrying after $TIMEOUT seconds..."
+    sleep $TIMEOUT
+    fi
+    done
+
+    echo '* Creating realm ' $REALM_NAME
+    RESP=`curl -s -k -f -v https://$KEYCLOAK_HOSTNAME:$KEYCLOAK_PORT/auth/admin/realms -H "Content-Type: application/json" -H "Authorization: bearer $ADMIN_TOKEN" --data '{
+    "enabled":true,
+    "id":"'"$REALM_NAME"'",
+    "realm":"'"$REALM_NAME"'"
+    }'`
+
+    echo '* Creating user in realm ' $REALM_NAME
+
+    echo 'username' $USER_NAME
+    echo 'userpass' $USER_PASSWORD
+
+    RESP=`curl -s -k -f -v https://$KEYCLOAK_HOSTNAME:$KEYCLOAK_PORT/auth/admin/realms/$REALM_NAME/users -H "Content-Type: application/json" -H "Authorization: bearer $ADMIN_TOKEN" --data '{
+    "username": "'"$USER_NAME"'",
+    "enabled": true,
+    "credentials": [
+        {
+            "type":  "password",
+            "value": "'"$USER_PASSWORD"'"
+        }
+    ],
+    "attributes": {
+            "roles": [],
+            "pwdReset": ["TRUE"]
+    }
+    }'`
+
+    echo "* Getting available roles"
+    USERS=`curl  --cacert $CACERT_FILE  --silent  https://$KEYCLOAK_HOSTNAME:$KEYCLOAK_PORT/auth/$IAM_ADMIN_USER/realms/$REALM_NAME/users -H "Content-Type: application/json" -H "Authorization: bearer $ADMIN_TOKEN"`
+    USER_ID=`echo $USERS | sed 's/.*id":"//g' | sed 's/".*//g'`
+
+    while [ -z $ROLE_ID ]
+    do
+    RESULT_ROLES=`curl --cacert $CACERT_FILE  --silent   https://$KEYCLOAK_HOSTNAME:$KEYCLOAK_PORT/auth/$IAM_ADMIN_USER/realms/$REALM_NAME/users/$USER_ID/role-mappings/realm/available -H "Content-Type: application/json" -H "Authorization: bearer $ADMIN_TOKEN"`
+    ROLE_ID=`echo $RESULT_ROLES | sed -n "s/.*\(id.*$ROLE_NAME\).*/\1/p;g" | sed 's/.*id":"//g' | sed 's/".*//g'`
+
+    if [ -z $ROLE_ID ]
+    then
+    echo "Role $ROLE_NAME not available, retrying after $TIMEOUT seconds"
+    sleep $TIMEOUT
+    else
+    echo "Role $ROLE_NAME available, role id: $ROLE_ID"
+    fi
+    done
+
+    echo "* Assigning $ROLE_NAME role to the user"
+    RESULT=`curl --silent -f --cacert $CACERT_FILE https://$KEYCLOAK_HOSTNAME:$KEYCLOAK_PORT/auth/$IAM_ADMIN_USER/realms/$REALM_NAME/users/$USER_ID/role-mappings/realm -H "Content-Type: application/json" -H "Authorization: bearer $ADMIN_TOKEN" --data '[{"id": "'$ROLE_ID'","name":"'all-in-one-gas'"}]'`
+
+    echo "* User created! Please login using $USER_NAME : $USER_PASSWORD"
+    exit 0
+{{- end }}

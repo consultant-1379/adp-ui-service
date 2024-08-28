@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-faultmappings-configmap
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+data:
+  eric-adp-gui-aggregator-service.json: |-
+{{ .Files.Get "static/faultmappings/eric-adp-gui-aggregator-service-faultmapping.json" | indent 4 }}

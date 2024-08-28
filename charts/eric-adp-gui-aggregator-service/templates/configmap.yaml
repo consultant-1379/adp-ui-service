@@ -1,0 +1,468 @@
+{{- $global := fromJson (include "eric-adp-gui-aggregator-service.global" .) -}}
+{{- $ingressPath := include "eric-adp-gui-aggregator-service.ingressPath" . -}}
+{{- $directLoggingEnabled := eq "true" (include "eric-adp-gui-aggregator-service.directLoggingEnabled" .) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-configmap
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+data:
+  backend-service-config.json: |
+    {
+        "k8sLabelValue":  "{{ .Values.configuration.k8sLabelValue }}",
+        "logging": {
+          "defaultLogLevel": "{{ .Values.configuration.logging.defaultLogLevel }}",
+          "logLevelCategories": {{ .Values.configuration.logging.logLevelCategories | toJson }},
+          "serviceName": "{{ .Values.configuration.logging.serviceName }}",
+          "stdout": {
+            "enabled": {{ include "eric-adp-gui-aggregator-service.stdoutLogEnabled" . }},
+            "format": "{{ .Values.configuration.logging.stdoutLogFormat }}"
+          },
+          "jsonTCPLog": {
+            "enabled": {{ $directLoggingEnabled }},
+            "host": "{{ .Values.configuration.dependencies.logTransformer.hostname }}",
+            "facility": "{{ .Values.configuration.logging.logCollector.facility }}",
+            "port": {{ $global.security.tls.enabled | ternary "5024" "5025" }}
+          }
+        },
+        "faultIndications": {
+          "enabled": {{ .Values.configuration.faultIndications.enabled }}
+        },
+        "guiContext": "{{ .Values.configuration.guiContext }}",
+        "discoverIngress": {{ .Values.configuration.discoverIngress }},
+        "ingressPath": "{{ $ingressPath }}",
+        "useHttps": {{ $global.security.tls.enabled }},
+        "verifyClientCertificate": "{{ .Values.service.endpoints.http.tls.verifyClientCertificate }}",
+        "enforcedTLS": "{{ .Values.service.endpoints.http.tls.enforced }}",
+        "serviceName": "{{ include "eric-adp-gui-aggregator-service.name" . }}",
+        "headlessServiceName": "{{ include "eric-adp-gui-aggregator-service.name" . }}-headless-svc",
+        "servicePort": "{{ .Values.service.port }}",
+        "dependencies": {
+          "gasIam": {
+            "serviceName": "gasIam",
+            "enabled": {{ .Values.configuration.userPermission.enabled }},
+            "iamServiceName": "{{ .Values.configuration.userPermission.iamServiceName }}",
+            "iamHostName": "{{ $global.hosts.iam }}",
+            "realmName": "{{ .Values.configuration.userPermission.realmName }}",
+            "audience": "{{ .Values.configuration.userPermission.audience }}",
+            "serverCertPath": "/run/secrets/iamServerCert/{{ $global.iam.cacert.key }}",
+            "nonTLSMode": {{ .Values.configuration.userPermission.nonTLSMode }},
+            {{- include "eric-adp-gui-aggregator-service.iamFieldMappings" . | indent 12 }}
+            "tls": {
+              "sendClientCert": true,
+              "verifyServerCert": false
+            }
+          },
+          "logtransformer": {
+            "enabled": {{ $directLoggingEnabled }}
+          },
+          "prometheus": {
+            "enabled": {{ .Values.metrics.enabled }},
+            "appName": "{{ .Values.configuration.dependencies.prometheus.appName }}"
+          },
+          "dstCollector": {
+            "enabled": {{ .Values.dst.enabled }}
+          },
+          "faultHandler": {
+            "enabled": {{ .Values.configuration.faultIndications.enabled }},
+            "hostname": "{{ .Values.configuration.dependencies.faultHandler.hostname }}",
+            "tlsPort": {{ .Values.configuration.dependencies.faultHandler.tlsPort }},
+            "httpPort": {{ .Values.configuration.dependencies.faultHandler.httpPort }},
+            "serviceName": "{{ .Values.configuration.dependencies.faultHandler.serviceName }}"
+          }
+        }
+
+    }
+
+  manualconfig.json: |
+     {
+        "apps": [
+        {{- if .Values.manualconfig.apps | empty | not }}{{ $appsLength := len .Values.manualconfig.apps | add -1 }}
+        {{- range $index, $value := .Values.manualconfig.apps }}
+          {
+            {{- if $value.type }}
+            "type": {{ $value.type | quote }},
+            {{- end }}
+            {{- if $value.descriptionShort }}
+            "descriptionShort": {{ $value.descriptionShort | quote }},
+            {{- end }}
+            {{- if $value.descriptionLong }}
+            "descriptionLong": {{ $value.descriptionLong | quote }},
+            {{- end }}
+            {{- if $value.childNames }}
+            "childNames": [{{ $childNamesLength := len $value.childNames | add -1 }}
+              {{- range $childNameIndex, $childName := $value.childNames }}
+              {{ $childName | quote }}{{- if lt $childNameIndex $childNamesLength }},{{- end }}
+              {{- end }}
+            ],
+            {{- end }}
+            {{- if $value.groupNames }}
+            "groupNames": [{{ $groupNamesLength := len $value.groupNames | add -1 }}
+              {{- range $groupNameIndex, $groupName := $value.groupNames }}
+              {{ $groupName | quote }}{{- if lt $groupNameIndex $groupNamesLength }},{{- end }}
+              {{- end }}
+            ],
+            {{- end }}
+            {{- if $value.tags }}
+            "tags": [{{ $tagsLength := len $value.tags | add -1 }}
+              {{- range $tagsIndex, $tag := $value.tags }}
+              {{ $tag | quote }}{{- if lt $tagsIndex $tagsLength }},{{- end }}
+              {{- end }}
+            ],
+            {{- end }}
+            {{- if $value.priority }}
+            "priority": {{ $value.priority }},
+            {{- end }}
+            {{- if $value.color }}
+            "color": {{ $value.color | quote }},
+            {{- end }}
+            {{- if $value.acronym }}
+            "acronym": {{ $value.acronym | quote }},
+            {{- end }}
+            {{- if $value.url }}
+            "url": {{ $value.url | quote }},
+            {{- end }}
+            {{- if $value.route }}
+            "route": {{ $value.route | quote }},
+            {{- end }}
+            {{- if $value.hidden }}
+            "hidden": {{ $value.hidden | quote }},
+            {{- end }}
+            "displayName": {{ $value.displayName | quote }},
+            "version": {{ $value.version | quote }},
+            {{- if $value.module }}
+            "module": {{ $value.module | quote}},
+            {{- end }}
+            {{- if $value.options }}
+            "options": {
+            {{- $first := true}}
+            {{- range $key, $val := $value.options }}
+              {{- if $first}}{{$first = false}}{{- else -}},{{- end}}
+              {{ $key | quote }} : {{ $val | quote }}
+            {{- end }}
+            },
+            {{- end }}
+            "name": {{ $value.name | quote }}
+          }{{- if lt $index $appsLength }},{{- end }}
+        {{- end }}{{ else }}{{- end }}
+        ],
+        "groups": [
+        {{- if .Values.manualconfig.groups | empty | not }}{{ $groupsLength := len .Values.manualconfig.groups | add -1 }}
+        {{- range $index, $value := .Values.manualconfig.groups }}
+          {
+            {{- if $value.descriptionShort }}
+            "descriptionShort": {{ $value.descriptionShort | quote }},
+            {{- end }}
+            {{- if $value.descriptionLong }}
+            "descriptionLong": {{ $value.descriptionLong | quote }},
+            {{- end }}
+            {{- if $value.type }}
+            "type": {{ $value.type | quote }},
+            {{- end }}
+            {{- if $value.priority }}
+            "priority": {{ $value.priority }},
+            {{- end }}
+            {{- if $value.tags }}
+            "tags": [{{ $tagsLength := len $value.tags | add -1 }}
+              {{- range $tagsIndex, $tag := $value.tags }}
+              {{ $tag | quote }}{{- if lt $tagsIndex $tagsLength }},{{- end }}
+              {{- end }}
+            ],
+            {{- end }}
+            {{- if $value.color }}
+            "color": {{ $value.color | quote }},
+            {{- end }}
+            {{- if $value.acronym }}
+            "acronym": {{ $value.acronym | quote }},
+            {{- end }}
+            "displayName": {{ $value.displayName | quote }},
+            "version": {{ $value.version | quote }},
+            "name": {{ $value.name | quote }}
+          }{{- if lt $index $groupsLength }},{{- end }}
+        {{- end }}{{ else }}{{- end }}
+        ],
+        "actions": [
+          {{- if .Values.manualconfig.actions | empty | not }}{{ $actionsLength := len .Values.manualconfig.actions | add -1 }}
+          {{- range $index, $value := .Values.manualconfig.actions }}
+            {
+              {{- if $value.id }}
+              "id": {{ $value.id | quote }},
+              {{- end }}
+              "meta": {
+                {{- if $value.meta.displayName }}
+                "displayName": {{ $value.meta.displayName | quote }},
+                {{- end }}
+                {{- if $value.meta.shortDescription }}
+                "shortDescription": {{ $value.meta.shortDescription | quote }},
+                {{- end }}
+                {{- if $value.meta.longDescription }}
+                "longDescription": {{ $value.meta.longDescription | quote }},
+                {{- end }}
+                {{- if $value.meta.icon }}
+                "icon": {{ $value.meta.icon | quote }},
+                {{- end }}
+                {{- if $value.meta.version }}
+                "version": {{ $value.meta.version | quote }},
+                {{- end }}
+                {{- if $value.meta.private }}
+                "private": {{ $value.meta.private | quote }},
+                {{- end }}
+                {{- if $value.meta.group }}
+                "group": [{{ $groupLength := len $value.meta.group | add -1 }}
+                  {{- range $groupIndex, $group := $value.meta.group }}
+                  {{ $group | quote }}{{- if lt $groupIndex $groupLength }},{{- end }}
+                  {{- end }}
+                ],
+                {{- end }}
+                {{- if $value.meta.tags }}
+                "tags": [{{ $tagsLength := len $value.meta.tags | add -1 }}
+                  {{- range $tagsIndex, $tag := $value.meta.tags }}
+                  {{ $tag | quote }}{{- if lt $tagsIndex $tagsLength }},{{- end }}
+                  {{- end }}
+                ]
+                {{- end }}
+                {{- if $value.meta.module }}
+                "module": {{ $value.meta.module | quote }},
+                {{- end }}
+                {{- if $value.meta.version }}
+                "version": {{ $value.meta.version | quote }},
+                {{- end }}
+                {{- if $value.meta.parameters }}
+                "parameters": [{{ $parametersLength := len $value.meta.parameters | add -1 }}
+                  {{- range $parametersIndex, $parameter := $value.meta.parameters }}
+                  {{ $parameter | quote }}{{- if lt $parametersIndex $parametersLength }},{{- end }}
+                  {{- end }}
+                ]
+                {{- end }}
+              }
+              {{- if $value.fixparameters }}
+                "fixparameters": [
+                  {{- if .Values.manualconfig.actions.fixparameters | empty | not }}{{ $actionsLength := len .Values.manualconfig.actions.fixparameters | add -1 }}
+                  {{- range $index, $value := .Values.manualconfig.actions.fixparameters }}
+                    {
+                      {{- if $value.name }}
+                      "name": {{ $value.name | quote }},
+                      {{- end }}
+                      {{- if $value.type }}
+                      "type": {{ $value.type | quote }},
+                      {{- end }}
+                      {{- if $value.value }}
+                      "value": {{ $value.value | quote }}
+                      {{- end }}
+                    }{{- if lt $index $actionsLength }},{{- end }}
+                  {{- end }}{{ else }}{{- end }}
+                ]
+              {{- end }}
+            }{{- if lt $index $actionsLength }},{{- end }}
+          {{- end }}{{ else }}{{- end }}
+        ]
+      }
+  manual-overrides.json: |
+     {
+        "overrides": {
+          "apps": [
+          {{- if .Values.manualconfig.overrides.apps | empty | not }}{{ $appsLength := len .Values.manualconfig.overrides.apps | add -1 }}
+          {{- range $index, $value := .Values.manualconfig.overrides.apps }}
+            {
+              {{- if $value.type }}
+              "type": {{ $value.type | quote }},
+              {{- end }}
+              {{- if $value.descriptionShort }}
+              "descriptionShort": {{ $value.descriptionShort | quote }},
+              {{- end }}
+              {{- if $value.descriptionLong }}
+              "descriptionLong": {{ $value.descriptionLong | quote }},
+              {{- end }}
+              {{- if $value.childNames }}
+              "childNames": [{{ $childNamesLength := len $value.childNames | add -1 }}
+                {{- range $childNameIndex, $childName := $value.childNames }}
+                {{ $childName | quote }}{{- if lt $childNameIndex $childNamesLength }},{{- end }}
+                {{- end }}
+              ],
+              {{- end }}
+              {{- if $value.groupNames }}
+              "groupNames": [{{ $groupNamesLength := len $value.groupNames | add -1 }}
+                {{- range $groupNameIndex, $groupName := $value.groupNames }}
+                {{ $groupName | quote }}{{- if lt $groupNameIndex $groupNamesLength }},{{- end }}
+                {{- end }}
+              ],
+              {{- end }}
+              {{- if $value.tags }}
+              "tags": [{{ $tagsLength := len $value.tags | add -1 }}
+                {{- range $tagsIndex, $tag := $value.tags }}
+                {{ $tag | quote }}{{- if lt $tagsIndex $tagsLength }},{{- end }}
+                {{- end }}
+              ],
+              {{- end }}
+              {{- if $value.priority }}
+              "priority": {{ $value.priority }},
+              {{- end }}
+              {{- if $value.color }}
+              "color": {{ $value.color | quote }},
+              {{- end }}
+              {{- if $value.acronym }}
+              "acronym": {{ $value.acronym | quote }},
+              {{- end }}
+              {{- if $value.url }}
+              "url": {{ $value.url | quote }},
+              {{- end }}
+              {{- if $value.route }}
+              "route": {{ $value.route | quote }},
+              {{- end }}
+              {{- if $value.displayName }}
+              "displayName": {{ $value.displayName | quote }},
+              {{- end }}
+              {{- if $value.version }}
+              "version": {{ $value.version | quote }},
+              {{- end }}
+              {{- if $value.module }}
+              "module": {{ $value.module | quote}},
+              {{- end }}
+              {{- if $value.options }}
+              "options": {
+              {{- $first := true}}
+              {{- range $key, $val := $value.options }}
+                {{- if $first}}{{$first = false}}{{- else -}},{{- end}}
+                {{ $key | quote }} : {{ $val | quote }}
+              {{- end }}
+              },
+              {{- end }}
+              {{- if $value.hidden }}
+              "hidden": {{ $value.hidden | quote }},
+              {{- end }}
+              "name": {{ $value.name | quote }}
+            }{{- if lt $index $appsLength }},{{- end }}
+          {{- end }}{{ else }}{{- end }}
+          ],
+          "groups": [
+          {{- if .Values.manualconfig.overrides.groups | empty | not }}{{ $groupsLength := len .Values.manualconfig.overrides.groups | add -1 }}
+          {{- range $index, $value := .Values.manualconfig.overrides.groups }}
+            {
+              {{- if $value.descriptionShort }}
+              "descriptionShort": {{ $value.descriptionShort | quote }},
+              {{- end }}
+              {{- if $value.descriptionLong }}
+              "descriptionLong": {{ $value.descriptionLong | quote }},
+              {{- end }}
+              {{- if $value.type }}
+              "type": {{ $value.type | quote }},
+              {{- end }}
+              {{- if $value.priority }}
+              "priority": {{ $value.priority }},
+              {{- end }}
+              {{- if $value.tags }}
+              "tags": [{{ $tagsLength := len $value.tags | add -1 }}
+                {{- range $tagsIndex, $tag := $value.tags }}
+                {{ $tag | quote }}{{- if lt $tagsIndex $tagsLength }},{{- end }}
+                {{- end }}
+              ],
+              {{- end }}
+              {{- if $value.color }}
+              "color": {{ $value.color | quote }},
+              {{- end }}
+              {{- if $value.acronym }}
+              "acronym": {{ $value.acronym | quote }},
+              {{- end }}
+              {{- if $value.hidden }}
+              "hidden": {{ $value.hidden | quote }},
+              {{- end }}
+              {{- if $value.displayName }}
+              "displayName": {{ $value.displayName | quote }},
+              {{- end }}
+              {{- if $value.version }}
+              "version": {{ $value.version | quote }},
+              {{- end }}
+              "name": {{ $value.name | quote }}
+            }{{- if lt $index $groupsLength }},{{- end }}
+          {{- end }}{{ else }}{{- end }}
+          ],
+          "components": [
+          {{- if .Values.manualconfig.overrides.components | empty | not }}{{ $componentsLength := len .Values.manualconfig.overrides.components | add -1 }}
+          {{- range $index, $value := .Values.manualconfig.overrides.components }}
+            {
+              {{- if $value.descriptionShort }}
+              "descriptionShort": {{ $value.descriptionShort | quote }},
+              {{- end }}
+              {{- if $value.descriptionLong }}
+              "descriptionLong": {{ $value.descriptionLong | quote }},
+              {{- end }}
+              {{- if $value.type }}
+              "type": {{ $value.type | quote }},
+              {{- end }}
+              {{- if $value.module }}
+              "module": {{ $value.module | quote }},
+              {{- end }}
+              {{- if $value.specification }}
+              "specification": {{ $value.specification | quote }},
+              {{- end }}
+              {{- if $value.service }}
+              "service": {{ $value.service | quote }},
+              {{- end }}
+              {{- if $value.options }}
+              "options": {{ $value.options | quote }},
+              {{- end }}
+              {{- if $value.priority }}
+              "priority": {{ $value.priority }},
+              {{- end }}
+              {{- if $value.tags }}
+              "tags": [{{ $tagsLength := len $value.tags | add -1 }}
+                {{- range $tagsIndex, $tag := $value.tags }}
+                {{ $tag | quote }}{{- if lt $tagsIndex $tagsLength }},{{- end }}
+                {{- end }}
+              ],
+              {{- end }}
+              {{- if $value.color }}
+              "color": {{ $value.color | quote }},
+              {{- end }}
+              {{- if $value.acronym }}
+              "acronym": {{ $value.acronym | quote }},
+              {{- end }}
+              {{- if $value.displayName }}
+              "displayName": {{ $value.displayName | quote }},
+              {{- end }}
+              {{- if $value.version }}
+              "version": {{ $value.version | quote }},
+              {{- end }}
+              "name": {{ $value.name | quote }}
+            }{{- if lt $index $componentsLength }},{{- end }}
+          {{- end }}{{ else }}{{- end }}
+          ]
+        },
+        "groupMappings": [
+        {{- if .Values.manualconfig.groupMappings | empty | not }}{{ $groupMappingLength := len .Values.manualconfig.groupMappings | add -1 }}
+        {{- range $index, $value := .Values.manualconfig.groupMappings }}
+          {
+            "group": {{ $value.group | quote }},
+            "apps": [{{ $appsLength := len $value.apps | add -1 }}
+              {{- range $appsIndex, $app := $value.apps }}
+              {{ $app | quote }}{{- if lt $appsIndex $appsLength }},{{- end }}
+              {{- end }}
+            ]
+          }{{- if lt $index $groupMappingLength }},{{- end }}
+        {{- end }}{{ else }}{{- end }}
+        ]
+      }
+  manual-service-config.json: |
+    {
+      "serviceList": [
+        {
+          "name": {{ include "eric-adp-gui-aggregator-service.name" . | quote}},
+          "version": {{ include "eric-adp-gui-aggregator-service.version" . | quote}},
+          "URL":
+            {{- if $global.security.tls.enabled -}}"https://localhost:{{- .Values.service.port -}}{{ .Values.configuration.guiContext }}"
+            {{- else -}}"http://localhost:{{- .Values.service.port -}}{{ .Values.configuration.guiContext }}"
+            {{- end -}}
+        }{{- if .Values.manualconfig.services | empty | not }},{{ end }}
+      {{- if .Values.manualconfig.services | empty | not }}{{ $groupsLength := len .Values.manualconfig.services | add -1 }}
+      {{- range $index, $value := .Values.manualconfig.services }}
+        {
+          "name": {{ $value.name | quote }},
+          "version": {{ $value.version | quote }},
+          "URL": {{ $value.URL | quote }}
+        }{{- if lt $index $groupsLength }},{{- end }}
+      {{- end }}{{ else }}{{- end }}
+      ]
+    }

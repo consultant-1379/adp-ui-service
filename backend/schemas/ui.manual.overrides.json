@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "$id": "http://adp.ericsson.com/ui.manual.overrides.json",
+  "type": "object",
+  "description": "File descriptor for UI micro front-ends.\nThis file includes all apps, components and groups supported by UI micro front-ends.\nThis file should be named 'config.json' and should be accessible from the service root URL.\n",
+  "properties": {
+    "version": {
+      "$id": "http://adp.ericsson.com/ui.manual.overrides.json#/properties/version",
+      "type": "string",
+      "description": "Schema version of the config.json."
+    },
+    "overrides": {
+      "$id": "http://adp.ericsson.com/ui.manual.overrides.json#/properties/overrides",
+      "type": "object",
+      "description": "List of config overrides.",
+      "items": {
+        "$ref": "ui.config.override.json"
+      }
+    },
+    "groupMappings": {
+      "$id": "http://adp.ericsson.com/ui.manual.overrides.json#/properties/groupMappings",
+      "type": "array",
+      "description": "List of group mappings.",
+      "items": {
+        "$ref": "ui.config.groupMappings.json"
+      }
+    }
+  },
+  "additionalProperties": false
+}

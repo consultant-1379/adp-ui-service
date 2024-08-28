@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "collector": {
+      "$id": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/collector",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "sampler": {
+      "$id": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/sampler",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "span": {
+      "$id": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/span",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "processor": {
+      "$id": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/processor",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+
+    "dst": {
+      "$id": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/dst",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    }
+  }
+}

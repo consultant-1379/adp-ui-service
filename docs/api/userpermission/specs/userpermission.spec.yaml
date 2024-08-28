@@ -1,0 +1,181 @@
+openapi: 3.0.1
+info:
+  title: User Info and Permission REST API (IF.GUI.USERPERMISSION.REST)
+  description: |
+    # Introduction
+
+    This specification describes the REST API (for GUIs) to retrieve user info and user permissions.
+
+    User Permission REST API can be used to retrieve information (e.g., username, user id) of the current user in session
+    as well as the permissions (what security resources it has access) of the user.
+    The source of the information returned by the API is ADP IAM (Keycloak).
+
+  contact:
+    name: Smart Insights Team
+    email: PDLSCRUMNW@pdl.internal.ericsson.com
+  version: "1.0.0"
+  x-api-id: 6272dd99-a2f4-4aa0-b154-ba66522efeea
+  x-audience: company-internal
+servers:
+  - url: /userpermission/v1
+    description: Base
+tags:
+  - name: IF.GUI.USERPERMISSION.REST
+    x-displayName: User Info and Permission REST API
+paths:
+  /userinfo:
+    get:
+      operationId: getUserinfo
+      summary: Get user info and determine realm from the auth cookie
+      description: |
+        Returns normalized IAM's `/userinfo` endpoint's response extended with the
+        last login time if not present in the response and original properties
+        returned by IAM's `/userinfo` endpoint.
+      tags:
+        - IF.GUI.USERPERMISSION.REST
+      responses:
+        "200":
+          description: OK
+          content:
+            "application/json":
+              schema:
+                $ref: "../schemas/userinfo.schema.yaml"
+              examples:
+                userinfo:
+                  value:
+                    userId: 8dd9927d-207e-4a1f-98e7-e3ae0ddea7cb
+                    username: gas-user
+                    lastLoginTime: 20230918101954Z
+        "404":
+          description: Not Found - The user cannot be found
+        "500":
+          description: Internal Server Error - The endpoint is not working
+          content:
+            "application/problem+json":
+              schema:
+                $ref: "../schemas/internal.error.res.schema.yaml"
+              examples:
+                adp.error.internal:
+                  summary: Internal Server error
+                  value:
+                    code: adp.error.internal
+                    message: This API endpoint is not enabled. Check service configuration.
+  /{realm}/userinfo:
+    get:
+      operationId: getRealmUserinfo
+      summary: Get user info from a specific realm
+      description: |
+        Returns normalized IAM's `/userinfo` endpoint's response for a specific realm
+        extended with the last login time if not present in the response and original
+        properties returned by IAM's `/userinfo` endpoint.
+      tags:
+        - IF.GUI.USERPERMISSION.REST
+      parameters:
+        - in: path
+          name: realm
+          required: true
+          schema:
+            type: string
+          description: The realm to fetch user info from.
+      responses:
+        "200":
+          description: OK
+          content:
+            "application/json":
+              schema:
+                $ref: "../schemas/userinfo.schema.yaml"
+              examples:
+                userinfo:
+                  value:
+                    userId: 8dd9927d-207e-4a1f-98e7-e3ae0ddea7cb
+                    username: gas-user
+                    lastLoginTime: 20230918101954Z
+        "401":
+          description: Unauthorized - The user is not authenticated, or the user session has expired.
+        "403":
+          description: Forbidden - The authorization request does not map to any permission, or the access token was requested without the "scope=openid" parameter.
+        "404":
+          description: Not Found - The user or the realm cannot be found
+        "500":
+          description: Internal Server Error - The endpoint is not working
+          content:
+            "application/problem+json":
+              schema:
+                $ref: "../schemas/internal.error.res.schema.yaml"
+              examples:
+                adp.error.internal:
+                  summary: Internal Server error
+                  value:
+                    code: adp.error.internal
+                    message: This API endpoint is not enabled. Check service configuration.
+  /permission:
+    post:
+      operationId: getPermissionInfo
+      summary: Get permission info for the current user
+      description: |
+        Returns the IAM's `/token` endpoint's response for a specific user.
+      tags:
+        - IF.GUI.USERPERMISSION.REST
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              $ref: "../schemas/userpermission.permission.req.schema.yaml"
+            examples:
+              permissions:
+                value:
+                  response_mode: permissions
+              decision:
+                value:
+                  response_mode: decision
+                  permission: ["GET"]
+      responses:
+        "200":
+          description: OK
+          content:
+            "application/json":
+              schema:
+                $ref: "../schemas/userpermission.permission.res.schema.yaml"
+              examples:
+                decision:
+                  $ref: "#/components/examples/decisionResponse"
+                permission:
+                  $ref: "#/components/examples/permissionResponse"
+        "400":
+          description: Bad Request - The POST body is invalid.
+        "401":
+          description: Unauthorized - The user is not authenticated, or the user session has expired.
+        "403":
+          description: Forbidden - The authorization request does not map to any permission
+        "404":
+          description: Not Found - Realm cannot be found
+        "500":
+          description: Internal Server Error - The endpoint is not working
+          content:
+            "application/problem+json":
+              schema:
+                $ref: "../schemas/internal.error.res.schema.yaml"
+              examples:
+                adp.error.internal:
+                  summary: Internal Server error
+                  value:
+                    code: adp.error.internal
+                    message: This API endpoint is not enabled. Check service configuration.
+components:
+  examples:
+    permissionResponse:
+      value:
+        - scopes:
+            - "TRACE"
+            - "HEAD"
+            - "DELETE"
+            - "POST"
+            - "GET"
+            - "CONNECT"
+            - "OPTIONS"
+            - "PUT"
+          rsid: "90cda438-55cc-4bbf-ac7a-80c24141b4b3"
+          rsname: "all-in-one-gas_eric-adp-gui-aggregator-service-authproxy"
+    decisionResponse:
+      value:
+        result: true

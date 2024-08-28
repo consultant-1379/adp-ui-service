@@ -1,0 +1,18 @@
+{{- $authorizationProxy := fromJson (include "eric-adp-gui-aggregator-service.authz-proxy-values" .) -}}
+{{- if $authorizationProxy.enabled }}
+{{- $global             := fromJson (include "eric-adp-gui-aggregator-service.authz-proxy-global" .) -}}
+{{- if $global.security.tls.enabled }}
+apiVersion: siptls.sec.ericsson.com/v1
+kind: InternalCertificate
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-auth-proxy-client-cert
+  labels:
+    {{- $authProxyLabels := include "eric-adp-gui-aggregator-service.authz-proxy-labels" . | fromYaml -}}
+    {{- $commonLabels := include "eric-adp-gui-aggregator-service.labels" . | fromYaml -}}
+    {{- include "eric-adp-gui-aggregator-service.mergeLabels" (dict "location" .Template.Name "sources" (list $authProxyLabels $commonLabels)) | trim | nindent 4 }}
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+spec:
+{{ include "eric-adp-gui-aggregator-service.authz-proxy-client-cert-spec" . | indent 2 }}
+{{- end }}
+{{- end }}

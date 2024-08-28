@@ -1,0 +1,6 @@
+description: List of all licensed and user authorized applications.
+type: array
+items:
+  allOf:
+    - $ref: "./ui.schemas.yaml#/components/schemas/Id"
+    - $ref: "./ui.schemas.yaml#/components/schemas/App"

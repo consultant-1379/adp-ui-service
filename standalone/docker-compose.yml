@@ -1,0 +1,46 @@
+version: '2.1'
+
+# this same own network is used in each service so that GAS can download configs using container name in the URL
+networks:
+  standalone-network:
+    driver: bridge
+
+services:
+  # definition of GAS service, please fill-in <version>
+  gas:
+    image: armdocker.rnd.ericsson.se/proj-eea-drop/eric-adp-gui-aggregator-service:<version>
+    depends_on:
+      - mock1
+      - mock2
+    networks:
+      - standalone-network
+    ports:
+      - 8080:3000
+    volumes:
+      - ../standalone/manual-service-config.json:/runtime/server/config/backend-service-config/manual-service-config.json
+      - ../standalone/backend-service-config.json:/runtime/server/config/backend-service-config/backend-service-config.json
+
+  # the followings define the mock services
+  # when modifying them, sync with mounted ./manual-service-config.json and depends_on list above
+
+  # mock1 is started without dockerfile, wrapped into ADP Node.js builder image
+  # you may overwrite environment, volume and command for your specific application
+  mock1:
+    image: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/adp-nodejs-lts-builder-image
+    environment:
+      - MOCK_ID=ui-generic-ecm
+      - PUBLIC_PATH=ui-generic-ecm
+    networks:
+      - standalone-network
+    volumes:
+      - ../mock/domain-ui-generic/:/gui/
+    command: /bin/sh -c "cd /gui && npm start"
+
+  # mock2 is started using its Dockerfile, make sure it is built with the same name as in image field
+  mock2:
+    image: domain-ui-generic
+    environment:
+      - MOCK_ID=mock-esm-service-1
+      - PUBLIC_PATH=esm-service-1
+    networks:
+      - standalone-network

@@ -1,0 +1,271 @@
+{{- if .Values.configuration.cnom.defaultDashboards.enabled }}
+{{- $constants := fromJson (include "eric-adp-gui-aggregator-service.constants" .) -}}
+{{- $prometheusAppName := .Values.configuration.dependencies.prometheus.appName | replace "-" "_" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-cnom-cm
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+    ericsson.com/cnom-server-dashboard-models: "true"
+data:
+  {{ include "eric-adp-gui-aggregator-service.name" . }}-cnom-default-dashboard.json: |
+    {
+      "namespace": "{{ $constants.cnomDashboardsNamespace }}",
+      "dashboards": [
+        {
+          "_id": "{{ include "eric-adp-gui-aggregator-service.name" . }}-cnom-default-dashboard",
+          "title": "General Service Metrics for GAS",
+          "apps": ["statusOverview"],
+          "order": 0,
+          {{- if .Values.configuration.cnom.dashboardTreeView.enabled }}
+          "dashboardTreeView": {
+            "tree": [["GUI Aggregator Service" , "GUI Aggregator Metrics"]]
+          },
+          {{- end }}
+          {{- if .Values.configuration.cnom.dashboardTopology.enabled }}
+          "topology": true,
+          {{- end }}
+          "tiles": [
+            {
+              "xSize": 5,
+              "widget": "cpu_time_spent"
+            },
+            {
+              "xSize": 5,
+              "widget": "nodejs_heap_size"
+            },
+            {
+              "xSize": 5,
+              "widget": "k8s_resourses"
+            },
+            {
+              "xSize": 5,
+              "widget": "api_response_time"
+            },
+            {
+              "xSize": 2,
+              "widget": "ui_requests_by_code_method"
+            },
+            {
+              "xSize": 2,
+              "widget": "ui_meta_v1_apps_requests_by_code_method"
+            },
+            {
+              "xSize": 2,
+              "widget": "ui_serve_v1_import_map_requests_by_code_method"
+            },
+            {
+              "xSize": 2,
+              "widget": "ui_serve_v1_static_requests_by_code_method"
+            },
+            {
+              "xSize": 2,
+              "widget": "ui_logging_v1_logs_requests_by_code_method"
+            },
+            {
+              "xSize": 10,
+              "ySize": 2,
+              "widget": "builtin:pod_table",
+              "variables": {
+                "podListFilterRegex": "^{{ include "eric-adp-gui-aggregator-service.name" . }}.*"
+              }
+            }
+          ]
+        }
+      ],
+      "widgets": [
+        {
+          "_id": "cpu_time_spent",
+          "widgetType": "timeline",
+          "title": "CPU",
+          "unit": "%",
+          "sources": [
+            { "source": "{{ $prometheusAppName }}_process_cpu" }
+          ]
+        },
+        {
+          "_id": "nodejs_heap_size",
+          "widgetType": "timeline",
+          "title": "NodeJS heap size",
+          "unit": "MB",
+          "sources": [
+            { "source": "{{ $prometheusAppName }}_nodejs_heap_size_used_bytes" },
+            { "source": "{{ $prometheusAppName }}_nodejs_heap_size_total_bytes" }
+          ]
+        },
+        {
+          "_id": "k8s_resourses",
+          "widgetType": "timeline",
+          "title": "K8S resources",
+          "unit": "Number of distributed resources",
+          "sources": [
+            { "source": "{{ $prometheusAppName }}_pod_num" },
+            { "source": "{{ $prometheusAppName }}_endpoint_num" },
+            { "source": "{{ $prometheusAppName }}_service_num" }
+          ]
+        },
+        {
+          "_id": "api_response_time",
+          "widgetType": "timeline",
+          "title": "Response time per request",
+          "unit": "ms",
+          "sources": [
+            { "source": "{{ $prometheusAppName }}_ui_response_time" },
+            { "source": "{{ $prometheusAppName }}_ui_meta_v1_apps_response_time" },
+            { "source": "{{ $prometheusAppName }}_ui_serve_v1_import_map_response_time" },
+            { "source": "{{ $prometheusAppName }}_ui_serve_v1_static_response_time" },
+            { "source": "{{ $prometheusAppName }}_ui_logging_v1_logs_response_time" }
+          ]
+        },
+        {
+          "_id": "ui_requests_by_code_method",
+          "widgetType": "donut",
+          "title": "/ui responses",
+          "unit": "Number of responses",
+          "format": "d",
+          "sources": [
+            { "source": "{{ $prometheusAppName }}_ui_requests_total_by_code_method" }
+          ]
+        },
+        {
+          "_id": "ui_meta_v1_apps_requests_by_code_method",
+          "widgetType": "donut",
+          "title": "/ui-meta/v1/apps responses",
+          "unit": "Number of responses",
+          "format": "d",
+          "sources": [
+            { "source": "{{ $prometheusAppName }}_ui_meta_v1_apps_requests_total_by_code_method" }
+          ]
+        },
+        {
+          "_id": "ui_serve_v1_import_map_requests_by_code_method",
+          "widgetType": "donut",
+          "title": "/ui-serve/v1/import-map responses",
+          "unit": "Number of responses",
+          "format": "d",
+          "sources": [
+            { "source": "{{ $prometheusAppName }}_ui_serve_v1_import_map_requests_total_by_code_method" }
+          ]
+        },
+        {
+          "_id": "ui_serve_v1_static_requests_by_code_method",
+          "widgetType": "donut",
+          "title": "/ui-serve/v1/static responses",
+          "unit": "Number of responses",
+          "format": "d",
+          "sources": [
+            { "source": "{{ $prometheusAppName }}_ui_serve_v1_static_requests_total_by_code_method" }
+          ]
+        },
+        {
+          "_id": "ui_logging_v1_logs_requests_by_code_method",
+          "widgetType": "donut",
+          "title": "/ui-logging/v1/logs responses",
+          "unit": "Number of responses",
+          "format": "d",
+          "sources": [
+            { "source": "{{ $prometheusAppName }}_ui_logging_v1_logs_requests_total_by_code_method" }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "_id": "{{ $prometheusAppName }}_process_cpu",
+          "sourceType": "prometheus",
+          "query": "rate({{ $prometheusAppName }}_process_cpu_seconds_total[5m])",
+          "label": "CPU time spent"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_nodejs_heap_size_used_bytes",
+          "sourceType": "prometheus",
+          "query": "{{ $prometheusAppName }}_nodejs_heap_size_used_bytes / 1024 / 1024",
+          "label": "Used"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_nodejs_heap_size_total_bytes",
+          "sourceType": "prometheus",
+          "query": "{{ $prometheusAppName }}_nodejs_heap_size_total_bytes / 1024 / 1024",
+          "label": "Total"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_pod_num",
+          "sourceType": "prometheus",
+          "query": "{{ $prometheusAppName }}_pod_num",
+          "label": "Pods"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_endpoint_num",
+          "sourceType": "prometheus",
+          "query": "{{ $prometheusAppName }}_endpoint_num",
+          "label": "Endpoints"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_service_num",
+          "sourceType": "prometheus",
+          "query": "{{ $prometheusAppName }}_service_num",
+          "label": "Services"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_ui_response_time",
+          "sourceType": "prometheus",
+          "query": "(sum(increase({{ $prometheusAppName }}_ui_http_response_times_total[5m])) / sum(increase({{ $prometheusAppName }}_ui_http_requests_total[5m]))) > 0 or on() vector(0)",
+          "label": "/ui"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_ui_meta_v1_apps_response_time",
+          "sourceType": "prometheus",
+          "query": "(sum(increase({{ $prometheusAppName }}_ui_meta_v1_apps_http_response_times_total[5m])) / sum(increase({{ $prometheusAppName }}_ui_meta_v1_apps_http_requests_total[5m]))) > 0 or on() vector(0)",
+          "label": "/ui-meta/v1/apps"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_ui_serve_v1_import_map_response_time",
+          "sourceType": "prometheus",
+          "query": "(sum(increase({{ $prometheusAppName }}_ui_serve_v1_import_map_http_response_times_total[5m])) / sum(increase({{ $prometheusAppName }}_ui_serve_v1_import_map_http_requests_total[5m]))) > 0 or on() vector(0)",
+          "label": "/ui-serve/v1/import-map"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_ui_serve_v1_static_response_time",
+          "sourceType": "prometheus",
+          "query": "(sum(increase({{ $prometheusAppName }}_ui_serve_v1_static_http_response_times_total[5m])) / sum(increase({{ $prometheusAppName }}_ui_serve_v1_static_http_requests_total[5m]))) > 0 or on() vector(0)",
+          "label": "/ui-serve/v1/static"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_ui_logging_v1_logs_response_time",
+          "sourceType": "prometheus",
+          "query": "(sum(increase({{ $prometheusAppName }}_ui_logging_v1_logs_http_response_times_total[5m])) / sum(increase({{ $prometheusAppName }}_ui_logging_v1_logs_http_requests_total[5m]))) > 0 or on() vector(0)",
+          "label": "/ui-logging/v1/logs"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_ui_requests_total_by_code_method",
+          "sourceType": "prometheus",
+          "splitByLabelName": "code_method",
+          "query": "label_join(increase({{ $prometheusAppName }}_ui_http_requests_total[$timeRangeDuration]), 'code_method', ' ', 'method', 'code')"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_ui_meta_v1_apps_requests_total_by_code_method",
+          "sourceType": "prometheus",
+          "splitByLabelName": "code_method",
+          "query": "label_join(increase({{ $prometheusAppName }}_ui_meta_v1_apps_http_requests_total[$timeRangeDuration]), 'code_method', ' ', 'method', 'code')"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_ui_serve_v1_import_map_requests_total_by_code_method",
+          "sourceType": "prometheus",
+          "splitByLabelName": "code_method",
+          "query": "label_join(increase({{ $prometheusAppName }}_ui_serve_v1_import_map_http_requests_total[$timeRangeDuration]), 'code_method', ' ', 'method', 'code')"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_ui_serve_v1_static_requests_total_by_code_method",
+          "sourceType": "prometheus",
+          "splitByLabelName": "code_method",
+          "query": "label_join(increase({{ $prometheusAppName }}_ui_serve_v1_static_http_requests_total[$timeRangeDuration]), 'code_method', ' ', 'method', 'code')"
+        },
+        {
+          "_id": "{{ $prometheusAppName }}_ui_logging_v1_logs_requests_total_by_code_method",
+          "sourceType": "prometheus",
+          "splitByLabelName": "code_method",
+          "query": "label_join(increase({{ $prometheusAppName }}_ui_logging_v1_logs_http_requests_total[$timeRangeDuration]), 'code_method', ' ', 'method', 'code')"
+        }
+      ]
+    }
+{{- end }}

@@ -1,0 +1,28 @@
+{{- $authorizationProxy := fromJson (include "eric-adp-gui-aggregator-service.authz-proxy-values" .) -}}
+{{- $global := fromJson (include "eric-adp-gui-aggregator-service.global" .) -}}
+{{- if and ($global.security.tls.enabled) ($authorizationProxy.enabled) }}
+apiVersion: siptls.sec.ericsson.com/v1
+kind: InternalCertificate
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-authz-client-cert
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+spec:
+  kubernetes:
+    generatedSecretName: {{ include "eric-adp-gui-aggregator-service.name" . }}-authz-client-cert
+  certificate:
+    subject:
+      ## The Subject Common Name (CN) of the certificate.
+      ## This typically corresponds to the domain name of the service or a client identifier.
+      cn: authz-client
+    subjectAlternativeName:
+      populateKubernetesDns: false
+    issuer:
+      ## The identifier for the Issuer CA. Decides from which CA to request the certificate.
+      reference: {{ include "eric-adp-gui-aggregator-service.name" . }}-http-client-ca
+    extendedKeyUsage:
+      tlsClientAuth: true
+      tlsServerAuth: false
+{{- end }}

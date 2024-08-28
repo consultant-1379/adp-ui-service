@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "$id": "http://adp.ericsson.com/ui.config.groupMappings.json",
+  "type": "object",
+  "description": "This schema describes the required schema of the group mapping config.",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version of the groupMapping config.json."
+    },
+    "group": {
+      "type": "string",
+      "description": "Name of the group, which will be added."
+    },
+    "apps": {
+      "type": "array",
+      "description": "List of apps.",
+      "items": {
+        "type": "string",
+        "description": "Name of the app"
+      }
+    }
+  },
+  "additionalProperties": false
+}

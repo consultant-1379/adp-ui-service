@@ -1,0 +1,42 @@
+{
+  "apps": [
+    {
+      "displayName": "Nova Explorer New Name",
+      "version": "0.1.0",
+      "url": "http://localhost:9999/nova-explorer-new-route",
+      "descriptionLong": "Dummy external app for testing purposes.",
+      "name": "nova1",
+      "groupNames": ["nova", "new_group"],
+      "type": "external"
+    },
+    {
+      "displayName": "Nova Explorer Standalone - Very Long External Application Name",
+      "version": "0.1.0",
+      "url": "http://localhost:9999/nova-explorer-standalone",
+      "descriptionLong": "Dummy external app for testing purposes.",
+      "name": "nova2",
+      "groupNames": ["ecm", "nova"],
+      "type": "external"
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Nova explorer new group name",
+      "version": "0.1.0",
+      "name": "nova",
+      "type": "category",
+      "descriptionLong": "New long description."
+    }
+  ],
+  "components": [
+    {
+      "service": "domain1",
+      "name": "component-1",
+      "displayName": "Component entities new displayname",
+      "version": "1.0.0",
+      "descriptionLong": "New long description",
+      "type": "json",
+      "specification": "component-1/spec.json"
+    }
+  ]
+}

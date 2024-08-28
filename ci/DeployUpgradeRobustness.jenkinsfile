@@ -1,0 +1,304 @@
+pipeline {
+  agent {
+    node('presentation')
+  }
+  options {
+    ansiColor('xterm')
+    timeout(time: 1, unit: 'HOURS')
+  }
+  parameters {
+    booleanParam(name: 'PUBLISH_REPORT', defaultValue: false, description: 'Publish the created test report')
+    string(name: 'GAS_VERSION', description: 'The drop (-) version of the GAS Helm chart to deploy. If empty, the latest drop is deployed.')
+  }
+  stages {
+    stage('Clean') {
+      steps {
+        sh 'bob clean'
+      }
+    }
+    stage('Init') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO')
+          ]) {
+            ansiColor('xterm') {
+              sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml init'
+            }
+          }
+        }
+      }
+    }
+    stage('Install npm dependencies') {
+      steps {
+        sh 'bob npm-install'
+      }
+    }
+    stage('Install dependencies and drop, change port and run integration tests') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml install-gas-and-dependencies'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml change-port-number-check'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml integration-tests-in-cluster-backend-nodeport'
+          }
+        }
+      }
+    }
+    stage('Restart rollout and run integration tests') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml restart-rollout-with-wait-and-duration-save'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml integration-tests-in-cluster-backend-nodeport'
+          }
+        }
+      }
+    }
+    stage('Delete one pod and run integration tests') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml delete-one-pod-and-wait'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml integration-tests-in-cluster-backend-nodeport'
+          }
+        }
+      }
+    }
+    stage('Delete all pods and run integration tests') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml delete-all-pods-and-wait'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml integration-tests-in-cluster-backend-nodeport'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml uninstall-gas'
+          }
+        }
+      }
+    }
+    stage('Install baseline') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml install-gas-baseline'
+            sh 'bob save-external-gas-address'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml upgrade-baseline-with-nodeport'
+          }
+        }
+      }
+    }
+    stage('Run browser cache test on baseline') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml manage-profile-volume-for-cache-tests:create-profile-volume'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml integration-tests-in-cluster-frontend-cache-test-nodeport'
+          }
+        }
+      }
+    }
+    stage('Upgrade from baseline to drop and measure loss of service') {
+      parallel {
+        stage('Start API fetch with k6') {
+          steps {
+            lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+              withCredentials([
+                usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+                usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+                file(credentialsId: env.system, variable: 'KUBECONFIG')
+              ]) {
+                sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml k6-get-api-test'
+              }
+            }
+          }
+        }
+        stage('Upgrade to drop and measure lead time') {
+          steps {
+            lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+              withCredentials([
+                usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+                usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+                file(credentialsId: env.system, variable: 'KUBECONFIG')
+              ]) {
+                sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml upgrade-from-baseline-to-drop-and-measure-lead-time'
+              }
+            }
+          }
+        }
+      }
+    }
+    stage('Run browser cache test on drop') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml integration-tests-in-cluster-frontend-cache-test-nodeport'
+          }
+        }
+      }
+    }
+    stage('Run integration tests') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml integration-tests-in-cluster-backend-nodeport'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml uninstall-gas-with-suffix'
+          }
+        }
+      }
+    }
+    stage('Install drop, scale out and run integration tests') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml install-gas-drop'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml scale-out'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml integration-tests-in-cluster-backend-nodeport'
+          }
+        }
+      }
+    }
+    stage('Scale in and run integration tests') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml scale-in'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml integration-tests-in-cluster-backend-nodeport'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml uninstall-gas'
+          }
+        }
+      }
+    }
+    stage('Install baseline for rollback') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml install-gas-baseline'
+          }
+        }
+      }
+    }
+    stage('Upgrade from baseline to drop for rollback') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml upgrade-from-baseline-to-drop'
+          }
+        }
+      }
+    }
+    stage('Rollback to baseline') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml rollback-to-baseline'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml uninstall-gas-with-suffix'
+          }
+        }
+      }
+    }
+    stage('Upgrade from latest plus to drop, measure lead time and run integration tests') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+             usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+             usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+             file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml upgrade-from-latest-plus-to-drop-and-measure-lead-time'
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml integration-tests-in-cluster-backend-nodeport'
+          }
+        }
+      }
+    }
+    stage('Create test report') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([file(credentialsId: env.system, variable: 'KUBECONFIG')]) {
+            sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml create-test-report'
+          }
+        }
+      }
+    }
+    stage('Publish test report') {
+      when { expression { env.PUBLISH_REPORT == 'true' } }
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+          usernamePassword(credentialsId: 'eridoc-username-password', usernameVariable: 'ERIDOC_USERNAME', passwordVariable: 'ERIDOC_PASSWORD')
+        ]) {
+          sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml publish-test-report'
+        }
+      }
+    }
+    stage('Cleanup namespace') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([file(credentialsId: env.system, variable: 'KUBECONFIG')]) {
+            ansiColor('xterm') {
+              sh 'bob namespace-cleanup'
+            }
+          }
+        }
+      }
+    }
+  }
+  post {
+    always {
+      sh 'bob -r ci/rulesets/deploy-upgrade-robustness.yaml manage-profile-volume-for-cache-tests:remove-profile-volume'
+      archiveArtifacts 'build/doc-archive/k8s-test-report/k8s-test-report.md'
+    }
+  }
+}

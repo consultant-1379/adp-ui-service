@@ -1,0 +1,137 @@
+openapi: 3.0.1
+info:
+  title: UI Logging REST API (IF.GUI.LOG.REST)
+  description: |
+    # Introduction
+
+    This document describes the UI Logging REST API, which is meant to be used for collecting client-side logs.
+
+    This API enables UIs to push their logs captured on the client side (in the browser) to GAS service backend,
+    which receives and forwards these logs for server-side log-aggregation towards the logging stack.
+
+  contact:
+    name: Smart Insights Team
+    email: PDLSCRUMNW@pdl.internal.ericsson.com
+  version: "1.0.0"
+  x-api-id: bbadd340-1e0f-4a20-8f6b-dac485b836c7
+  x-audience: internal
+servers:
+  - url: /ui-logging/v1
+    description: Base
+tags:
+  - name: IF.GUI.LOG.REST
+    x-displayName: UI Log Interface
+paths:
+  /logs:
+    post:
+      operationId: postLogs
+      summary: Report UI Logs
+      description: Sends UI user session events.
+      tags:
+        - IF.GUI.LOG.REST
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/Logs"
+            examples:
+              adp.ui.logs:
+                $ref: "#/components/examples/UILogs"
+      responses:
+        "200":
+          description: OK - Logs saved successfully
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                adp.error.internal:
+                  $ref: "#/components/examples/ADPErrorInternal"
+
+components:
+  schemas:
+    Log:
+      type: object
+      description: Log Object.
+      required:
+        - timestamp
+        - severity
+        - message
+      properties:
+        timestamp:
+          description: Log generation timestamp as per RFC 5424. YYYY-MM-DDThh:mm:ss.sss±hh:mm.
+          type: string
+        severity:
+          description: Log severity level.
+          type: string
+          enum:
+            - debug
+            - info
+            - warning
+            - error
+            - critical
+        applicationName:
+          description: Name of the UI application which produces log
+          type: string
+        message:
+          description: Detailed log message.
+          type: string
+        category:
+          description: An identifier of the type of message. This Shall follows GL-D1114-070-A,D.
+          type: string
+        uniqueLogId:
+          description: Unique log identifier identifies uniquely in the service code the origin of a logged event across multiple versions of the service.
+          type: string
+    Logs:
+      type: object
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Log"
+    Error:
+      type: object
+      description: User Interface API Error Response
+      required:
+        - errors
+      properties:
+        errors:
+          description: Detailed error object that describes which parameter(s) is causing the error.
+          type: array
+          items:
+            type: object
+            properties:
+              msg:
+                description: Error message
+                type: string
+              param:
+                description: Parameter name
+                type: string
+              value:
+                description: Parameter value
+                type: string
+              location:
+                description: Location of the parameter that caused the error. It's either `body`, `query`, `params`, `cookies` or `headers`.
+                type: string
+              nestedErrors:
+                description: Nested errors
+                type: array
+  examples:
+    ADPErrorInternal:
+      value:
+        errors:
+          - msg: severity parameter should be one of the values 'critical', 'error', 'warning', 'info', 'debug'
+            param: severity
+            value: alarm
+    UILogs:
+      value:
+        logs:
+          - timestamp: 2020-10-03T11:15:00.000+01:00
+            severity: error
+            message: Unable to load the vendor.js file.
+            applicationName: common-launcher
+          - timestamp: 2020-10-03T10:15:00.002Z
+            severity: info
+            message: User authorized successfully.

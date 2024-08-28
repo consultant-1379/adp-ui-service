@@ -1,0 +1,14 @@
+{
+  "apps": [
+  ],
+  "groups": [
+    {
+      "displayName": "Dummy Product 2",
+      "version": "1.0.0",
+      "name": "eea:dummy2",
+      "type": "product",
+      "descriptionLong": "Dummy product 2, for UI demo purposes only.",
+      "descriptionShort": "DP2"
+    }
+  ]
+}

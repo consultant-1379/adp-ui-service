@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "description": "List of config.package.json files from services",
+  "required": ["modules"],
+  "properties": {
+    "modules": {
+      "$id": "#/properties/modules",
+      "type": "array",
+      "description": "Describes one package",
+      "additionalItems": true,
+      "items": {
+        "$id": "#/properties/modules/items",
+        "anyOf": [
+          {
+            "$id": "#/properties/modules/items/anyOf/0",
+            "type": "object",
+            "description": "An explanation about the purpose of this instance.",
+            "required": ["name", "version", "path"],
+            "properties": {
+              "name": {
+                "$id": "#/properties/modules/items/anyOf/0/properties/name",
+                "type": "string",
+                "description": "Name of the package"
+              },
+              "version": {
+                "$id": "#/properties/modules/items/anyOf/0/properties/version",
+                "type": "string",
+                "description": "Version number of the package"
+              },
+              "path": {
+                "$id": "#/properties/modules/items/anyOf/0/properties/path",
+                "type": "string",
+                "description": "Path to the package"
+              },
+              "main": {
+                "$id": "#/properties/modules/items/anyOf/0/properties/main",
+                "type": "string",
+                "description": "The main entrypoint"
+              },
+              "dependencies": {
+                "$id": "#/properties/modules/items/anyOf/2/properties/dependencies",
+                "type": "object",
+                "description": "Additional dependency for the package",
+                "patternProperties": {
+                  "^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$": {
+                    "type": "string",
+                    "description": "The library as dependency"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  }
+}

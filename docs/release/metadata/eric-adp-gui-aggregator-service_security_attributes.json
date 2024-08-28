@@ -1,0 +1,75 @@
+{
+  "metadata": {
+    "serviceHelmChartName": "eric-adp-gui-aggregator-service",
+    "usedSchemaVersion": "1.0.0",
+    "fileVersion": "1.0.0",
+    "dateEdited": "2023-11-03",
+    "usedConstraintsVersion": "1.0.0",
+    "serviceVersion": "1.0.0"
+  },
+  "images": [
+    {
+      "name": "eric-adp-gui-aggregator-service",
+      "privileges": {
+        "allowPrivilegeEscalation": {
+          "value": false
+        },
+        "privileged": {
+          "value": false
+        },
+        "readOnlyRootFilesystem": {
+          "value": true
+        },
+        "fsGroup": {
+          "value": "*"
+        },
+        "supplementalGroups": {
+          "value": ["*"]
+        },
+        "runAsNonRoot": {
+          "value": true
+        },
+        "hostPID": {
+          "value": false
+        },
+        "hostIPC": {
+          "value": false
+        },
+        "hostNetwork": {
+          "value": {
+            "enabled": false
+          }
+        },
+        "capabilities": {
+          "value": [""]
+        },
+        "volumes": {
+          "value": [
+            "configMap",
+            "downwardAPI",
+            "emptyDir",
+            "persistentVolumeClaim",
+            "projected",
+            "secret"
+          ]
+        },
+        "sysctls": {
+          "value": [""]
+        },
+        "procMount": {
+          "value": "Default"
+        },
+        "seccomp": {
+          "value": {
+            "type": ["RuntimeDefault"]
+          }
+        },
+        "apparmor": {
+          "value": {
+            "type": ["runtime/default"]
+          }
+        }
+      }
+    }
+  ]
+}

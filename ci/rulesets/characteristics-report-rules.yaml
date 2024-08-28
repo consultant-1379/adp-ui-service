@@ -1,0 +1,227 @@
+modelVersion: 2.0
+import:
+  common: ../../ruleset2.0.yaml
+  robustness: deploy-upgrade-robustness.yaml
+
+docker-images:
+  - k6Image: armdocker.rnd.ericsson.se/dockerhub-ericsson-remote/loadimpact/k6:latest
+  - athenaImage: armdocker.rnd.ericsson.se/proj-adp-rob-and-char/athena:latest
+
+var:
+  - loadtest-start-time
+  - loadtest-end-time
+  - version
+  - k6s-avg
+  - app-speed-index
+  - product-speed-index
+  - token
+
+env:
+  - ARM_TOKEN_SELI (default=notset)
+
+properties:
+  - maxVus: 100
+  - responseTimeThreshold: 500
+  - sleepUnit: 2
+  - includeStaticAssets: true
+  - failOnThreshold: false
+  - athena-use-case: gas-light-characteristics-report
+  - athena-pods: eric-adp-gui-aggregator-service-.*
+  - athena-flavor: minimum
+  - athena-log-level: INFO
+  - athena-input: load-test/characteristics-report-input/input.json
+  - athena-output-folder: load-test/output
+  - load-test-report-folder: load-test/report
+  - k6s-summary-path: ${load-test-report-folder}/load-test-report.json
+  - lighthouse-report-folder: load-test/perf-test/lighthouse-report
+  - lighthouse-product-page-html: ${lighthouse-report-folder}/product-page.html
+  - lighthouse-product-page-json: ${lighthouse-report-folder}/product-page.json
+  - lighthouse-app-page-html: ${lighthouse-report-folder}/app-page.html
+  - lighthouse-app-page-json: ${lighthouse-report-folder}/app-page.json
+  - report-name: perf-report
+  - report-generation-output: build/doc-archive/perf-report/
+  - characteristics-ci-chart-values-yaml: ci/config/minimal-ci-chart-values.yaml
+  - cluster-node-domain: seli.gic.ericsson.se
+
+rules:
+  install-ci-mocks-gas:
+    - rule: robustness.download-gas-drop-chart
+    - rule: common.install-ci-simple
+      properties:
+        - ci-chart-values-file: ${characteristics-ci-chart-values-yaml}
+    - rule: common.set-chart-values-test
+    - rule: common.install-gas
+    - rule: common.save-external-gas-address
+    - rule: common.upgrade-service-with-nodeport
+
+  install-characteristics-chart:
+    - task: generate
+      docker-image: common.adp-release-auto
+      docker-flags:
+        - "--env ENABLE_HELM_V3=true"
+      cmd: helm-package
+        --folder charts/characteristics-report
+        --workdir .bob
+        --output .bob
+        --version 0.0.0
+        --helm-credentials ${common.repositories-yaml-path}
+    - task: install
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd:
+        - "helm install characteristics-report .bob/characteristics-report-0.0.0.tgz \
+          --wait \
+          --timeout 30m0s \
+          --username ${env.common.ARM_USER_SELI} \
+          --password ${env.common.ARM_TOKEN_SELI} \
+          --set global.pullSecret=${common.image-pullsecret} \
+          --namespace=${var.common.k8s-namespace}"
+
+  wait-to-prometheus-cadvisor-ready:
+    - task: wait-to-prometheus-cadvisor-ready
+      cmd: sleep 180
+
+  forward-pm-port:
+    - task: forward-pm-port
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd:
+        - kubectl port-forward pods/eric-pm-server-0 19090:9090 -n ${var.common.k8s-namespace}
+
+  run-load-tests:
+    - task: save-loadtests-start-time
+      cmd:
+        - date "+%s" > .bob/var.loadtest-start-time
+    - task: run-tests
+      docker-image: k6Image
+      docker-flags:
+        - "--env GAS_URL=http://${var.common.worker-node}.${cluster-node-domain}:${var.common.gas-nodeport}"
+        - "--env MAX_VUS=${maxVus}"
+        - "--env INCLUDE_STATIC_ASSETS=${includeStaticAssets}"
+        - "--env FAIL_ON_THRESHOLD=${failOnThreshold}"
+        - "--env RESPONSE_TIME_THRESHOLD=${responseTimeThreshold}"
+        - "--env SLEEP_UNIT=${sleepUnit}"
+        - "--user=0"
+        - "--net=host"
+        - "--volume ${env.common.PWD}/load-test/report:/report"
+      cmd: run --out json=.bob/test_detailed_results.json ./load-test/loadtests/load-test.js
+    - task: save-loadtests-end-time
+      cmd:
+        - date "+%s" > .bob/var.loadtest-end-time
+
+  generate-athena-report:
+    - task: wait-for-port-forward
+      cmd: sleep 30
+    - task: fill-in-service-version
+      cmd: sed -i 's/$SERVICE_VERSION/${var.version}/' ${athena-input}
+    - task: generate-report
+      docker-image: athenaImage
+      docker-flags:
+        - "--network=host"
+      cmd:
+        - athena adp_char_report
+          -u ${athena-use-case}
+          --pods ${athena-pods}
+          -o ${athena-output-folder}
+          -f ${athena-flavor}
+          -n ${var.common.k8s-namespace}
+          -log ${athena-log-level}
+          -s ${var.loadtest-start-time}
+          -e ${var.loadtest-end-time}
+          --pm-url localhost:19090
+          --char-report ${athena-input}
+
+  perf-test-ui:
+    - task: perf-test-ui
+      docker-image: common.nodejs-builder
+      docker-flags:
+        - "--env GAS_URL=http://${var.common.worker-node}.${cluster-node-domain}:${var.common.gas-nodeport}"
+      cmd:
+        - npm run perf:test:ui
+
+  # .bob/${common.helm-chart-name}-internal is used as a target path in misc.download-gas-chart
+  # the version is find out from the pulled chart file name, because if the pipeline is started without version parameter
+  # this is the only place where the version can be identified
+  find-out-the-version:
+    - task: find-out-the-version
+      cmd: ls .bob/${common.helm-chart-name}-internal | grep -oP '(\d+\.?){3}-\d+' > .bob/var.version
+
+  publish-report:
+    - rule: find-out-the-version
+    - task: create-versioned-report-file
+      cmd: cp ${athena-output-folder}/updated_adp_char_report.json ${athena-output-folder}/adp-characteristics-${var.version}.json
+    - task: upload-the-result
+      docker-image: common.adp-release-auto
+      cmd: upload_file.sh
+        --filename=${athena-output-folder}/adp-characteristics-${var.version}.json
+        --repository=${common.helm-chart-repo-server}/${common.doc-arm-dev-path}/drop-documents/
+        --api-token=${env.ARM_TOKEN_SELI}
+
+  publish-performance-report:
+    - rule: find-out-the-version
+    - task: common.functions.release:upload-file # upload-zip-documents-to-artifactory
+      properties:
+        - file-to-upload: ./build/performance-report-${var.version}.zip
+        - repo-for-upload: ${common.helm-chart-repo-server}/${common.doc-arm-dev-path}/drop-documents/
+        - upload-api-token: ${env.ARM_TOKEN_SELI}
+    - task: eridoc-upload
+      docker-image: common.adp-release-auto
+      docker-flags:
+        - --env ERIDOC_USERNAME="${env.common.ERIDOC_USERNAME}"
+        - --env ERIDOC_PASSWORD="${env.common.ERIDOC_PASSWORD}"
+      cmd:
+        - eridoc upload --config ./docs/release/config/eridoc/release-characteristics-report.yaml --debug --no-validate-certificates --set semver=${var.common.semver}
+
+  create-performance-report:
+    - task: create-report-folders
+      cmd:
+        - mkdir -p .bob/${load-test-report-folder}
+        - mkdir -p .bob/${lighthouse-report-folder}
+    - task: collect-logs
+      cmd:
+        - cp ${k6s-summary-path} .bob/${k6s-summary-path}
+        - cp ${lighthouse-app-page-html} .bob/${lighthouse-app-page-html}
+        - cp ${lighthouse-product-page-html} .bob/${lighthouse-product-page-html}
+        - cp ${lighthouse-app-page-json} .bob/${lighthouse-app-page-json}
+        - cp ${lighthouse-product-page-json} .bob/${lighthouse-product-page-json}
+    - task: parse-reports
+      docker-image: common.ci-toolbox
+      cmd:
+        - cat .bob/${k6s-summary-path} | jq -r '. | .metrics."http_req_duration{expected_response:true}".values.avg' > .bob/var.k6s-avg
+        - cat .bob/${lighthouse-app-page-json} | jq -r '. | ."speed-index".numericValue' > .bob/var.app-speed-index
+        - cat .bob/${lighthouse-product-page-json} | jq -r '. | ."speed-index".numericValue' > .bob/var.product-speed-index
+    - task: common.functions.report-generation:fill-ejs-template
+      properties:
+        - report-template-file: docs/release/content/perf-report-template.ejs.md
+        - template-variables: avg=${var.k6s-avg} kubernetesVersion=${var.common.kubernetes-version} helmVersion=${var.common.helm-version} appSpeedScore=${var.app-speed-index} productSpeedScore=${var.product-speed-index}
+        - report-output-path: ${report-generation-output}
+        - report-name: ${report-name}
+    - task: common.functions.report-generation:echo-messages
+      properties:
+        - report-output-path: ${report-generation-output}
+        - report-name: ${report-name}
+    - task: common.functions.report-generation:convert-to-pdf
+      properties:
+        - report-output-path: ${report-generation-output}
+    - rule: find-out-the-version
+    - task: archive-reports
+      docker-image: common.adp-release-auto
+      cmd:
+        - cp ./build/doc-archive/perf-report/pdf/perf-report/perf-report.pdf ./build/doc-archive/perf-report/final
+        - cp -r .bob/${k6s-summary-path} ./build/doc-archive/perf-report/final/k6s-summary
+        - cp -r .bob/${lighthouse-app-page-html} ./build/doc-archive/perf-report/final/lighthouse-app-report
+        - cp -r .bob/${lighthouse-product-page-html} ./build/doc-archive/perf-report/final/lighthouse-product-report
+        - >
+          bash -c '
+          cd build/doc-archive/perf-report/final;
+          zip -q -r ./../../../performance-report-${var.version}.zip .;
+          zip -q -r ./../../../performance-report.zip .;
+          '

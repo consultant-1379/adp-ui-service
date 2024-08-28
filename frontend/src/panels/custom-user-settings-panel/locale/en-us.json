@@ -1,0 +1,14 @@
+{
+  "SETTINGS_PANEL": {
+    "SWITCH_THEME": "Switch theme",
+    "DARK": "Dark",
+    "LIGHT": "Light",
+    "MY_SETTINGS": "My settings",
+    "SIGN_IN": "Sign in",
+    "SIGN_OUT": "Sign out",
+    "ACCOUNT_LABEL": "Account",
+    "EDIT_USER_ACCOUNT": "Edit user account",
+    "LAST_LOG_IN_MISSING": "Last login time not available"
+  },
+  "LAST_LOG_IN_TEXT": "Last sign in was {{lastLoginTime}}"
+}

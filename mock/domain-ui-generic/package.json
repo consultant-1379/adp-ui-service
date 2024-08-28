@@ -1,0 +1,38 @@
+{
+  "name": "domain-ui-1",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "install:all": "npm install && npm run install:uiMocks",
+    "install:uiMocks": "npm --prefix public/e-ui-app-1 install && npm --prefix public/e-ui-app-2 install && npm --prefix public/esm-service-1 install && npm --prefix public/e-ui-tree-apps install && npm --prefix public/action-consumer install && npm --prefix public/action-provider install && npm --prefix public/dev-portal-mock-gui install",
+    "build:dev": "npm --prefix public/e-ui-app-1 run build:dev && npm --prefix public/e-ui-app-2 run build:dev && npm --prefix public/esm-service-1 run build:dev && npm --prefix public/e-ui-tree-apps run build:dev && npm --prefix public/action-consumer run build:dev && npm --prefix public/action-provider run build:dev && npm --prefix public/dev-portal-mock-gui run build:dev",
+    "clean:all": "npm run clean:node && npm run clean:buildFolders",
+    "clean:node": "rm -rf node_modules && rm -rf public/e-ui-app-1/node_modules && rm -rf public/e-ui-app-2/node_modules && rm -rf public/esm-module-1/node_modules && rm -rf public/e-ui-tree-apps/node_modules && rm -rf public/action-consumer/node_modules && rm -rf public/action-provider/node_modules && rm -rf public/dev-portal-mock-gui/node_modules",
+    "clean:buildFolders": "rm -rf public/e-ui-app-1/build && rm -rf public/e-ui-app-2/build && rm -rf public/esm-module-1/build && rm -rf public/e-ui-tree-apps/build && rm -rf public/action-consumer/build && rm -rf public/action-provider/build && rm -rf public/dev-portal-mock-gui/build",
+    "start:watch": "node_modules/.bin/nodemon server.js --watch .",
+    "start:mock": "cross-env MOCK_ID=ui-generic-eea TLS=false PUBLIC_PATH=ui-generic-eea CONTEXT_ROOT=/ui node server.js"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  },
+  "dependencies": {
+    "@adp/telemetry": "^0.1.13",
+    "chokidar": "^3.6.0",
+    "express": "^4.18.1",
+    "nodemon": "^2.0.4"
+  },
+  "overrides": {
+    "@adp/telemetry": {
+      "@opentelemetry/context-async-hooks": "1.22.0",
+      "@opentelemetry/core": "1.22.0",
+      "@opentelemetry/propagator-b3": "1.22.0",
+      "@opentelemetry/resources": "1.22.0",
+      "@opentelemetry/sdk-trace-base": "1.22.0",
+      "@opentelemetry/semantic-conventions": "1.22.0",
+      "@opentelemetry/propagator-jaeger": "1.22.0",
+      "@opentelemetry/sdk-trace-node": "1.22.0"
+    }
+  }
+}

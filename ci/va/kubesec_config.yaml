@@ -1,0 +1,13 @@
+Kubesec:
+  Product: "eric-adp-gui-aggregator-service" #Node/TPG Name
+  Product_internal: "GUI Aggregator Lightweight" #Product name
+  Product_contact: "PDLSCRUMNW@pdl.internal.ericsson.com" #Email of the SPOC or DL
+  KubesecYAML:
+    Scan: True
+    armLinks:
+      Links:
+      valuesOverride:
+  KubesecCluster:
+    Scan: False
+    KubeconfigFile: $KUBECONFIG
+    namespace: $NAMESPACE

@@ -1,0 +1,18 @@
+type: object
+description: |
+  File descriptor for shared packages compatible with UI micro front-ends.
+  This file includes meta information of shared packages served by the current service for UI micro front-ends.
+
+  This file **MUST** be named as `config.package.json` and **MUST** be accessible from the service root context path.
+required:
+  - version
+  - packages
+properties:
+  version:
+    type: string
+    description: Schema version of the config.package.json.
+  packages:
+    type: array
+    description: List of shared packages available as part of the service.
+    items:
+      $ref: "./ui.package.yaml"

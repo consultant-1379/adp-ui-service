@@ -1,0 +1,624 @@
+modelVersion: 2.0
+import:
+  common: ../../ruleset2.0.yaml
+  functions: ../../ruleset-functions.yaml
+  release: release-rules.yaml
+
+env:
+  - GAS_VERSION (default=>0.0.0-0) #Default gives the latest
+
+docker-images:
+  - k6Image: armdocker.rnd.ericsson.se/dockerhub-ericsson-remote/loadimpact/k6:latest
+
+var:
+  - version
+  - mock-service-iccr-value
+  - rollout-restart-start-time
+  - rollout-restart-finish-time
+  - baseline-upgrade-start-time
+  - baseline-upgrade-finish-time
+  - lplus-upgrade-start-time
+  - lplus-upgrade-finish-time
+  - scale-out-finish-time
+  - scale-out-start-time
+  - scale-in-finish-time
+  - scale-in-start-time
+  - rollback-start-time
+  - rollback-finish-time
+  - eric-sec-key-management-version
+  - eric-data-distributed-coordinator-ed-version
+  - eric-sec-sip-tls-version
+  - helm-chart-file-name-baseline
+  - loss-of-service
+  - nodeport-url
+
+properties:
+  - helm-drop-artifactory: ${common.helm-chart-repo-server}/proj-eea-drop-helm/${common.helm-chart-name}
+  - helm-release-artifactory: ${common.helm-chart-repo-server}//proj-eea-released-helm/${common.helm-chart-name}
+  - mocks-config-yaml: ci/config/mocks-config.yaml
+  - baseline-version: "2.12.0+12"
+  - scale-out: 5
+  - scale-in: 1
+  - report-name: k8s-test-report
+  - report-generation-output: build/doc-archive/k8s-test-report/
+  - k6-get-api-test-path: load-test/report/k6-get-api-test-report.json
+  - helm-release-name: "application-under-test"
+  - helm-release-name-with-suffix: "application-under-test-br"
+  - gas-http-client-cert-name: eric-adp-gui-aggregator-service-http-client-cert
+  - test-ci-chart-values-yaml: ci/config/minimal-ci-chart-values.yaml
+  - new-port: 13000
+  - target-port: adp-ui-port
+
+rules:
+  init:
+    - rule: common.init-robustness
+
+  #this installs the latest drop version by default
+  install-gas-and-dependencies:
+    - rule: download-gas-drop-chart
+    - rule: download-gas-baseline-chart
+    - rule: common.generate-dummy-service-all
+    - rule: install-ci-and-mocks-test
+    - rule: common.set-chart-values-test
+    - rule: set-drop-version-to-version
+    - rule: install-gas-drop
+    - rule: enable-mocks
+    - rule: wait-for-domain-apps-to-be-discovered
+
+  install-gas-drop:
+    - rule: common.install-gas
+    - rule: common.save-external-gas-address
+    - rule: common.upgrade-service-with-nodeport
+
+  uninstall-gas:
+    - rule: functions.uninstall-gas
+      properties:
+        - deployment-to-uninstall: ${helm-release-name}
+
+  uninstall-gas-with-suffix:
+    - rule: functions.uninstall-gas
+      properties:
+        - deployment-to-uninstall: ${helm-release-name-with-suffix}
+
+  restart-rollout-with-wait-and-duration-save:
+    - task: save-rollout-restart-start-time
+      cmd:
+        - date "+%s" > .bob/var.rollout-restart-start-time
+    - task: system-rollout-restart
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd: >
+        /bin/bash -c '
+        kubectl rollout restart deployment ${common.helm-chart-name} -n ${var.common.k8s-namespace};
+        kubectl rollout status --watch --timeout=1800s -n ${var.common.k8s-namespace} deployment ${common.helm-chart-name} || exit 1;
+        '
+    - task: save-rollout-restart-finish-time
+      cmd:
+        - date "+%s" > .bob/var.rollout-restart-finish-time
+
+  delete-one-pod-and-wait:
+    - task: pod-delete
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd: >
+        /bin/bash -c '
+        kubectl delete pod $(kubectl get pods -n ${var.common.k8s-namespace} -l app.kubernetes.io/name=${common.helm-chart-name} -o jsonpath="{.items[0].metadata.name}") -n ${var.common.k8s-namespace};
+        kubectl rollout status --watch --timeout=1800s -n ${var.common.k8s-namespace} deployment ${common.helm-chart-name} || exit 1;
+        '
+
+  delete-all-pods-and-wait:
+    - task: pods-delete
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd: >
+        /bin/bash -c '
+        kubectl delete pod -l app.kubernetes.io/name=${common.helm-chart-name} -n ${var.common.k8s-namespace};
+        kubectl rollout status --watch --timeout=1800s -n ${var.common.k8s-namespace} deployment ${common.helm-chart-name} || exit 1;
+        '
+
+  install-gas-baseline:
+    - task: install-gas-baseline
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd:
+        - test.py --helm-v3 --kubernetes-admin-conf=${env.common.KUBECONFIG}
+          --helm-user=${env.common.ARM_USER_SELI}
+          --arm-api-token=${env.common.ARM_TOKEN_SELI}
+          --kubernetes-namespace=${var.common.k8s-namespace}
+          --chart-archive=.bob/${common.helm-chart-name}-internal-baseline/${var.helm-chart-file-name-baseline}
+          --helm-repo=${release.helm-chart-released-repo}
+          --docker-server=${common.image-registry}
+          --docker-username=${env.common.ARM_USER_SELI}
+          --docker-password=${env.common.ARM_TOKEN_SELI}
+          --secret-name=${common.image-pullsecret}
+          --helm_variables="${var.common.additional-chart-values}"
+          --helm_value_file="${var.common.additional-chart-values-file}"
+          --baseline_chart_version=${baseline-version}
+          --helm-timeout=600
+          --skip-cleanup
+          --ignore-cleanup
+
+  upgrade-baseline-with-nodeport:
+    - task: set-hostname
+      cmd: echo -n ",uiconfig.hostname=${var.common.worker-node}.seli.gic.ericsson.se:${var.common.gas-nodeport}" >> .bob/var.additional-chart-values
+    - task: upgrade-nodeport
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd:
+        - test.py --helm-v3 --kubernetes-admin-conf=${env.common.KUBECONFIG}
+          --helm-user=${env.common.ARM_USER_SELI}
+          --arm-api-token=${env.common.ARM_TOKEN_SELI}
+          --kubernetes-namespace=${var.common.k8s-namespace}
+          --chart-archive=.bob/${common.helm-chart-name}-internal-baseline/${var.helm-chart-file-name-baseline}
+          --helm-repo=${release.helm-chart-released-repo}
+          --docker-server=${common.image-registry}
+          --docker-username=${env.common.ARM_USER_SELI}
+          --docker-password=${env.common.ARM_TOKEN_SELI}
+          --secret-name=${common.image-pullsecret}
+          --helm_variables="${var.common.additional-chart-values}"
+          --helm_value_file="${var.common.additional-chart-values-file}"
+          --baseline_chart_version=${baseline-version}
+          --helm-release-name=${helm-release-name-with-suffix}
+          --helm-timeout=600
+          --skip-cleanup
+          --ignore-cleanup
+          --only-upgrade
+
+  upgrade-from-baseline-to-drop:
+    - task: upgrade-from-baseline-to-drop
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd:
+        - test.py --helm-v3 --kubernetes-admin-conf=${env.common.KUBECONFIG}
+          --helm-user=${env.common.ARM_USER_SELI}
+          --arm-api-token=${env.common.ARM_TOKEN_SELI}
+          --kubernetes-namespace=${var.common.k8s-namespace}
+          --chart-archive=.bob/${common.helm-chart-name}-internal/${var.common.helm-chart-file-name}
+          --helm-repo=${common.helm-chart-drop-repo}
+          --docker-server=${common.image-registry}
+          --docker-username=${env.common.ARM_USER_SELI}
+          --docker-password=${env.common.ARM_TOKEN_SELI}
+          --secret-name=${common.image-pullsecret}
+          --helm_variables="${var.common.additional-chart-values}"
+          --helm_value_file="${var.common.additional-chart-values-file}"
+          --baseline_chart_version=${baseline-version}
+          --helm-release-name=${helm-release-name-with-suffix}
+          --helm-timeout=600
+          --skip-cleanup
+          --ignore-cleanup
+          --only-upgrade
+
+  upgrade-latest-plus-with-nodeport:
+    - task: set-hostname
+      cmd: echo -n ",uiconfig.hostname=${var.common.worker-node}.seli.gic.ericsson.se:${var.common.gas-nodeport}" >> .bob/var.additional-chart-values
+    - task: upgrade-latest-plus-with-nodeport
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd:
+        - test.py --helm-v3 --kubernetes-admin-conf=${env.common.KUBECONFIG}
+          --helm-user=${env.common.ARM_USER_SELI}
+          --arm-api-token=${env.common.ARM_TOKEN_SELI}
+          --kubernetes-namespace=${var.common.k8s-namespace}
+          --chart-archive=.bob/${common.helm-chart-name}-internal/${var.common.helm-chart-file-name}
+          --helm-repo=${release.helm-chart-released-repo}
+          --docker-server=${common.image-registry}
+          --docker-username=${env.common.ARM_USER_SELI}
+          --docker-password=${env.common.ARM_TOKEN_SELI}
+          --secret-name=${common.image-pullsecret}
+          --helm_variables="${var.common.additional-chart-values}"
+          --helm_value_file="${var.common.additional-chart-values-file}"
+          --baseline_chart_version="$(<.bob/var.gas-latest-plus-version)"
+          --helm-release-name=${helm-release-name-with-suffix}
+          --helm-timeout=600
+          --skip-cleanup
+          --ignore-cleanup
+          --only-upgrade
+
+  upgrade-from-baseline-to-drop-and-measure-lead-time:
+    - task: save-baseline-upgrade-start-time
+      cmd:
+        - date "+%s" > .bob/var.baseline-upgrade-start-time
+    - rule: upgrade-from-baseline-to-drop
+    - task: save-baseline-upgrade-finish-time
+      cmd:
+        - date "+%s" > .bob/var.baseline-upgrade-finish-time
+
+  upgrade-from-latest-plus-to-drop-and-measure-lead-time:
+    - task: get-latest-plus-version
+      docker-image: common.k8-test
+      cmd: bash -c '
+        curl -L -H "X-JFrog-Art-Api:${env.common.ARM_TOKEN_SELI}" ${helm-release-artifactory} -o .bob/var.gas-all-releases;
+        sed -i "s/[a-zA-Z]\+//g;s/< =*.*-----//g;s/<.*$//g;s/.*>.*$//g;s/[.][0-9]*$//g;s/[.] *$//g;/^$/d" .bob/var.gas-all-releases;
+        sort -V -u -b -r -o .bob/var.gas-all-releases .bob/var.gas-all-releases;
+        cut -d" " -f1 .bob/var.gas-all-releases | sed -n 1p > .bob/var.gas-latest-plus-version;'
+    - task: save-lplus-upgrade-start-time
+      cmd:
+        - date "+%s" > .bob/var.lplus-upgrade-start-time
+    - task: install-latest-plus-and-upgrade-to-drop
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd:
+        - test.py --helm-v3 --kubernetes-admin-conf=${env.common.KUBECONFIG}
+          --helm-user=${env.common.ARM_USER_SELI}
+          --arm-api-token=${env.common.ARM_TOKEN_SELI}
+          --kubernetes-namespace=${var.common.k8s-namespace}
+          --chart-archive=.bob/${common.helm-chart-name}-internal/${var.common.helm-chart-file-name}
+          --helm-repo=${release.helm-chart-released-repo}
+          --docker-server=${common.image-registry}
+          --docker-username=${env.common.ARM_USER_SELI}
+          --docker-password=${env.common.ARM_TOKEN_SELI}
+          --secret-name=${common.image-pullsecret}
+          --helm_variables="${var.common.additional-chart-values}"
+          --helm_value_file="${var.common.additional-chart-values-file}"
+          --baseline_chart_version="$(<.bob/var.gas-latest-plus-version)"
+          --helm-timeout=600
+          --skip-cleanup
+          --ignore-cleanup
+    - rule: common.save-external-gas-address
+    - rule: upgrade-latest-plus-with-nodeport
+    - task: save-lplus-upgrade-finish-time
+      cmd:
+        - date "+%s" > .bob/var.lplus-upgrade-finish-time
+
+  rollback-to-baseline:
+    - task: save-rollback-start-time
+      cmd:
+        - date "+%s" > .bob/var.rollback-start-time
+    - task: rollback
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd:
+        - helm rollback ${helm-release-name-with-suffix} --namespace=${var.common.k8s-namespace}
+    - task: save-rollback-finish-time
+      cmd:
+        - date "+%s" > .bob/var.rollback-finish-time
+
+  scale-out:
+    - task: save-scale-out-start-time
+      cmd:
+        - date "+%s" > .bob/var.scale-out-start-time
+    - task: system-scale-out
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd: >
+        /bin/bash -c '
+        kubectl scale deployment ${common.helm-chart-name} -n ${var.common.k8s-namespace} --replicas=${scale-out};
+        kubectl rollout status --watch --timeout=1800s -n ${var.common.k8s-namespace} deployment ${common.helm-chart-name} || exit 1;
+        '
+    - task: save-scale-out-finish-time
+      cmd:
+        - date "+%s" > .bob/var.scale-out-finish-time
+
+  scale-in:
+    - task: save-scale-in-start-time
+      cmd:
+        - date "+%s" > .bob/var.scale-in-start-time
+    - task: system-scale-in
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd: >
+        /bin/bash -c '
+        kubectl scale deployment ${common.helm-chart-name} -n ${var.common.k8s-namespace} --replicas=${scale-in};
+        kubectl rollout status --watch --timeout=1800s -n ${var.common.k8s-namespace} deployment ${common.helm-chart-name} || exit 1;
+        '
+    - task: save-scale-in-finish-time
+      cmd:
+        - date "+%s" > .bob/var.scale-in-finish-time
+
+  k8s-test-nodeport:
+    - rule: common.generate-dummy-service-all
+    - rule: install-ci-and-mocks-test
+    - rule: common.set-chart-values-test
+    - rule: common.install-gas
+    - rule: common.save-external-gas-address
+    - rule: common.upgrade-service-with-nodeport
+    - rule: enable-mocks
+    - rule: wait-for-domain-apps-to-be-discovered
+    - task: system-scale-down
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd: >
+        /bin/bash -c '
+        kubectl scale deployment ${common.helm-chart-name} -n ${var.common.k8s-namespace} --replicas=${scale-in};
+        kubectl rollout status --watch --timeout=1800s -n ${var.common.k8s-namespace} deployment ${common.helm-chart-name} || exit 1;
+        '
+    - rule: integration-tests-in-cluster-backend-nodeport
+    - rule: integration-tests-in-cluster-frontend-nodeport
+    - rule: common.namespace-cleanup
+
+  install-ci-and-mocks-test:
+    - rule: common.install-ci-simple
+      properties:
+        - ci-chart-values-file: ${test-ci-chart-values-yaml}
+
+  enable-mocks:
+    - task: upgrade
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd: "helm upgrade adp-gas-dependencies .bob/ci-0.0.0.tgz \
+        --namespace ${var.common.k8s-namespace} \
+        --wait \
+        --timeout 10m0s \
+        --reuse-values \
+        --values ${common.mocks-enable-yaml} \
+        --set demo-ui-service-ecm.uid=${env.common.ARM_USER_SELI} \
+        --set demo-ui-service-eea.uid=${env.common.ARM_USER_SELI} \
+        --set demo-ui-service-enm.uid=${env.common.ARM_USER_SELI}"
+
+  wait-for-domain-apps-to-be-discovered:
+    - task: wait-for-gas-http-client-cert
+      docker-image: common.k8-test
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd: >
+        bash -c '
+          SECONDS=0
+          while (( $SECONDS < 300 )) ; do
+            secret=$(kubectl get secret ${gas-http-client-cert-name} -n ${var.common.k8s-namespace} -o json)
+            if [[ $secret ]]; then
+              mkdir ci/scripts/secrets
+              $(kubectl get secret ${gas-http-client-cert-name} -n ${var.common.k8s-namespace} -o json > ci/scripts/secrets/client-secret.json)
+              echo "GAS HTTP Client certificate was successfully fetched!"
+              break;
+            else
+              echo "GAS HTTP Client certificate is not available yet"
+              sleep 30
+            fi
+          done
+          wait
+          '
+    - task: wait-for-domain-apps-to-be-discovered
+      docker-image: common.nodejs-builder
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd: >
+        node ci/scripts/service-checker.js ${var.common.k8s-namespace} ${var.common.ingress-protocol} ${functions.helm-chart-name} \
+        demo-ui-service-ecm \
+        demo-ui-service-eea \
+        demo-ui-service-enm \
+        demo-ui-service-esma \
+        demo-ui-service-esmb \
+        demo-ui-service-esmc \
+        demo-ui-service-eui1 \
+        demo-ui-service-eui2 \
+        demo-ui-service-action-consumer \
+        demo-ui-service-action-provider \
+        demo-ui-service-3pp
+
+  integration-tests-in-cluster-backend-nodeport:
+    - task: start-kubernetes-backend-integration-tests
+      docker-image: common.nodejs-builder
+      docker-flags:
+        - "--env WORKER_NODE=${var.common.worker-node}"
+        - "--env NODEPORT=${var.common.gas-nodeport}"
+      cmd:
+        - npm run test:backend:integration
+
+  integration-tests-in-cluster-frontend-nodeport:
+    - task: start-kubernetes-frontend-integration-tests
+      cmd: bash -c '
+        export USER_ID=$(id -u);
+        export GROUP_ID=$(id -g);
+        export WORKER_NODE=${var.common.worker-node};
+        export NODEPORT=${var.common.gas-nodeport};
+        EXIT_CODE=1;
+        TRIES=3;
+        while [[ $EXIT_CODE -ne 0 ]] && [[ $EXIT_CODE -ne 2 ]] && [[ $TRIES -gt 0 ]];
+        do
+        echo "Running Selenium test. $TRIES attempts left";
+        docker-compose --project-name frontend_e2e_${env.common.BUILD_TAG} --file integration-tests/docker/selenium-docker-compose.yml up --abort-on-container-exit --exit-code-from tester;
+        EXIT_CODE=$$?;
+        ((TRIES--));
+        docker-compose --project-name frontend_e2e_${env.common.BUILD_TAG} --file integration-tests/docker/selenium-docker-compose.yml down -v;
+        done;
+        exit $EXIT_CODE'
+
+  integration-tests-in-cluster-frontend-cache-test-nodeport:
+    - task: start-kubernetes-frontend-cache-integration-tests
+      cmd: bash -c '
+        export USER_ID=$(id -u);
+        export GROUP_ID=$(id -g);
+        export WORKER_NODE=${var.common.worker-node};
+        export NODEPORT=${var.common.gas-nodeport};
+        EXIT_CODE=1;
+        TRIES=3;
+        while [[ $EXIT_CODE -ne 0 ]] && [[ $EXIT_CODE -ne 2 ]] && [[ $TRIES -gt 0 ]];
+        do
+        echo "Running Selenium test. $TRIES attempts left";
+        docker-compose --project-name cache_${env.common.BUILD_TAG} --file integration-tests/docker/selenium-docker-compose-cache.yml up --abort-on-container-exit --exit-code-from tester;
+        EXIT_CODE=$$?;
+        ((TRIES--));
+        docker-compose --project-name cache_${env.common.BUILD_TAG} --file integration-tests/docker/selenium-docker-compose-cache.yml down -v;
+        done;
+        exit $EXIT_CODE'
+
+  manage-profile-volume-for-cache-tests:
+    - task: create-profile-volume
+      cmd: docker volume create profile_${env.common.BUILD_TAG}
+    - task: remove-profile-volume
+      cmd: docker volume rm profile_${env.common.BUILD_TAG}
+
+  download-gas-drop-chart:
+    - task: prepare-drop-image-folder
+      docker-image: common.adp-release-auto
+      cmd: mkdir -p .bob/${common.helm-chart-name}-internal
+    - task: pull-latest-gas-drop-chart
+      docker-image: common.k8-test
+      cmd: bash -c '
+        if [[ "${env.GAS_VERSION}" == *"+"* ]]; then
+        helm pull ${common.helm-chart-name}
+        --version "${env.GAS_VERSION}"
+        --repo ${release.helm-chart-released-repo}
+        --username ${env.common.ARM_USER_SELI}
+        --password ${env.common.ARM_TOKEN_SELI}
+        --destination .bob/${common.helm-chart-name}-internal;
+        else
+        helm pull ${common.helm-chart-name}
+        --version "${env.GAS_VERSION}"
+        --repo ${common.helm-chart-drop-repo}
+        --username ${env.common.ARM_USER_SELI}
+        --password ${env.common.ARM_TOKEN_SELI}
+        --destination .bob/${common.helm-chart-name}-internal;
+        fi'
+    - task: update-helm-chart-file-name
+      cmd: ls .bob/${common.helm-chart-name}-internal > .bob/var.helm-chart-file-name
+
+  download-gas-baseline-chart:
+    - task: prepare-drop-image-folder
+      docker-image: common.adp-release-auto
+      cmd: mkdir -p .bob/${common.helm-chart-name}-internal-baseline
+    - task: pull-latest-gas-drop-chart
+      docker-image: common.k8-test
+      cmd: bash -c '
+        helm pull ${common.helm-chart-name}
+        --version "${baseline-version}"
+        --repo ${release.helm-chart-released-repo}
+        --username ${env.common.ARM_USER_SELI}
+        --password ${env.common.ARM_TOKEN_SELI}
+        --destination .bob/${common.helm-chart-name}-internal-baseline'
+    - task: update-helm-chart-file-name-baseline
+      cmd: ls .bob/${common.helm-chart-name}-internal-baseline > .bob/var.helm-chart-file-name-baseline
+
+  find-out-the-version:
+    - task: find-out-the-version
+      cmd: ls .bob/${common.helm-chart-name}-internal | grep -oP '(\d+\.?){3}-\d+' > .bob/var.version
+
+  set-drop-version-to-version:
+    - task: set-drop-version-to-version
+      cmd: /bin/bash -c '
+        if [ "${env.GAS_VERSION}" = ">0.0.0-0" ]; then
+        echo -n $(ls .bob/${common.helm-chart-name}-internal) | grep -oP "(\d+\.?){3}-\d+" | tr -d "\n" > .bob/var.version;
+        else
+        echo -n "${env.GAS_VERSION}" | sed "s/+/-/;s/>/~/" > .bob/var.version;
+        fi'
+
+  create-test-report:
+    - rule: common.get-versions
+    - task: pull-image
+      cmd: docker pull ${var.common.image-full-name-internal}:${var.version}
+    - task: save-image-size
+      cmd: docker image inspect ${var.common.image-full-name-internal}:${var.version} -f '{{.Size}}' | numfmt --to=si > .bob/var.docker-image-size
+    - task: common.functions.report-generation:fill-ejs-template
+      properties:
+        - report-template-file: docs/release/content/k8s-test-report-template.ejs.md
+        - template-variables: gasVersion=${var.version} gasBaselineVersion=${baseline-version} kubernetesVersion=${var.common.kubernetes-version} helmVersion=${var.common.helm-version} dockerImageName=${var.common.image-full-name-internal} dockerImageTag=${var.version} dockerImageSize=${var.common.docker-image-size} installStartTime=${var.common.install-start-time} installFinishTime=${var.common.install-finish-time} rolloutRestartStartTime=${var.rollout-restart-start-time} rolloutRestartFinishTime=${var.rollout-restart-finish-time} baselineUpgradeStartTime=${var.baseline-upgrade-start-time} baselineUpgradeFinishTime=${var.baseline-upgrade-finish-time} upgradeLatestPlusStartTime=${var.lplus-upgrade-start-time} upgradeLatestPlusFinishTime=${var.lplus-upgrade-finish-time} rollbackStartTime=${var.rollback-start-time} rollbackFinishTime=${var.rollback-finish-time} scaleOutStartTime=${var.scale-out-start-time} scaleOutFinishTime=${var.scale-out-finish-time} scaleInStartTime=${var.scale-in-start-time} scaleInFinishTime=${var.scale-in-finish-time} lossOfService=${var.loss-of-service}
+        - report-output-path: ${report-generation-output}
+        - report-name: ${report-name}
+    - task: common.functions.report-generation:echo-messages
+      properties:
+        - report-output-path: ${report-generation-output}
+        - report-name: ${report-name}
+    - task: common.functions.report-generation:convert-to-pdf
+      properties:
+        - report-output-path: ${report-generation-output}
+    - rule: find-out-the-version
+    - task: archive-reports
+      docker-image: common.adp-release-auto
+      cmd:
+        - cp ./build/doc-archive/k8s-test-report/pdf/k8s-test-report/k8s-test-report.pdf ./build/doc-archive/k8s-test-report/final
+        - >
+          bash -c '
+          cd build/doc-archive/k8s-test-report/final;
+          zip -q -r ./../../../k8s-test-report-${var.common.version}.zip .;
+          zip -q -r ./../../../k8s-test-report.zip .;
+          '
+
+  publish-test-report:
+    - rule: find-out-the-version
+    - task: common.functions.release:upload-file # upload-zip-documents-to-artifactory
+      properties:
+        - file-to-upload: ./build/k8s-test-report-${var.common.version}.zip
+        - repo-for-upload: ${common.helm-chart-repo-server}/${common.doc-arm-dev-path}/drop-documents/
+        - upload-api-token: ${env.common.ARM_TOKEN_SELI}
+    - task: eridoc-upload
+      docker-image: common.adp-release-auto
+      docker-flags:
+        - --env ERIDOC_USERNAME="${env.common.ERIDOC_USERNAME}"
+        - --env ERIDOC_PASSWORD="${env.common.ERIDOC_PASSWORD}"
+      cmd:
+        - eridoc upload --config ./docs/release/config/eridoc/release-k8s-report.yaml --debug --no-validate-certificates --set semver=${var.common.semver}
+
+  k6-get-api-test:
+    - task: simple-k6-get-api-test
+      docker-image: k6Image
+      docker-flags:
+        - "--env GAS_URL=http://${var.common.worker-node}.seli.gic.ericsson.se:${var.common.gas-nodeport}"
+        - "--user=0"
+        - "--volume ${env.common.PWD}/load-test/report:/report"
+      cmd: run --out json=.bob/test_get_api_results.json ./load-test/k6tests/k6-get-api-test.js
+    - task: parse-simple-getapi-test
+      docker-image: common.ci-toolbox
+      cmd:
+        - cat ${k6-get-api-test-path} | jq -r '. | .metrics.checks.values.fails' > .bob/var.loss-of-service
+
+  change-port-number-check:
+    - rule: common.service-upgrade-test
+      properties:
+        - additional-chart-value-params: "${var.common.additional-chart-values},service.port=${new-port}"
+    - task: check-port-upgrade
+      docker-image: common.nodejs-builder
+      docker-flags:
+        - "--network=host"
+        - "--env KUBECONFIG=${env.common.KUBECONFIG}"
+        - "--volume ${env.common.KUBECONFIG}:${env.common.KUBECONFIG}:ro"
+        - "--volume ${env.common.PWD}:${env.common.PWD}"
+      cmd: >
+        node ci/scripts/port-checker.js ${var.common.k8s-namespace} ${functions.helm-chart-name} ${target-port} ${new-port}

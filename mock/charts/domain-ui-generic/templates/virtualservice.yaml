@@ -1,0 +1,23 @@
+{{- if eq (include "domain-ui-generic.serviceMeshEnabled" .) "true" }}
+{{- $path := include "domain-app.ingressPath" . -}}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "domain-ui-generic.name" . }}-virtual-service
+spec:
+  hosts:
+  - {{ .Values.serviceMesh.ingress.hostname | quote }}
+  gateways:
+  - {{ include "domain-ui-generic.name" . }}-ingress-traffic-gateway
+  http:
+  - match:
+    - uri:
+        prefix: {{ $path }}/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        port:
+          number: {{ .Values.service.port }}
+        host: {{ include "domain-ui-generic.name" . }}-http
+{{- end }}

@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "domain-ui-generic.name" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      dui-generic: {{ include "domain-ui-generic.name" . }}
+  template:
+    metadata:
+      labels:
+        dui-generic: {{ include "domain-ui-generic.name" . }}
+      {{- if eq (include "domain-ui-generic.serviceMeshEnabled" .) "true" }}
+        sidecar.istio.io/inject: "true"
+      {{- else }}
+        sidecar.istio.io/inject: "false"
+      {{- end }}
+        {{- if  .Values.dst.enabled }}
+          {{- with .Values.dst.labels }}
+            {{- toYaml . | nindent 8 -}}
+          {{- end }}
+        {{- end }}
+    spec:
+      containers:
+        - name: main
+          image: {{ template "domain-app.registryUrl" . }}/{{ .Values.imageCredentials.repoPath }}/{{ .Values.images.main.name }}:{{ .Values.images.main.tag }}
+          env:
+            - name: MOCK_ID
+              value: {{ include "domain-ui-generic.name" . }}
+            - name: TLS
+              value: "{{ .Values.global.security.tls.enabled }}"
+            - name: PUBLIC_PATH
+              value: {{ .Values.publicPath}}
+            - name: CONTEXT_ROOT
+              value: {{ .Values.contextRoot }}
+            - name: K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: K8S_POD
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: K8S_CONTAINER
+              value: {{ .Chart.Name }}
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['dui-generic']
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ template "domain-ui-generic.otelExporterOtlpEndpoint" . }}
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: {{ .Values.dst.sampler.samplingRate | quote }}
+            - name: OTEL_SPAN_ATTRIBUTE_VALUE_LENGTH_LIMIT
+              value:  {{ .Values.dst.span.attributeValueLengthLimit | quote }}
+            - name: OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT
+              value: {{ .Values.dst.span.attributePerSpanCountLimit | quote }}
+            - name: OTEL_SPAN_ATTRIBUTE_PER_EVENT_COUNT_LIMIT
+              value:  {{ .Values.dst.span.attributePerEventCountLimit | quote }}
+            - name: OTEL_SPAN_ATTRIBUTE_PER_LINK_COUNT_LIMIT
+              value:  {{ .Values.dst.span.attributePerLinkCountLimit | quote }}
+            - name: OTEL_SPAN_EVENT_COUNT_LIMIT
+              value: {{ .Values.dst.span.eventCountLimit | quote }}
+            - name: OTEL_SPAN_LINK_COUNT_LIMIT
+              value:  {{ .Values.dst.span.linkCountLimit | quote }}
+            - name: PROPAGATOR
+              value: {{ .Values.dst.propagator | quote }}
+            - name: OTEL_BSP_EXPORT_TIMEOUT
+              value: {{ .Values.dst.processor.exportTimeoutMillis | quote }}
+            - name: OTEL_BSP_MAX_EXPORT_BATCH_SIZE
+              value: {{ .Values.dst.processor.maxExportBatchSize | quote }}
+            - name: OTEL_BSP_MAX_QUEUE_SIZE
+              value: {{ .Values.dst.processor.maxQueueSize | quote }}
+            - name: OTEL_BSP_SCHEDULE_DELAY
+              value: {{ .Values.dst.processor.scheduledDelayMillis | quote }}
+        {{- if .Values.resources }}
+          resources:
+            {{- toYaml .Values.resources.main | nindent 12 }}
+        {{- end }}
+          volumeMounts:
+        {{- if eq (include "domain-ui-generic.name" . ) "demo-ui-service-configuration-checker" }}
+          - name: ui-config-volume
+            mountPath: /runtime/server/deployment-config
+        {{- end }}
+        {{- if .Values.global.security.tls.enabled }}
+          - name: root-ca-volume
+            mountPath: /run/secrets/root
+            readOnly: true
+          - name: gas-ca-volume
+            mountPath: /run/secrets/ca
+          - name: internal-cert
+            mountPath: /run/secrets/servercert
+          {{- if or (and .Values.ingress.enabled .Values.ingress.useContour) .Values.ingress.adpIccrCaSecret }}
+          - name: ingress-ca-volume
+            mountPath: /run/secrets/ingress
+            readOnly: true
+          {{- end }}
+        {{- end }}
+      volumes:
+      {{- if eq (include "domain-ui-generic.name" . ) "demo-ui-service-configuration-checker" }}
+        - name: ui-config-volume
+          configMap:
+            name: {{ include "domain-ui-generic.name" . }}-ui-configmap
+      {{- end }}
+      {{- if .Values.global.security.tls.enabled }}
+        - name: root-ca-volume
+          secret:
+            secretName: {{ .Values.global.security.tls.trustedInternalRootCa.secret }}
+        - name: gas-ca-volume
+          secret:
+            secretName: eric-adp-gui-aggregator-service-internal-ui-client-ca
+        - name: internal-cert
+          secret:
+            secretName: {{ include "domain-ui-generic.name" . }}-server-cert
+        {{- if or (and .Values.ingress.enabled .Values.ingress.useContour) .Values.ingress.adpIccrCaSecret }}
+        - name: ingress-ca-volume
+          projected:
+            sources:
+            - secret:
+              {{- if .Values.ingress.adpIccrCaSecret }}
+                name: {{ .Values.ingress.adpIccrCaSecret }}
+              {{- else }}
+                name: {{ .Values.ingress.adpIccrServiceName }}-client-ca
+              {{- end }}
+                optional: true
+        {{- end }}
+      {{- end }}
+      {{- if include "domain-app.pullSecrets" . }}
+      imagePullSecrets:
+        - name: {{ template "domain-app.pullSecrets" . }}
+      {{- end}}

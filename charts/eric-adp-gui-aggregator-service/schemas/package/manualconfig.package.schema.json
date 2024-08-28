@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "app": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/app",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "group": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/group",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "actions": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/actions",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "uiActionMeta": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/uiAction/meta",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "uiActionFixparameters": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/uiAction/fixparameters",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "service": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/service",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "components": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/components",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "overrides": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/overrides",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "groupMapping": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/groupMapping",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    },
+    "manualconfig": {
+      "$id": "urn:adp:helm:schemas:v1:gas-manualconfig-conditional:v1/manualconfig",
+      "$ref": "urn:adp:helm:schemas:v1:gas-conditionalFragments:v1/emptyFragment"
+    }
+  }
+}

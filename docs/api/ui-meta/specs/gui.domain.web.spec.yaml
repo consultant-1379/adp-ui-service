@@ -1,0 +1,145 @@
+openapi: 3.0.1
+info:
+  title: UI Metadata File Descriptor (IF.GUI.DOMAIN.WEB)
+  description: |
+    # UI Meta-Data Specification (JSON Schema)
+
+    This document describes the format of UI Metadata file descriptor and how it shall be exposed, as identified in the ADP GUI FA.
+    Every service exposing UIs must implement this interface, that is, expose (by HTTP) the `UI Meta-Data` file to be displayed within the OSS Portal.
+
+    ## Terms
+
+    - **Client Container**: An SPA (Single Page Application) implementing the App Shell pattern e.g. E-UI SDK Container.
+    - **UI App**: A full screen user interface exposed by a Microservice that can execute in the Client Container e.g. E-UI SDK App.
+    - **External UI App**: Any UIs that have a separate web page (outside the Client Container) or other alternative renderer e.g. Citrix.
+    - **UI Component**: A reusable, embeddable UI Web Component exposed by a Microservice e.g. E-UI SDK Shareable Components.
+    - **GUI Domain Web Interface**: The interface provided by micro front-ends to access UI apps and components.
+
+  contact:
+    name: Smart Insights Team
+    email: PDLSCRUMNW@pdl.internal.ericsson.com
+  version: "1.1.0"
+  x-api-id: 01c09908-e4af-463f-b35b-5f117f735575
+  x-audience: company-internal
+servers:
+  - url: /
+    description: Base
+tags:
+  - name: IF.GUI.DOMAIN.WEB
+    x-displayName: UI Metadata File Descriptor
+paths:
+  /config.json:
+    get:
+      operationId: getConfigFileContent
+      summary: Fetch configuration from config.json file
+      description: |
+        File descriptor for UI micro front-ends.
+        This file includes meta information of all apps, shared components and groups supported by UI micro front-ends.
+
+        This file should be named as _config.json_ and be accessible from the service root context path.
+      tags:
+        - IF.GUI.DOMAIN.WEB
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/ui.config.yaml"
+              examples:
+                config.json:
+                  $ref: "#/components/examples/configJson"
+        "400":
+          description: Bad Request - Path is incorrect
+
+components:
+  examples:
+    configJson:
+      value:
+        version: "1.1.0"
+        apps:
+          - name: "adp-oam-ui-tools"
+            displayName: "Configuration Tools"
+            descriptionLong: "ADP.OAM.UI.TOOLS.DESC.LONG"
+            descriptionShort: "ADP.OAM.UI.TOOLS.DESC.SHORT"
+            module: "@adp-oam/ui-tools"
+            color: "blue"
+            acronym: "AUT"
+            version: "0.1.0"
+            type: "euisdk"
+            route: "oam-tools"
+            priority: 1
+            childNames: ["adp-oam-ui-tools-scheduler"]
+            groupNames: ["adp-tools"]
+            tags: ["tools"]
+            specification: "./adp-oam-ui-tools/app.config.json"
+          - name: "adp-oam-ui-tools-scheduler"
+            displayName: "Scheduler"
+            descriptionLong: "ADP.OAM.UI.TOOLS.SCH.DESC.LONG"
+            descriptionShort: "ADP.OAM.UI.TOOLS.SCH.DESC.SHORT"
+            module: "@adp-oam/ui-tools-scheduler"
+            color: "#D2691E"
+            acronym: "SCH"
+            version: "0.1.0"
+            type: "euisdk"
+            route: "oam-tools/scheduler"
+            priority: 1
+            groupNames: ["adp-tools", "oam"]
+            tags: ["tools"]
+            specification: "./adp-oam-ui-tools-scheduler/app.config.json"
+          - name: "adp-market-place"
+            displayName: "ADP Market Place"
+            module: "@adp/marketplace"
+            color: "#008B8B"
+            acronym: "AMP"
+            version: "1.0.0"
+            type: "external"
+            url: "https://adp.ericsson.se/marketplace"
+            priority: 10
+            groupNames: ["adp-tools"]
+            tags: ["adp", "marketplace"]
+        groups:
+          - name: "adp-tools"
+            displayName: "Tools"
+            descriptionLong: "Tools Application"
+            descriptionShort: "Utlity applications helps to perform common activities."
+            color: "green"
+            acronym: "TL"
+            type: "domain"
+            priority: 10
+            tags: ["tools"]
+            version: "1.0.0"
+          - name: "oam"
+            displayName: "OAM"
+            descriptionShort: "Operation and Maintenance Application"
+            color: "#8B008B"
+            type: "domain"
+            priority: 20
+            version: "1.0.0"
+        components:
+          - name: "adp-latest-entities"
+            version: "0.1.0"
+            displayName: "Latest Entities"
+            descriptionLong: "Overview of all the entities created during last 2 weeks."
+            module: "@adp/latest-entities"
+            type: "oden"
+            priority: 10
+            specification: "./config/component.config.json"
+        actions:
+          actions:
+            - id: eric-eo-usermgmt-ui.view-user-profile-action
+              displayName: "View User Profile"
+              version: "1.0.0"
+              module: "view-user-action"
+            - id: eric-eea-call-browser-service.list-calls-action
+              displayName: "View Subscriber's Call List"
+              version: "1.0.0"
+              module: "view-subscriber-action"
+              parameters":
+                - name: "url"
+                  type: "url_template"
+                  value: "https://eea.internal.ericsson.local/callbrowser/query?subscriberimsi={imsi}&startime={timeInterval.start_time}&endtime={timeInterval.end_time}"
+            - id: "eric-eea-call-browser-service.compare-calls-action"
+              displayName": "Compare Multiple Calls"
+              version: "1.0.0"
+              module: "compare-calls-action"

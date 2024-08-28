@@ -1,0 +1,136 @@
+pipeline {
+  agent {
+    node('presentation')
+  }
+  options {
+    ansiColor('xterm')
+    timeout(time: 1, unit: 'HOURS')
+    buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '30'))
+  }
+  parameters {
+    string(name: 'GAS_VERSION', description: 'The drop which is to be measured')
+    booleanParam(name: 'MAIL_ON_FAILURE', defaultValue: true, description: 'Send mail if the job fails')
+    booleanParam(name: 'PUBLISH_PERFORMANCE_REPORT', defaultValue: false, description: 'Publish the created performance report')
+  }
+  stages {
+    stage('Cleanup') {
+      steps {
+        sh 'bob clean'
+      }
+    }
+    stage('Init') {
+      stages {
+        stage('Initializing CI tests') {
+          steps {
+            lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+              withCredentials([
+                usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+                usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+                file(credentialsId: env.system, variable: 'KUBECONFIG')
+              ]) {
+                ansiColor('xterm') {
+                  sh 'bob init-ci-test'
+                }
+              }
+            }
+          }
+        }
+        stage('Install npm dependencies') {
+          steps {
+            sh 'bob npm-install'
+          }
+        }
+      }
+    }
+    stage('Deploy helm chart to cluster') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+            file(credentialsId: env.system, variable: 'KUBECONFIG')
+          ]) {
+            ansiColor('css') {
+              sh 'bob -r ci/rulesets/characteristics-report-rules.yaml install-ci-mocks-gas'
+            }
+          }
+        }
+      }
+    }
+    stage('Run verification load tests') {
+      steps {
+        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+          sh 'bob -r ci/rulesets/characteristics-report-rules.yaml run-load-tests -p maxVus=70 -p responseTimeThreshold=600 -p includeStaticAssets=false -p failOnThreshold=false'
+        }
+      }
+    }
+    stage('Run UI performance tests') {
+      steps {
+        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+          ansiColor('css') {
+            sh 'bob -r ci/rulesets/characteristics-report-rules.yaml perf-test-ui'
+          }
+        }
+      }
+    }
+    stage('Create performance test report') {
+      steps {
+        sh 'bob -r ci/rulesets/characteristics-report-rules.yaml create-performance-report'
+      }
+    }
+    stage('Publish performance test report') {
+      when { expression { env.PUBLISH_PERFORMANCE_REPORT == 'true' } }
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+          usernamePassword(credentialsId: 'eridoc-username-password', usernameVariable: 'ERIDOC_USERNAME', passwordVariable: 'ERIDOC_PASSWORD')
+        ]) {
+          sh 'bob -r ci/rulesets/characteristics-report-rules.yaml publish-performance-report'
+        }
+      }
+    }
+    stage('Cleanup namespace') {
+      steps {
+        lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+          withCredentials([file(credentialsId: env.system, variable: 'KUBECONFIG')]) {
+            ansiColor('xterm') {
+              sh 'bob namespace-cleanup'
+            }
+          }
+        }
+      }
+    }
+  }
+  post {
+    always {
+      archiveArtifacts 'load-test/report/load-test-report.json'
+      archiveArtifacts 'load-test/perf-test/lighthouse-report/product-page.html'
+      archiveArtifacts 'load-test/perf-test/lighthouse-report/app-page.html'
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'load-test/perf-test/lighthouse-report/',
+        reportFiles: 'product-page.html',
+        reportName: 'Product Page Lighthouse report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'load-test/perf-test/lighthouse-report/',
+        reportFiles: 'app-page.html',
+        reportName: 'App Page Lighthouse report'
+      ])
+    }
+    failure {
+      script {
+        if (params.MAIL_ON_FAILURE == 'true') {
+          mail to: 'f98b007c.ericsson.onmicrosoft.com@emea.teams.ms',
+          subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+          body: "Failure on ${env.BUILD_URL}"
+        }
+      }
+    }
+  }
+}

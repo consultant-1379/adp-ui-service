@@ -1,0 +1,118 @@
+modelVersion: 2.0
+import:
+  common: ../../ruleset2.0.yaml
+
+env:
+  - JIRA_TOKEN (default=notset)
+  - IMAGE_TAG (default=notset)
+  - JENKINS_USERNAME (default=notset)
+  - JENKINS_PASSWORD (default=notset)
+
+properties:
+  - jira-portfolio-team: 3492 # EEA Smart Insights Team code
+  - credential-id-mimer-prod: mimer-token-production
+  - jenkins-server: https://seliius27190.seli.gic.ericsson.se:8443
+
+rules:
+  # DesignCheck.jenkinsfile
+
+  design-rule-chart-check:
+    - rule: common.generate-ci-values-schema
+    - task: run-helm-dr-check
+      docker-image: common.adp-helm-dr-check
+      # NOTE: explanation about -D properties:
+      #   .Capabilities.APIVersions don't work correctly in this case for DR-1124-100, so we need to set the capabilities manually
+      #   https://gerrit-gamma.gic.ericsson.se/plugins/gitiles/adp-cicd/adp-helm-dr-checker#DR_1124_100_A
+      # DR exemptions, delete from -D args if JIRA task is implemented:
+      cmd: helm-dr-check
+        --helm-chart charts/${common.helm-chart-name}
+        --output .bob/check-charts/
+        --helm-v3
+        --fail-on-warnings true
+        --values-file ci/config/helm-dr-values.yaml
+        "-DhelmDesignRule.template.Capabilities.APIVersions=networking.k8s.io/v1"
+
+  design-rule-image-check:
+    - task: run-image-dr-check
+      docker-image: common.adp-image-dr-check
+      docker-flags:
+        - "-v /var/run/docker.sock:/var/run/docker.sock"
+        - '-u $(id -u):$(id -g) $(for x in $(id -G); do printf " --group-add %s" "$x"; done)'
+        - "--env REGISTRY_USER=${env.common.ARM_USER_SELI}"
+        - "--env REGISTRY_TOKEN=${env.common.ARM_TOKEN_SELI}"
+      cmd: image-dr-check ${common.helm-image-dr-vm-args}
+        --image ${var.common.image-full-name-internal}:${var.common.version}
+        --remote
+        --fail-on-warnings true
+        --output .bob/check-image/
+
+  create-design-rule-checker-jira-card:
+    - task: create-or-update-design-rule-jira
+      docker-image: common.ci-toolbox
+      cmd: jira_ticket_generation.sh
+        -token='${env.JIRA_TOKEN}'
+        -m='Create Issue'
+        -t='Bug'
+        -p='ADPRS'
+        -a=-1
+        -s='New design pattern warning(s) in the ${common.image-title} microservice'
+        -d='${env.common.BUILD_URL}'
+        -pt=${jira-portfolio-team}
+        -r='Major'
+        -cmp='${common.jira-component-name}'
+
+  # UpdateBaseOS.jenkinsfile
+
+  create-new-cbo-patch:
+    - task: create-modification
+      docker-image: common.adp-release-auto
+      cmd:
+        - "sed -i 's/^  - image-base-os-version: .*/  - image-base-os-version: ${env.IMAGE_TAG}/' ruleset2.0.yaml"
+        - config-handler update
+          --set-cbo-version ${env.IMAGE_TAG}
+          --product-structure plms/product_structure.yaml
+          --debug
+    - task: create-new-cbo-patch
+      docker-image: common.adp-release-auto
+      docker-flags:
+        - "--env GERRIT_USERNAME"
+        - "--env GERRIT_PASSWORD"
+      cmd: >
+        gerrit create-patch
+        --file ruleset2.0.yaml plms/product_structure.yaml
+        --message "Update Common Base OS to ${env.IMAGE_TAG}"
+        --message "Requirement: no-jira"
+        --git-repo-local .
+        --wait-label "Verified"="+1"
+        --timeout 3600
+        --debug
+        --submit
+
+  # UpdateMuninToken.jenkinsfile
+
+  jenkins-munin-secret-update:
+    - task: munin-production-secret-update
+      docker-image: common.adp-release-auto
+      cmd: munin-jenkins update-secret-text
+        -t ${env.common.MUNIN_TOKEN}
+        --jenkins-credential-id ${credential-id-mimer-prod}
+        --jenkins-username ${env.JENKINS_USERNAME}
+        --jenkins-password ${env.JENKINS_PASSWORD}
+        --server ${jenkins-server}/
+
+  # ciChartCheck.jenkinsfile
+
+  create-ci-chart-check-jira-card:
+    - task: create-or-update-ci-check-jira
+      docker-image: common.ci-toolbox
+      cmd: jira_ticket_generation.sh
+        -token='${env.JIRA_TOKEN}'
+        -m='Create Issue'
+        -t='Bug'
+        -p='ADPRS'
+        -a=-1
+        -s='New ciChart deployment issue in the ${common.image-title} microservice'
+        -d='${env.common.BUILD_URL}'
+        -pt=${jira-portfolio-team}
+        -r='Major'
+        -cmp='${common.jira-component-name}'

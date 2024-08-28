@@ -1,0 +1,19 @@
+{
+  "serviceList": [
+    {
+      "name": "Mock ESM Container",
+      "version": "1.0",
+      "URL": "http://mock1:4000"
+    },
+    {
+      "name": "Mock ESM Service 1",
+      "version": "1.0",
+      "URL": "http://mock2:4000"
+    },
+    {
+      "name": "eric-adp-gui-aggregator-service",
+      "version": "1.0.0",
+      "URL": "http://localhost:3000/ui"
+    }
+  ]
+}

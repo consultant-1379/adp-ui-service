@@ -1,0 +1,208 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-general:v1",
+  "allOf": [
+    {
+      "$comment": "global.pullSecret and imageCredentials.pullSecret",
+      "$ref": "urn:adp:helm:schemas:v1:DR-D1123-115:v1"
+    },
+    {
+      "$comment": "affinity",
+      "$ref": "urn:adp:helm:schemas:v1:DR-D1120-050-AD:v1"
+    },
+    {
+      "$comment": "log",
+      "$ref": "urn:adp:helm:schemas:v1:DR-D470222-010:v1"
+    },
+    {
+      "properties": {
+        "enabled": {
+          "type": ["null", "boolean"],
+          "$comment": "Toggle deployment of service"
+        },
+        "annotations": {
+          "$ref": "urn:adp:helm:schemas:v1:labels-and-annotations-common:v1/annotations"
+        },
+        "labels": {
+          "$ref": "urn:adp:helm:schemas:v1:labels-and-annotations-common:v1/labels"
+        },
+        "nodeSelector": {
+          "$ref": "urn:adp:helm:schemas:v1:DR-D1120-045-AD:v1/nodeSelector"
+        },
+        "appArmorProfile": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "main": { "$ref": "urn:adp:helm:schemas:v1:DR-D1123-127:v1/appArmorProfile" },
+                "ericsecoauthsap": {
+                  "$ref": "urn:adp:helm:schemas:v1:DR-D1123-127:v1/appArmorProfile"
+                },
+                "ericsecoauthproxy": {
+                  "$ref": "urn:adp:helm:schemas:v1:DR-D1123-127:v1/appArmorProfile"
+                }
+              },
+              "required": ["main", "ericsecoauthsap", "ericsecoauthproxy"]
+            },
+            { "$ref": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/appArmorProfile" }
+          ]
+        },
+        "seccompProfile": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "main": { "$ref": "urn:adp:helm:schemas:v1:DR-D1123-128:v1/seccompProfile" },
+                "ericsecoauthsap": {
+                  "$ref": "urn:adp:helm:schemas:v1:DR-D1123-128:v1/seccompProfile"
+                },
+                "ericsecoauthproxy": {
+                  "$ref": "urn:adp:helm:schemas:v1:DR-D1123-128:v1/seccompProfile"
+                }
+              },
+              "required": ["main", "ericsecoauthsap", "ericsecoauthproxy"]
+            },
+            { "$ref": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/seccompProfile" }
+          ]
+        },
+        "podDisruptionBudget": {
+          "$ref": "urn:adp:helm:schemas:v1:DR-D1120-056-AD:v1/podDisruptionBudget"
+        },
+        "terminationGracePeriodSeconds": {
+          "$ref": "urn:adp:helm:schemas:v1:DR-D1120-080-AD:v1/terminationGracePeriodSeconds"
+        },
+        "tolerations": { "$ref": "urn:adp:helm:schemas:v1:DR-D1120-060-AD:v1/tolerations" },
+        "topologySpreadConstraints": {
+          "$ref": "urn:adp:helm:schemas:v1:DR-D1120-090-AD:v1/topologySpreadConstraints"
+        },
+        "networkPolicy": {
+          "$ref": "urn:adp:helm:schemas:v1:DR-D1125-059:v1/networkPolicy"
+        },
+        "productInfo": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "rstate": {
+                  "type": "string"
+                }
+              },
+              "required": ["rstate"]
+            },
+            { "$ref": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/productInfo" }
+          ]
+        },
+        "imageCredentials": {
+          "type": "object",
+          "properties": {
+            "repoPath": {
+              "oneOf": [
+                { "$ref": "urn:adp:helm:schemas:v1:DR-D1121-106:v1/repoPath" },
+                {
+                  "$comment": "This part required to pass DR-D1123-115",
+                  "$ref": "urn:adp:helm:schemas:v1:DR-D1121-104:v1/imageCredentials"
+                }
+              ]
+            },
+            "main": {
+              "allOf": [
+                { "$ref": "urn:adp:helm:schemas:v1:DR-D1121-102:v1/imageCredentials" },
+                { "$ref": "urn:adp:helm:schemas:v1:DR-D1121-104:v1/imageCredentials" },
+                { "$ref": "urn:adp:helm:schemas:v1:DR-D1121-106:v1/imageCredentials" }
+              ]
+            }
+          },
+          "required": ["main"]
+        },
+        "metrics": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "enableNewScrapePattern": {
+                  "type": "boolean"
+                },
+                "port": {
+                  "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/port"
+                }
+              },
+              "required": ["enabled"]
+            },
+            { "$ref": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/metrics" }
+          ]
+        },
+        "replicaCount": {
+          "$ref": "urn:adp:helm:schemas:v1:DR-D1122-131:v1/replicaCount-mandatory"
+        },
+        "updateStrategy": {
+          "allOf": [
+            { "$ref": "urn:adp:helm:schemas:v1:DR-D1120-025-AD:v1/updateStrategy" },
+            { "$ref": "urn:adp:helm:schemas:v1:DR-D1120-030-AD:v1/updateStrategy" }
+          ]
+        },
+        "resources": {
+          "allOf": [
+            {
+              "type": "object",
+              "properties": {
+                "main": { "$ref": "urn:adp:helm:schemas:v1:DR-D1126-005:v1" },
+                "ericsecoauthsap": { "$ref": "urn:adp:helm:schemas:v1:DR-D1126-005:v1" },
+                "ericsecoauthproxy": { "$ref": "urn:adp:helm:schemas:v1:DR-D1126-005:v1" }
+              },
+              "required": ["main", "ericsecoauthsap", "ericsecoauthproxy"]
+            },
+            { "$ref": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/resources" }
+          ]
+        },
+        "podPriority": {
+          "type": "object",
+          "properties": {
+            "main": { "$ref": "urn:adp:helm:schemas:v1:DR-D1126-030:v1/podPriority" }
+          }
+        },
+        "probes": {
+          "type": "object",
+          "properties": {
+            "main": {
+              "allOf": [
+                {
+                  "properties": {
+                    "livenessProbe": {
+                      "$ref": "urn:adp:helm:schemas:v1:container-probes-common:v1/fullContainerProbe"
+                    }
+                  },
+                  "required": ["livenessProbe"]
+                },
+                { "$ref": "urn:adp:helm:schemas:v1:DR-D1120-014-AD:v1" }
+              ]
+            }
+          },
+          "required": ["main"]
+        }
+      },
+      "required": [
+        "annotations",
+        "labels",
+        "nodeSelector",
+        "appArmorProfile",
+        "seccompProfile",
+        "podDisruptionBudget",
+        "terminationGracePeriodSeconds",
+        "tolerations",
+        "topologySpreadConstraints",
+        "networkPolicy",
+        "productInfo",
+        "imageCredentials",
+        "metrics",
+        "replicaCount",
+        "updateStrategy",
+        "resources",
+        "podPriority",
+        "probes"
+      ]
+    }
+  ]
+}

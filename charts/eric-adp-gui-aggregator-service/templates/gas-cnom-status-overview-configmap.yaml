@@ -1,0 +1,36 @@
+{{- if .Values.configuration.cnom.defaultDashboards.enabled }}
+{{- $constants := fromJson (include "eric-adp-gui-aggregator-service.constants" .) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-st-overview
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+data:
+  {{ include "eric-adp-gui-aggregator-service.name" . }}-cnom-status-overview.yaml: |-
+    app: "statusOverview"
+    feature: "status_overview"
+    {{- if .Values.configuration.cnom.dashboardTreeView.enabled }}
+    dashboardTreeView:
+      enabled: true
+    {{- end }}
+    {{- if .Values.configuration.cnom.dashboardTopology.enabled }}
+    normalUser:
+      dashboards:
+        - dashboard: "{{ $constants.cnomDashboardsNamespace }}:{{ include "eric-adp-gui-aggregator-service.name" . }}-cnom-default-dashboard"
+          visible: true
+          types:
+            - "gasCnomDefaultDashboard"
+      topologySettings:
+        title: "Select Dashboard"
+      topologySource:
+        - sourceType: "constant"
+          data:
+            label: "GUI Aggregator Service"
+            children:
+              - label: "General Service Metrics"
+                data:
+                  name: "GUI Aggregator Metrics"
+                  type: "gasCnomDefaultDashboard"
+    {{- end }}
+{{- end }}

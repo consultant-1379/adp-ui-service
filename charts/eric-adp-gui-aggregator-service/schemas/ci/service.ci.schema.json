@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-service-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "rootValues": {
+      "$id": "urn:adp:helm:schemas:v1:gas-service-conditional:v1/rootValues",
+      "properties": {
+        "global": true,
+        "enabled": true,
+        "annotations": true,
+        "labels": true,
+        "nodeSelector": true,
+        "appArmorProfile": true,
+        "seccompProfile": true,
+        "securityPolicy": true,
+        "podDisruptionBudget": true,
+        "affinity": true,
+        "terminationGracePeriodSeconds": true,
+        "tolerations": true,
+        "topologySpreadConstraints": true,
+        "log": true,
+        "ingress": true,
+        "networkPolicy": true,
+        "productInfo": true,
+        "imageCredentials": true,
+        "metrics": true,
+        "service": true,
+        "replicaCount": true,
+        "updateStrategy": true,
+        "resources": true,
+        "podPriority": true,
+        "probes": true,
+        "configuration": true,
+        "uiconfig": true,
+        "manualconfig": true,
+        "authorizationProxy": true,
+        "dst": true,
+        "contextRoot": true,
+        "publicPath": true,
+        "images": true,
+        "nameOverride": true
+      },
+      "additionalProperties": false
+    }
+  }
+}

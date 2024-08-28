@@ -1,0 +1,23 @@
+{
+  "name": "esm-module-1",
+  "version": "0.0.1",
+  "description": "Mock Portal",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "build:dev": "rollup -c",
+    "start:watch": "node_modules/.bin/nodemon server.js --watch ."
+  },
+  "devDependencies": {
+    "@eui/rollup-config-generator": "^1.2.0",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-node-polyfills": "^0.2.1"
+  },
+  "dependencies": {
+    "@eui/app": "^1.0.0",
+    "@eui/base": "^1.0.0",
+    "@eui/lit-component": "^1.0.0",
+    "@eui/theme": "^1.0.0",
+    "nodemon": "^2.0.4"
+  }
+}

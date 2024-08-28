@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "$id": "http://adp.ericsson.com/ui.deployment.config.json",
+  "type": "object",
+  "description": "Launcher UI client side configuration",
+  "properties": {
+    "logging": {
+      "$id": "http://adp.ericsson.com/ui.deployment.config.json#/properties/logging",
+      "type": "object",
+      "description": "Logging parameters for Launcher GUI.",
+      "properties": {
+        "logLevel": {
+          "$id": "http://adp.ericsson.com/ui.deployment.config.json#/properties/logging/logLevel",
+          "type": "string",
+          "description": "Logging level for Launcher GUI."
+        }
+      }
+    },
+    "logoutURL": {
+      "type": "string"
+    },
+    "userAccountURL": {
+      "type": "string"
+    },
+    "userPermission": {
+      "$id": "http://adp.ericsson.com/ui.deployment.config.json#/properties/userPermission",
+      "type": "object",
+      "description": "userPermission parameters for Launcher GUI",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "rest": {
+      "$id": "http://adp.ericsson.com/ui.deployment.config.json#/properties/ingress",
+      "type": "object",
+      "description": "Ingress properties for backend location.",
+      "properties": {
+        "hostname": {
+          "$id": "http://adp.ericsson.com/ui.deployment.config.json#/properties/ingress/hostname",
+          "type": "string",
+          "description": "Name of the host, serving HA backend"
+        },
+        "path": {
+          "$id": "http://adp.ericsson.com/ui.deployment.config.json#/properties/ingress/path",
+          "type": "string",
+          "description": "Path to HA backend"
+        },
+        "protocol": {
+          "$id": "http://adp.ericsson.com/ui.deployment.config.json#/properties/ingress/protocol",
+          "type": "string",
+          "description": "Protocol used for communication with backend"
+        },
+        "port": {
+          "$id": "http://adp.ericsson.com/ui.deployment.config.json#/properties/ingress/port",
+          "type": "string",
+          "description": "Port used for communication with backend"
+        }
+      }
+    },
+    "routes": {
+      "$id": "http://adp.ericsson.com/ui.deployment.config.json#/properties/routes",
+      "type": "object",
+      "description": "API Route configs",
+      "additionalProperties": true
+    },
+    "uiSettings": {
+      "$id": "http://adp.ericsson.com/ui.deployment.config.json#/properties/uiSettings",
+      "type": "object",
+      "description": "Ui Settings configs",
+      "additionalProperties": true,
+      "properties": {
+        "storageMode": {
+          "$id": "http://adp.ericsson.com/ui.deployment.config.json#/properties/uisettings/storageMode",
+          "type": "string",
+          "description": "Ui Settings storage mode",
+          "enum": ["localStorage", "uiSettingsService"]
+        },
+        "baseUrl": {
+          "$id": "http://adp.ericsson.com/ui.deployment.config.json#/properties/uisettings/baseUrl",
+          "type": "string",
+          "description": "Ui Settings base Url"
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

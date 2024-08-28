@@ -1,0 +1,84 @@
+:host {
+  display: block;
+}
+
+:host([hide-legend]) .euisdk-chart-legend {
+  display: none;
+}
+
+.eds-chart {
+  display: flex;
+  flex: auto;
+  justify-content: center;
+}
+
+.eds-chart[hidden] {
+  display: none;
+}
+
+.eds-chart svg {
+  width: 200px;
+  height: 230px;
+}
+
+.canvas.donut {
+  transform: translate(100px, 100px);
+}
+
+.donut {
+  text-align: center;
+}
+
+.donut-layout {
+  display: flex;
+  align-items: flex-start;
+}
+
+.donut .active-arc path {
+  stroke: var(--layer2, #242424);
+  stroke-width: 2px;
+}
+
+.donut .transparent {
+  fill: rgba(0, 0, 0, 0);
+}
+
+.donut .value {
+  font-size: 40px;
+  fill: var(--text, #f2f2f2);
+  text-anchor: middle;
+  transform: translate(0, 20px);
+}
+
+.donut .unit {
+  display: none;
+  font-size: 12px;
+  fill: var(--text, #f2f2f2);
+  text-anchor: end;
+}
+
+.donut .label {
+  font-size: 16px;
+  fill: var(--text, #f2f2f2);
+  text-anchor: middle;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.donut path {
+  transition: fill 0.15s ease-in-out;
+}
+
+.chart-legend {
+  display: none;
+}
+
+.euisdk-chart-legend {
+  display: flex;
+  gap: var(--space-base, 8px);
+  justify-content: flex-end;
+  flex-direction: column;
+}
+
+.euisdk-chart-legend :last-child {
+  margin-right: 0;
+}

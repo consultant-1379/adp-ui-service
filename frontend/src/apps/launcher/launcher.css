@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  height: 100%;
+  border-right: var(--space-base) solid var(--layer1);
+}
+
+eui-notification {
+  position: absolute;
+}

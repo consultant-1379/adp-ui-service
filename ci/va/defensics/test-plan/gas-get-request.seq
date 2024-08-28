@@ -1,0 +1,33 @@
+<sequences>
+  <sequence name="http-diag">
+    <setting arg="--port">3001</setting>
+    <description name="gas-request-sequence">
+      gui-aggregator-service test request sequence
+    </description>
+
+    <send name="request-GET-ui" type="HTTP-Request-message">
+      <content file="request-messages/request-get-ui.txx" format="text"/>
+    </send>
+    <recv name="response-received-ui" type="HTTP-Response-message">
+    </recv>
+
+    <send name="request-GET-apps" type="HTTP-Request-message">
+      <content file="request-messages/request-get-apps.txx" format="text"/>
+    </send>
+    <recv name="response-received-apps" type="HTTP-Response-message">
+    </recv>
+
+    <send name="request-POST-logs" type="HTTP-Request-message">
+      <content file="request-messages/request-post-logs.txx" format="text"/>
+    </send>
+    <recv name="response-received-post-logs" type="HTTP-Response-message">
+    </recv>
+
+    <send name="request-GET-import-map" type="HTTP-Request-message">
+      <content file="request-messages/request-get-import-map.txx" format="text"/>
+    </send>
+    <recv name="response-received-import-map" type="HTTP-Response-message">
+    </recv>
+
+  </sequence>
+</sequences>

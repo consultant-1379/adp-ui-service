@@ -1,0 +1,37 @@
+type: object
+description: Descriptor of a shared package. A package **MUST** be contained in its own folder.
+  A package **MUST** contain at least one main module, but **MAY** contain multiple sub-modules.
+  Static assets **MUST** be bundled into the package's folder.
+required:
+  - version
+  - name
+  - path
+  - main
+properties:
+  version:
+    description: Version of the shared package. **MUST** be in semantic version.
+    type: string
+  name:
+    description: |
+      Name of the package. This is the unique id of the package which can be used as
+      bare-id reference in ESM import statements. It **MUST** follow NPM naming rules: `[@namespace/]packageName`
+      where `packageName` and `namespace` cannot contain `/`. Namespace is optional.
+    type: string
+  path:
+    description: Path to the package's folder. It **MUST** be relative to the service root.
+    type: string
+  main:
+    description:
+      Path to the main module. It **MUST** be elative to the package folder and **MUST** contain filename with extension.
+      This is the main module for the package, which is loaded by default.
+    type: string
+  dependencies:
+    description:
+      Defines the required dependency versions. It is a `_packageName_-_version_` map, where every entry
+      identifies a given package and the required version, which **MUST** be imported by the current package.
+    type: object
+    additionalProperties:
+      description:
+        A `_packageName_-_version_` entry which defines the required version for the current package.
+        The version definition can be an exact version or a semver compatible version range definition.
+      type: string

@@ -1,0 +1,6 @@
+#frame {
+  display: block;
+  height: 100%;
+  border-right: var(--space-base) solid var(--layer1);
+  padding-left: var(--space-large);
+}

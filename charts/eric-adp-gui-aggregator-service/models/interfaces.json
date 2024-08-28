@@ -1,0 +1,61 @@
+{
+  "metadata": {
+    "serviceHelmChartName": "eric-adp-gui-aggregator-service",
+    "usedSchemaVersion": "1.0.0",
+    "fileVersion": "1.0.1",
+    "dateEdited": "2024-05-16"
+  },
+  "interfaceImpls": [
+    {
+      "id": "IF.ADP.GUI.V1",
+      "container": "main",
+      "pod": "eric-adp-gui-aggregator-service",
+      "provides": {
+        "netIf": [
+          {
+            "id": "IF.ADP.GUI.META.V1",
+            "description": "Provides an aggregated view all all UI meta information accessible for the authorized user. Also supports notifying GUI Aggregator Lightweight of any changes made to UI Meta files from other domain services.",
+            "specVer": "1.3.0",
+            "type": "HttpJson",
+            "maturity": "stable"
+          },
+          {
+            "id": "IF.ADP.GUI.LOG.V1",
+            "description": "Enable GUIs and containers to post logs captured from the user UI session.",
+            "specVer": "1.0.0",
+            "type": "HttpJson",
+            "maturity": "stable"
+          },
+          {
+            "id": "IF.ADP.GUI.SERVE.ASSETS.V1",
+            "description": "Act as a reverse-proxy and returns a requested static asset from a domain service.",
+            "specVer": "1.0.0",
+            "type": "HTTP",
+            "maturity": "stable"
+          },
+          {
+            "id": "IF.ADP.GUI.DOMAIN.ASSETS.V1",
+            "description": "Used by domain services to expose their metadata and static assets to the GUI Aggregator Lightweight service.",
+            "specVer": "1.1.0",
+            "type": "HTTP",
+            "maturity": "stable"
+          },
+          {
+            "id": "IF.ADP.GUI.DOMAIN.V1",
+            "description": "Domain REST API to request dynamic data from their service e.g., list of alarms, topology data etc..",
+            "specVer": "1.0.0",
+            "type": "HTTP",
+            "maturity": "stable"
+          },
+          {
+            "id": "IF.ADP.GUI.USERPERMISSION.V1",
+            "description": "User permission Interface.",
+            "specVer": "1.0.0",
+            "type": "HttpJson",
+            "maturity": "stable"
+          }
+        ]
+      }
+    }
+  ]
+}

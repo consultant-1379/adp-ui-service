@@ -1,0 +1,20 @@
+{
+  "mode": "remote",
+  "kubecontext": "dev-presentation",
+  "isCiChartDeployed": false,
+  "metricsEnabled": false,
+  "logStreamingMethod": "console",
+  "ingressEnabled": true,
+  "serviceMeshEnabled": false,
+  "deployMockServices": true,
+  "deployEsmServices": false,
+  "deployMainService": true,
+  "deployCNOM": false,
+  "mTLS": true,
+  "ingressEnableTLS": false,
+  "helpAggregatorEnabled": true,
+  "nodePort": false,
+  "customK8sApiVersions": ["policy/v1/PodDisruptionBudget", "policy/v1", "batch/v1/CronJob"],
+  "enableAuthentication": false,
+  "customIdentifier": ""
+}

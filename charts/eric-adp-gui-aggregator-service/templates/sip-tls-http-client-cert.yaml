@@ -1,0 +1,24 @@
+{{- $global := fromJson (include "eric-adp-gui-aggregator-service.global" .) -}}
+{{- if $global.security.tls.enabled }}
+apiVersion: siptls.sec.ericsson.com/v1
+kind: InternalCertificate
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-http-client-cert
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+spec:
+  kubernetes:
+    generatedSecretName: {{ include "eric-adp-gui-aggregator-service.name" . }}-http-client-cert
+  certificate:
+    subject:
+      cn: {{ include "eric-adp-gui-aggregator-service.name" . }}
+    subjectAlternativeName:
+      populateKubernetesDns: false
+    issuer:
+      reference: {{ include "eric-adp-gui-aggregator-service.name" . }}-http-client-ca
+    extendedKeyUsage:
+      tlsClientAuth: true
+      tlsServerAuth: false
+{{- end }}

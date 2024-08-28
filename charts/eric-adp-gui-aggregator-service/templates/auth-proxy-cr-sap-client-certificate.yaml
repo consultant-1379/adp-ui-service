@@ -1,0 +1,25 @@
+{{- $authorizationProxy := fromJson (include "eric-adp-gui-aggregator-service.authz-proxy-values" .) -}}
+{{- if $authorizationProxy.enabled }}
+{{- $globals := fromJson (include "eric-adp-gui-aggregator-service.authz-proxy-global" .) -}}
+{{- if $globals.security.tls.enabled }}
+{{- if include "eric-adp-gui-aggregator-service.sap-cli-used" . }}
+apiVersion: siptls.sec.ericsson.com/v1
+kind: InternalCertificate
+metadata:
+  # The following name pattern is recommended, but not mandatory.
+  # Any unique name is sufficient.
+  name: {{ template "eric-adp-gui-aggregator-service.name" . }}-iam-sap-client-cert
+  labels:
+    # Include Service provider own labels here and add the below
+    # Authorization Proxy OAuth2 label template
+    {{- include "eric-adp-gui-aggregator-service.authz-proxy-labels" . | nindent 4 }}
+  annotations:
+    # Include Service provider own annotations here
+    # replace the include below with suitable content that brings in the SP specific annotations
+    {{- include "eric-adp-gui-aggregator-service.product-info" . | nindent 4 }}
+spec:
+# Include the sap client certificate specification from authorization proxy named template
+{{ include "eric-adp-gui-aggregator-service.authz-proxy-sap-cli-cert-spec" . | indent 2 }}
+{{- end }}
+{{- end }}
+{{- end }}

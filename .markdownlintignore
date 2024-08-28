@@ -1,0 +1,4 @@
+node_modules
+docs/release/content/fragments/pm_metrics_fragment.md
+docs/api/markdown/*.md
+mock/**/*.md

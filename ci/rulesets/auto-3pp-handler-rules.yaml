@@ -1,0 +1,100 @@
+modelVersion: 2.0
+import:
+  common: ../../ruleset2.0.yaml
+
+properties:
+  - update-3pp-hanling-branch: 3pp-handling
+  - port: 29418
+  - host: gerrit-gamma.gic.ericsson.se
+  - format: JSON
+  - topic: auto-3pp-handling
+  - status: open
+  - project: EEA/adp-ui-service
+  - protocol: https
+  - gerrit-url: ${common.gerrit-host}/a/${common.gerrit-project}
+  - finished-dependency-file-name: .bob/plms/finished_dependencies.yaml
+
+env:
+  # the name of branch where Git commit is merged
+  - BRANCH_NAME (default=master)
+  - GERRIT_USERNAME (default=notset)
+  - GERRIT_PASSWORD (default=notset)
+
+var:
+  - 3pp-topics
+  - 3pp-ref
+
+rules:
+  init:
+    - task: search-auto-3pp-handling-topics
+      docker-flags:
+        - --env GERRIT_USERNAME
+        - --env GERRIT_PASSWORD
+      cmd: >
+        /bin/bash -c '
+        ssh -p ${port} ${host} gerrit query --format=${format} --current-patch-set topic:${topic} status:${status} project:${common.gerrit-project} > .bob/var.3pp-topics
+        '
+
+    - task: cut-refs
+      cmd:
+        - grep -Eo '\brefs.*\/[^"]*' .bob/var.3pp-topics > .bob/var.3pp-refs
+
+    - task: create-plms-folder
+      cmd:
+        - mkdir -p .bob/plms
+
+    - task: run-3pp-handler
+      cmd: ci/scripts/3pp-handler.sh
+
+  auto-3pp-handling:
+    - task: fetch-3pp-branch
+      docker-image: common.adp-release-auto
+      docker-flags:
+        - --env GERRIT_USERNAME
+        - --env GERRIT_PASSWORD
+      cmd:
+        - git fetch ${protocol}://${env.GERRIT_USERNAME}:${env.GERRIT_PASSWORD}@${gerrit-url} ${var.3pp-ref} && git checkout FETCH_HEAD
+
+    - task: filter-out-dependencies-recheck
+      docker-image: common.ci-toolbox
+      cmd: filter-out-all-not-finished.js
+        --recheck
+        --scas
+        --scas-refresh-token ${env.common.SCAS_TOKEN}
+        --dependencies-path ${common.auto-dependency-file-name}
+        --output-dependencies-path ${common.auto-dependency-file-name}
+
+    - task: filter-out-dependencies-no-recheck
+      docker-image: common.ci-toolbox
+      cmd: filter-out-all-not-finished.js
+        --scas
+        --dependencies-path ${common.auto-dependency-file-name}
+        --output-dependencies-path ${finished-dependency-file-name}
+
+    - task: push-changes
+      cmd:
+        - git add ${common.auto-dependency-file-name}
+        - git commit --amend --no-edit
+        - git push origin HEAD:refs/for/${env.BRANCH_NAME}
+
+    - task: reset-to-master
+      cmd:
+        - git reset --hard origin/${env.BRANCH_NAME}
+
+  3pp-handling-tasks:
+    - task: auto-3pp-handling:reset-to-master
+    - task: auto-3pp-handling:fetch-3pp-branch
+    - task: auto-3pp-handling:filter-out-dependencies-recheck
+    - task: common.foss-helper:dependency-update-with-scas-no-errors
+    - task: common.foss-register-help:fix-license-stako-src
+    - task: common.foss-helper:fix-format
+    - task: auto-3pp-handling:filter-out-dependencies-no-recheck
+    - task: common.foss-helper:update-munin-section
+      properties:
+        - auto-dependency-file-name: ${finished-dependency-file-name}
+    - task: common.foss-helper:merge-dependencies
+      properties:
+        - manual-dependency-file-name: ${finished-dependency-file-name}
+        - dependency-full-file-name: ${common.auto-dependency-file-name}
+    - task: auto-3pp-handling:push-changes
+    - task: auto-3pp-handling:reset-to-master

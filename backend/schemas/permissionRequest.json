@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "id": "file://schema/PermissionRequest#",
+  "title": "IAM permission request schmea",
+  "description": "This schema describes the required body fields which needs to be sent to the GAS /userPermission/v1/permission endpoint",
+  "type": "object",
+  "required": ["response_mode"],
+  "properties": {
+    "audience": {
+      "description": "The client identifier of the resource server to which the client is seeking access.",
+      "type": "string"
+    },
+    "realm": {
+      "description": "IAM realm.",
+      "type": "string"
+    },
+    "response_mode": {
+      "description": "A string value indicating how the server should respond to authorization requests.",
+      "type": "string",
+      "enum": ["decision", "permissions"]
+    },
+    "permission": {
+      "type": "array",
+      "items": {
+        "description": "A string representing a set of one or more resources and scopes the client is seeking access.",
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

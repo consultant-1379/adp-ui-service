@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "prefix": "/ui-meta/v1",
+    "routes": {
+      "apps": { "path": "/apps", "allowedDataMethods": ["GET"] },
+      "groups": { "path": "/groups", "allowedDataMethods": ["GET"] },
+      "components": { "path": "/components", "allowedDataMethods": ["GET"] },
+      "services": { "path": "/services", "allowedDataMethods": ["PUT"] },
+      "actions": { "path": "/actions", "allowedDataMethods": ["GET"] }
+    }
+  },
+  "logging": {
+    "prefix": "/ui-logging/v1",
+    "routes": {
+      "logs": { "path": "/logs", "allowedDataMethods": ["POST"] }
+    }
+  },
+  "serve": {
+    "prefix": "/ui-serve/v1",
+    "routes": {
+      "static": { "path": "/static", "allowedDataMethods": ["GET"] },
+      "importMap": { "path": "/import-map", "allowedDataMethods": ["GET"] },
+      "packages": { "path": "/list-packages", "allowedDataMethods": ["GET"] }
+    }
+  },
+  "userPermission": {
+    "prefix": "/userpermission/v1",
+    "routes": {
+      "userInfo": { "path": "/userinfo", "allowedDataMethods": ["GET"] },
+      "realmUserInfo": { "path": "/:realm/userinfo", "allowedDataMethods": ["GET"] },
+      "permission": { "path": "/permission", "allowedDataMethods": ["POST"] }
+    }
+  }
+}

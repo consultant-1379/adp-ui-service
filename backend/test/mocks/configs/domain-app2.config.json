@@ -1,0 +1,42 @@
+{
+  "apps": [
+    {
+      "name": "domain-app-2",
+      "displayName": "Domain App 2",
+      "descriptionLong": "This is a domain specific app",
+      "version": "1.0.0",
+      "type": "web-client",
+      "url": "domain-app-2",
+      "tags": ["webapp"],
+      "specification": "domain-app-2/spec.json",
+      "groupNames": ["domain-group-2"]
+    }
+  ],
+  "components": [
+    {
+      "name": "component-2",
+      "displayName": "Component entities",
+      "version": "1.0.0",
+      "descriptionLong": "Component entities for MongoDB",
+      "type": "json",
+      "specification": "component-2/spec.json"
+    }
+  ],
+  "groups": [
+    {
+      "name": "domain-group-2",
+      "displayName": "Domain Group",
+      "version": "0.1.0",
+      "descriptionLong": "Domain applications",
+      "type": "apps"
+    }
+  ],
+  "actions": [
+    {
+      "id": "eric-eo-usermgmt-ui.view-user-profile-action",
+      "displayName": "View User Profile",
+      "version": "1.0.0",
+      "module": "view-user-action"
+    }
+  ]
+}

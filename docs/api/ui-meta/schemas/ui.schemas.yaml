@@ -1,0 +1,132 @@
+components:
+  schemas:
+    Id:
+      type: object
+      properties:
+        id:
+          description: Unique identification of the UI entity.
+          type: string
+
+    Entity:
+      type: object
+      required:
+        - name
+        - displayName
+        - version
+      properties:
+        name:
+          description: Full name of an UI entity. Well-known name defined during development time.
+          type: string
+        displayName:
+          description: Display name of an UI entity.
+          type: string
+        descriptionShort:
+          description: Description of an UI entity.
+          type: string
+        descriptionLong:
+          description: Detailed description of an UI entity.
+          type: string
+        color:
+          description: Color represents the UI entity. Color should be CSS supported name or HEX value.
+          type: string
+        acronym:
+          description: Short name of an UI entity.
+          type: string
+        type:
+          description: Classification of an UI entity. Example values are euisdk, oden, external, etc.
+          type: string
+        priority:
+          description: Display priority order.
+          type: integer
+        tags:
+          description: Tags associated.
+          type: array
+          items:
+            type: string
+        hidden:
+          description: Default is false. Set to true to hide the app form the menu.
+          type: boolean
+
+    Apps:
+      description: List of all licensed and user authorized applications.
+      type: array
+      items:
+        allOf:
+          - $ref: "#/components/schemas/Id"
+          - $ref: "#/components/schemas/App"
+    App:
+      allOf:
+        - $ref: "#/components/schemas/Entity"
+        - type: object
+          required:
+            - version
+          properties:
+            version:
+              description: Version of an UI application. Should be in semantic version.
+              type: string
+            route:
+              description: Relative path of an UI application. Mandatory container specific types.
+              type: string
+            module:
+              description: Module reference which implements this application.
+              type: string
+            url:
+              description: Full path of an UI application. Mandatory for external types.
+              type: string
+            specification:
+              description: Relative location of the application specification file.
+              type: string
+            options:
+              description: Extra runtime options for the application. Not parsed by GAS, passed to the REST API as it is.
+              type: object
+            childNames:
+              description: Children applications of an current UI application.
+              type: array
+              items:
+                type: string
+            groupNames:
+              description: Groups related to the current UI application.
+              type: array
+              items:
+                type: string
+            hidden:
+              description: Default is false. Set to true to hide the app form the menu.
+              type: boolean
+            service:
+              description: The name of the service the app is in.
+              type: string
+    Components:
+      description: List of all available shared components.
+      type: array
+      items:
+        allOf:
+          - $ref: "#/components/schemas/Id"
+          - $ref: "#/components/schemas/Component"
+    Component:
+      allOf:
+        - $ref: "#/components/schemas/Entity"
+        - type: object
+          required:
+            - version
+          properties:
+            version:
+              description: Version of an UI component. Should be in semantic version.
+              type: string
+            module:
+              description: Module reference which implements this component.
+              type: string
+            specification:
+              description: Location of the component specification file.
+              type: string
+            options:
+              description: Extra runtime options for the component. Not parsed by GAS, passed to the REST API as it is.
+              type: object
+    Groups:
+      description: List of all groups needed by above listed applications.
+      type: array
+      items:
+        allOf:
+          - $ref: "#/components/schemas/Id"
+          - $ref: "#/components/schemas/Group"
+    Group:
+      $ref: "#/components/schemas/Entity"

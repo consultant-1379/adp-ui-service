@@ -1,0 +1,880 @@
+{
+  "metadata": {
+    "serviceHelmChartName": "eric-adp-gui-aggregator-service",
+    "usedSchemaVersion": "3.1",
+    "fileVersion": "1.1.0",
+    "dateEdited": "2024-01-17"
+  },
+  "metrics": [
+    {
+      "pmMetric": "eric_adp_gas_light_process_cpu_user_seconds_total",
+      "metricDescription": "Total user CPU time spent in seconds.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_process_cpu_system_seconds_total",
+      "metricDescription": "Total system CPU time spent in seconds.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_process_cpu_seconds_total",
+      "metricDescription": "Total user and system CPU time spent in seconds.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_process_start_time_seconds",
+      "metricDescription": "Start time of the process since unix epoch in seconds.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_process_resident_memory_bytes",
+      "metricDescription": "Resident memory size in bytes.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_process_virtual_memory_bytes",
+      "metricDescription": "Virtual memory size in bytes.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_process_heap_bytes",
+      "metricDescription": "Process heap size in bytes.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_process_open_fds",
+      "metricDescription": "Number of open file descriptors.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_process_max_fds",
+      "metricDescription": "Maximum number of open file descriptors.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "USe",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_eventloop_lag_seconds",
+      "metricDescription": "Lag of event loop in seconds.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "uSe",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_eventloop_lag_min_seconds",
+      "metricDescription": "The minimum recorded event loop delay.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "uSe",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_eventloop_lag_max_seconds",
+      "metricDescription": "The maximum recorded event loop delay.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "uSe",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_eventloop_lag_mean_seconds",
+      "metricDescription": "The mean of the recorded event loop delays.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "uSe",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_eventloop_lag_stddev_seconds",
+      "metricDescription": "The standard deviation of the recorded event loop delays.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "uSe",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_eventloop_lag_p50_seconds",
+      "metricDescription": "The 50th percentile of the recorded event loop delays.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "uSe",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_eventloop_lag_p90_seconds",
+      "metricDescription": "The 90th percentile of the recorded event loop delays.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "uSe",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_eventloop_lag_p99_seconds",
+      "metricDescription": "The 99th percentile of the recorded event loop delays.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "uSe",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_active_handles",
+      "metricDescription": "Number of active libuv handles grouped by handle type. Every handle type is C++ class name.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "type"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_active_handles_total",
+      "metricDescription": "Total number of active handles.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_active_requests",
+      "metricDescription": "Number of active libuv requests grouped by request type. Every request type is C++ class name.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Red"
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_active_requests_total",
+      "metricDescription": "Total number of active requests.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_heap_size_total_bytes",
+      "metricDescription": "Process heap size from Node.js in bytes.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_heap_size_used_bytes",
+      "metricDescription": "Process heap size used from Node.js in bytes.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_external_memory_bytes",
+      "metricDescription": "Node.js external memory size in bytes.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "uSe",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_heap_space_size_total_bytes",
+      "metricDescription": "Process heap space size total from Node.js in bytes.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "space"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_heap_space_size_used_bytes",
+      "metricDescription": "Process heap space size used from Node.js in bytes.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "space"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_heap_space_size_available_bytes",
+      "metricDescription": "Process heap space size available from Node.js in bytes.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "space"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_version_info",
+      "metricDescription": "Node.js version info.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricLabel": [
+        {
+          "label": "version"
+        },
+        {
+          "label": "major"
+        },
+        {
+          "label": "minor"
+        },
+        {
+          "label": "patch"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_nodejs_gc_duration_seconds",
+      "metricDescription": "Garbage collection duration by kind, one of major, minor, incremental or weak callback.",
+      "metricType": "histogram",
+      "metricStatus": "stable",
+      "metricCategory": "USE",
+      "metricLabel": [
+        {
+          "label": "le"
+        },
+        {
+          "label": "kind"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_http_request_duration_seconds",
+      "metricDescription": "Duration histogram of http responses labeled with: status_code.",
+      "metricType": "histogram",
+      "metricStatus": "stable",
+      "metricCategory": "reD",
+      "metricLabel": [
+        {
+          "label": "le"
+        },
+        {
+          "label": "status_code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_service_num",
+      "metricDescription": "Total number of Service K8s discovered resources.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_pod_num",
+      "metricDescription": "Total number of Pod K8s discovered resources.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_endpoint_num",
+      "metricDescription": "Total number of Endpoint K8s discovered resources.",
+      "metricType": "gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Use",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_meta_v1_apps_http_requests_total",
+      "metricDescription": "Total number of requests to the \"/ui-meta/v1/apps\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_meta_v1_groups_http_requests_total",
+      "metricDescription": "Total number of requests to the \"/ui-meta/v1/groups\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_meta_v1_components_http_requests_total",
+      "metricDescription": "Total number of requests to the \"/ui-meta/v1/components\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_http_requests_total",
+      "metricDescription": "Total number of requests to the \"/ui\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_logging_v1_logs_http_requests_total",
+      "metricDescription": "Total number of requests to the \"/ui-logging/v1/logs\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_gas_internal_http_requests_total",
+      "metricDescription": "Total number of requests to the \"/gas-internal\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_serve_v1_import_map_http_requests_total",
+      "metricDescription": "Total number of requests to the \"/ui-serve/v1/import-map\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_serve_v1_list_packages_http_requests_total",
+      "metricDescription": "Total number of requests to the \"/ui-serve/v1/list-packages\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_serve_v1_static_http_requests_total",
+      "metricDescription": "Total number of requests to the \"/ui-serve/v1/static\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_meta_v1_apps_http_response_times_total",
+      "metricDescription": "Total time (in ms) spent in backend with processing requests to the \"/ui-meta/v1/apps\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_meta_v1_groups_http_response_times_total",
+      "metricDescription": "Total time (in ms) spent in backend with processing requests to the \"/ui-meta/v1/groups\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_meta_v1_components_http_response_times_total",
+      "metricDescription": "Total time (in ms) spent in backend with processing requests to the \"/ui-meta/v1/components\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_http_response_times_total",
+      "metricDescription": "Total time (in ms) spent in backend with processing requests to the \"/ui\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_logging_v1_logs_http_response_times_total",
+      "metricDescription": "Total time (in ms) spent in backend with processing requests to the \"/ui-logging/v1/logs\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_gas_internal_http_response_times_total",
+      "metricDescription": "Total time (in ms) spent in backend with processing requests to the \"/gas-internal\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_serve_v1_import_map_http_response_times_total",
+      "metricDescription": "Total time (in ms) spent in backend with processing requests to the \"/ui-serve/v1/import-map\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_serve_v1_list_packages_http_response_times_total",
+      "metricDescription": "Total time (in ms) spent in backend with processing requests to the \"/ui-serve/v1/list-packages\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_ui_serve_v1_static_http_response_times_total",
+      "metricDescription": "Total time (in ms) spent in backend with processing requests to the \"/ui-serve/v1/static\" API.",
+      "metricType": "counter",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "protocol"
+        },
+        {
+          "label": "endpoint"
+        },
+        {
+          "label": "method"
+        },
+        {
+          "label": "code"
+        },
+        {
+          "label": "app"
+        }
+      ]
+    },
+    {
+      "pmMetric": "eric_adp_gas_light_sum_of_retry_counters_of_in_progress_fetch_loops",
+      "metricDescription": "The sum of retry counters of in-progress fetch loops.",
+      "metricType": "Gauge",
+      "metricStatus": "stable",
+      "metricCategory": "Red",
+      "metricLabel": [
+        {
+          "label": "app"
+        }
+      ]
+    }
+  ]
+}

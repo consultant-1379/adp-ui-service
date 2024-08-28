@@ -1,0 +1,64 @@
+model_version: 3.0
+product_va_config:
+  name: GUI Aggregator Lightweight
+  product_name: eric-adp-gui-aggregator-service
+  version: "{VERSION}"
+  va_template_version: 2.0.0
+  description: The Lightweight GUI Aggregator service (GAS Light) contains the Launcher (aka Portal) web client (EUISDK) and the UI Service backend (node.js).
+  mitigations:
+    CVE-2018-6913:
+      category: NA
+      severity_based_on_risk_assessment: None
+      likelihood_of_attack: None
+      impact: None
+      mitigation: Perl is not used by the service.
+      description_of_usage: "Security update for perl (Important)Security update for perl
+      (Moderate)perl-32bit-5.18.2-12.17.1 on GA media (Moderate)perl-32bit-5.18.2-12.20.1 on GA
+      media (Moderate)
+
+        Found by the tool: xray
+      "
+      sce:
+        sce-id:
+        status:
+        expires:
+    CVE-2024-33600:
+      category: NA
+      severity_based_on_risk_assessment: None
+      likelihood_of_attack: None
+      impact: None
+      mitigation: nscd is not used directly by the service. Vulnerable component will be uplifted automatically, when CBOS fix is available.
+      description_of_usage: "nscd: Null pointer crashes after notfound responseIf the Name Service Cache Daemon's (nscd)
+      cache fails to add a not-foundnetgroup response to the cache, the client request can result
+      in a nullpointer dereference.  This flaw was introduced in glibc 2.15 when thecache was added
+      to nscd.This vulnerability is only present in the nscd binary.
+
+        Found by the tool: xray
+      "
+      sce:
+        sce-id:
+        status:
+        expires:
+    XRAY-N51:
+      category: FP
+      severity_based_on_risk_assessment: None
+      likelihood_of_attack: None
+      mitigation: GAS Service uses the patched version of the lib in question.
+      description_of_usage: "All versions of `http-proxy` are vulnerable to Denial of Service. An HTTP request with a long
+      body triggers an `ERR_HTTP_HEADERS_SENT` unhandled exception that crashes the proxy server.
+      This is only possible when the proxy server sets headers in the proxy request using the
+      `proxyReq.setHeader` function.
+
+      For a proxy server running on `http://localhost:3000`, the following curl request triggers
+      the unhandled exception:
+      ```curl -XPOST http://localhost:3000 -d '$(python -c 'print('x'*1025)')'```
+
+        Found by the tool: xray
+      "
+      sce:
+        sce-id: SCED-2024-000595
+        status: Approved
+        expires: 2024.07.15
+    open_ports:
+      3000/tcp:
+        intended: true

@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "$id": "http://adp.ericsson.com/ui.config.override.json",
+  "type": "object",
+  "description": "File descriptor for UI micro front-ends.\nThis file includes overrides for apps, components and groups defined in ui.config.overrides.json for UI micro front-ends.\nThis file should be accessible from the service root URL.\n",
+  "properties": {
+    "version": {
+      "$id": "http://adp.ericsson.com/ui.config.overrides.json#/properties/version",
+      "type": "string",
+      "description": "Schema version of the config.json."
+    },
+    "apps": {
+      "$id": "http://adp.ericsson.com/ui.config.overrides.json#/properties/apps",
+      "type": "array",
+      "description": "List of application specification overrides.",
+      "items": {
+        "$ref": "ui.app.override.json"
+      }
+    },
+    "groups": {
+      "$id": "http://adp.ericsson.com/ui.config.overrides.json#/properties/groups",
+      "type": "array",
+      "description": "List of group specification overrides.",
+      "items": {
+        "$ref": "ui.entity.override.json"
+      }
+    },
+    "components": {
+      "$id": "http://adp.ericsson.com/ui.config.overrides.json#/properties/components",
+      "type": "array",
+      "description": "List of component specification overrides.",
+      "items": {
+        "$ref": "ui.component.override.json"
+      }
+    }
+  },
+  "additionalProperties": false
+}

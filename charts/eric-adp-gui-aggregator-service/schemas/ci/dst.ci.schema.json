@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "collector": {
+      "$id": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/collector",
+      "properties": {
+        "host": true,
+        "otlpHttpPort": true,
+        "samplingConfigMap": true
+      },
+      "additionalProperties": false
+    },
+    "sampler": {
+      "$id": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/sampler",
+      "properties": {
+        "samplingRate": true
+      },
+      "additionalProperties": false
+    },
+    "span": {
+      "$id": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/span",
+      "properties": {
+        "attributeValueLengthLimit": true,
+        "attributePerSpanCountLimit": true,
+        "attributePerEventCountLimit": true,
+        "attributePerLinkCountLimit": true,
+        "eventCountLimit": true,
+        "linkCountLimit": true
+      },
+      "additionalProperties": false
+    },
+    "processor": {
+      "$id": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/processor",
+      "properties": {
+        "exportTimeoutMillis": true,
+        "maxExportBatchSize": true,
+        "maxQueueSize": true,
+        "scheduledDelayMillis": true
+      },
+      "additionalProperties": false
+    },
+
+    "dst": {
+      "$id": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/dst",
+      "properties": {
+        "enabled": true,
+        "collector": true,
+        "sampler": true,
+        "labels": true,
+        "span": true,
+        "propagator": true,
+        "processor": true
+      },
+      "additionalProperties": false
+    }
+  }
+}

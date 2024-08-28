@@ -1,0 +1,8 @@
+/node_modules/**
+/coverage/**
+/build/**
+.scannerwork/**/*
+test_js/allure-report/**/*
+test_js/allure-results/**/*
+testReport/**/*
+mock/**/artifacts/**

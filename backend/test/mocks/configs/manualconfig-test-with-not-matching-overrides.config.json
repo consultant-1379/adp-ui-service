@@ -1,0 +1,72 @@
+{
+  "apps": [
+    {
+      "displayName": "Nova Explorer",
+      "version": "0.1.0",
+      "url": "http://localhost:9999/nova-explorer",
+      "descriptionLong": "Dummy external app for testing purposes.",
+      "name": "nova1",
+      "groupNames": ["eea", "nova"],
+      "type": "external"
+    },
+    {
+      "displayName": "Nova Explorer Standalone - Very Long External Application Name",
+      "version": "0.1.0",
+      "url": "http://localhost:9999/nova-explorer-standalone",
+      "descriptionLong": "Dummy external app for testing purposes.",
+      "name": "nova2",
+      "groupNames": ["ecm", "nova"],
+      "type": "external"
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Nova explorer",
+      "version": "0.1.0",
+      "name": "nova",
+      "type": "category",
+      "descriptionLong": "Dummy external category for testing purposes."
+    }
+  ],
+  "overrides": {
+    "apps": [
+      {
+        "displayName": "Nova Explorer New Name",
+        "url": "http://localhost:9999/nova-explorer-new-route",
+        "name": "nova1",
+        "groupNames": ["nova", "new_group"],
+        "type": "external"
+      },
+      {
+        "displayName": "Whatever New Name",
+        "route": "http://localhost:9999/doesnt-matter-new-route",
+        "name": "nonexistingApp",
+        "groupNames": ["nova", "new_group"]
+      }
+    ],
+    "groups": [
+      {
+        "displayName": "Nova explorer new group name",
+        "name": "nova",
+        "descriptionLong": "New long description."
+      },
+      {
+        "displayName": "Non existing group new name",
+        "name": "nonexistingGroup",
+        "descriptionLong": "New long description."
+      }
+    ],
+    "components": [
+      {
+        "name": "component-1",
+        "displayName": "Component entities new displayname",
+        "descriptionLong": "New long description"
+      },
+      {
+        "name": "nonexistingComponent",
+        "displayName": "Component entities new displayname",
+        "descriptionLong": "New long description"
+      }
+    ]
+  }
+}

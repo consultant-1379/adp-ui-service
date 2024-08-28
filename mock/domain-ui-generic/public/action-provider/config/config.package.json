@@ -1,0 +1,16 @@
+{
+  "modules": [
+    {
+      "name": "action-provider",
+      "version": "1.0.0",
+      "path": "apps/action-provider",
+      "main": "action-provider.js"
+    },
+    {
+      "name": "action",
+      "version": "1.0.0",
+      "path": "modules",
+      "main": "action.js"
+    }
+  ]
+}

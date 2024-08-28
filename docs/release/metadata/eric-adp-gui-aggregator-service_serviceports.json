@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "serviceHelmChartName": "eric-adp-gui-aggregator-service",
+    "usedSchemaVersion": "1.0",
+    "fileVersion": "1.0",
+    "dateEdited": "2022-05-31"
+  },
+  "internalPorts": [
+    {
+      "serviceInterfaceName": "GAS Light Pod HTTP Server",
+      "protocol": "HTTP/HTTPS",
+      "ipAddressType": "",
+      "port": 3000,
+      "transportProtocol": "TCP",
+      "ipVersion": ["IPv4", "IPv6"]
+    },
+    {
+      "serviceInterfaceName": "GAS Light Pod HTTP Server for Metrics",
+      "protocol": "HTTP/HTTPS",
+      "ipAddressType": "",
+      "port": 3888,
+      "transportProtocol": "TCP",
+      "ipVersion": ["IPv4", "IPv6"]
+    },
+    {
+      "serviceInterfaceName": "GAS Light Service HTTP Server",
+      "protocol": "HTTP/HTTPS",
+      "ipAddressType": "",
+      "port": {
+        "helmParameter": "service.port"
+      },
+      "transportProtocol": "TCP",
+      "ipVersion": ["IPv4", "IPv6"]
+    },
+    {
+      "serviceInterfaceName": "Authentication Proxy Sidecar Pod OAuth2 Server",
+      "protocol": "HTTP/HTTPS",
+      "ipAddressType": "",
+      "port": {
+        "helmParameter": "authorizationProxy.port"
+      },
+      "transportProtocol": "TCP",
+      "ipVersion": ["IPv4", "IPv6"]
+    },
+    {
+      "serviceInterfaceName": "Authentication Proxy Sidecar Service OAuth2 Server",
+      "protocol": "HTTP/HTTPS",
+      "ipAddressType": "",
+      "port": 8080,
+      "transportProtocol": "TCP",
+      "ipVersion": ["IPv4", "IPv6"]
+    }
+  ],
+  "externalPorts": []
+}

@@ -1,0 +1,11 @@
+{
+  "logging": {
+    "logLevel": "info"
+  },
+  "userPermission": {
+    "enabled": true
+  },
+  "uiSettings": {
+    "storageMode": "localStorage"
+  }
+}

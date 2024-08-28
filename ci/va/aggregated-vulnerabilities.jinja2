@@ -1,0 +1,89 @@
+{%- macro fill_mitigation(mitigation_object) %}
+    {% if mitigation_object %}
+    mitigationText: >
+      {{ mitigation_object.mitigation|replace("\"", "'")|wordwrap(93)|indent(6,false) }}
+    exemption:
+      id: {{ mitigation_object.sce['sce-id'] }}
+      status: {{ mitigation_object.sce.status }}
+      expires: {{ mitigation_object.sce.expires }}
+    {%- else %}
+    mitigationText:
+    exemption:
+      id:
+      status:
+      expires:
+    {%- endif -%}
+{%- endmacro -%}
+vulnerabilities:
+{% for vuln in data.vulnerabilities %}
+  {% if not vuln.tool == 'zap' %}
+    {% if vuln.tool == 'kubeaudit' %}
+      {% set vuln_issue_id = vuln.name %}
+      {% if vuln.severity == 'Error' %}
+        {% set vuln_severity = "Critical" %}
+      {% else %}
+        {% set vuln_severity = "Low" %}
+      {% endif %}
+  - id: "{{ vuln.tool }}:{{ vuln_issue_id }}"
+    severity: {{ vuln_severity }}
+    {% if vuln_issue_id in product.mitigations %}
+      {{- fill_mitigation(product.mitigations[vuln_issue_id]) }}
+    {% else %}
+      {{- fill_mitigation() }}
+    {% endif %}
+    description: >
+      "{{ vuln.msg|replace("\"", "'")|wordwrap(93)|indent(6,false) }}
+
+        Found by the tool: {{ vuln.tool }}
+      "
+    {% elif vuln.tool == 'kubesec' %}
+      {% set vuln_issue_id = vuln.name %}
+      {% if vuln.severity == 'Unknown' %}
+        {% set vuln_severity = "Low" %}
+      {% else %}
+        {% set vuln_severity = vuln.severity %}
+      {% endif %}
+  - id: "{{ vuln.tool }}:{{ vuln_issue_id }}"
+    severity: {{ vuln_severity }}
+    {% if vuln_issue_id in product.mitigations %}
+      {{- fill_mitigation(product.mitigations[vuln_issue_id]) }}
+    {% else %}
+      {{- fill_mitigation() }}
+    {% endif %}
+    description: >
+      "{{ vuln.reason|replace("{'", "'")|replace("'}", "'")|replace("\"", "'")|wordwrap(93)|indent(6,false) }}
+
+        Found by the tool: {{ vuln.tool }}
+      "
+    {% else %}
+    {% set vuln_issue_id = vuln.name %}
+  - id: "{{ vuln_issue_id }}"
+    severity: {{ vuln.severity }}
+    {% if vuln_issue_id in product.mitigations %}
+      {{- fill_mitigation(product.mitigations[vuln_issue_id]) }}
+    {% else %}
+      {{- fill_mitigation() }}
+    {% endif %}
+    description: >
+      "{{ vuln.description|replace("\"", "'")|wordwrap(93)|indent(6,false) }}
+
+        Found by the tool: {{ vuln.tool }}
+      "
+    {% endif %}
+  {% endif %}
+{%- endfor %}
+{%- for alert in data.zap_report.alerts %}
+  {% set zap_id = 'zap-' + alert.pluginid + '-' + alert.sourceid %}
+  - id: "{{ zap_id }}"
+    severity: {{ alert.severity }}
+  {% if zap_id in product.mitigations %}
+    {{- fill_mitigation(product.mitigations[zap_id]) }}
+  {% else %}
+    {{- fill_mitigation() }}
+  {% endif %}
+    description: >
+      "{{ alert.desc|replace("\"", "'")|wordwrap(93)|indent(6,false) }}
+
+        Found by the tool: zap scanner
+      "
+{% endfor -%}

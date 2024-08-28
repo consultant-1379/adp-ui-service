@@ -1,0 +1,27 @@
+{
+  "apps": [
+    {
+      "displayName": "GroupMapping mock",
+      "version": "0.1.0",
+      "route": "http://localhost:1111/group-mapping",
+      "descriptionLong": "Dummy external app for groupMapping test.",
+      "name": "group-mapping-app",
+      "groupNames": []
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Group for GroupMapping",
+      "version": "0.1.0",
+      "name": "group-mapping-group",
+      "type": "category",
+      "descriptionLong": "Dummy category for testing groupMapping."
+    }
+  ],
+  "groupMappings": [
+    {
+      "group": "group-mapping-group",
+      "apps": ["group-mapping-app"]
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-dst:v1",
+  "type": "object",
+  "properties": {
+    "dst": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "collector": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/hostname"
+                    },
+                    "otlpHttpPort": {
+                      "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/port"
+                    },
+                    "samplingConfigMap": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["host", "otlpHttpPort"]
+                },
+                { "$ref": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/collector" }
+              ]
+            },
+            "sampler": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "samplingRate": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  },
+                  "required": ["samplingRate"]
+                },
+                { "$ref": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/sampler" }
+              ]
+            },
+            "labels": {
+              "type": "object"
+            },
+            "span": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "attributeValueLengthLimit": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "attributePerSpanCountLimit": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "attributePerEventCountLimit": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "attributePerLinkCountLimit": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "eventCountLimit": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "linkCountLimit": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "attributeValueLengthLimit",
+                    "attributePerSpanCountLimit",
+                    "attributePerEventCountLimit",
+                    "attributePerLinkCountLimit",
+                    "eventCountLimit",
+                    "linkCountLimit"
+                  ]
+                },
+                { "$ref": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/span" }
+              ]
+            },
+            "propagator": {
+              "type": "string",
+              "enum": ["b3", "tracecontext"]
+            },
+            "processor": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "exportTimeoutMillis": {
+                      "type": "number"
+                    },
+                    "maxExportBatchSize": {
+                      "type": "number"
+                    },
+                    "maxQueueSize": {
+                      "type": "number"
+                    },
+                    "scheduledDelayMillis": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "exportTimeoutMillis",
+                    "maxExportBatchSize",
+                    "maxQueueSize",
+                    "scheduledDelayMillis"
+                  ]
+                },
+                { "$ref": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/processor" }
+              ]
+            }
+          },
+          "required": [
+            "enabled",
+            "collector",
+            "sampler",
+            "labels",
+            "span",
+            "propagator",
+            "processor"
+          ]
+        },
+        { "$ref": "urn:adp:helm:schemas:v1:gas-dst-conditional:v1/dst" }
+      ]
+    }
+  },
+  "required": ["dst"]
+}

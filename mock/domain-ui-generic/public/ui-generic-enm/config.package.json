@@ -1,0 +1,25 @@
+{
+  "modules": [
+    {
+      "name": "app-1",
+      "version": "1.0.0",
+      "path": "/apps",
+      "main": "app-1.js"
+    },
+    {
+      "name": "comp-c",
+      "version": "3.0.0",
+      "path": "/components",
+      "main": "comp-c.js",
+      "dependencies": {
+        "framework": "1.1.0"
+      }
+    },
+    {
+      "name": "framework",
+      "version": "1.1.0",
+      "path": "/node_modules/framework/1.1.0/",
+      "main": "framework.js"
+    }
+  ]
+}

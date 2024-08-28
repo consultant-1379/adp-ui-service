@@ -1,0 +1,28 @@
+.header-container {
+  display: flex;
+  margin: auto;
+  width: 100%;
+  height: 300px;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-base, 8px);
+  position: relative;
+  bottom: 300px;
+  margin-bottom: -300px;
+}
+
+.header-content {
+  margin-top: var(--space-xxl, 32px);
+  display: flex;
+  width: fit-content;
+  flex-direction: column;
+  color: var(--gray-95, #f2f2f2);
+}
+
+.image-style {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  display: flex;
+  border-bottom: var(--space-small) solid var(--layer1);
+}

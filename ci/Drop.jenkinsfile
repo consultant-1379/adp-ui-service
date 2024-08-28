@@ -1,0 +1,376 @@
+pipeline {
+  agent {
+    node('presentation')
+  }
+  options {
+    ansiColor('xterm')
+    timeout(time: 1, unit: 'HOURS')
+    buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '30'))
+  }
+  stages {
+    stage('Clean') {
+      steps {
+        sh 'bob clean'
+      }
+    }
+    stage('Init stage') {
+      failFast true
+      parallel {
+        stage('Check Bob rules') {
+          when {
+            expression {
+              return  sh(
+                script: 'bob -q ruleset-validation-helper:validate-rules',
+                returnStdout: true
+              ).trim() != '0'
+            }
+          }
+          steps {
+            sh 'bob --dryrun $(bob -lq)'
+          }
+        }
+        stage('Set Bob variables') {
+          steps {
+            withCredentials([
+              usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+              usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO')
+            ]) {
+              script {
+                if (env.GERRIT_EVENT_TYPE == 'change-merged') {
+                  sh 'bob init-drop'
+                  archiveArtifacts 'artifact.properties'
+                } else {
+                  sh 'bob init-pre-drop'
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    stage('Install npm dependencies') {
+      steps {
+        sh 'bob npm-install'
+      }
+    }
+    stage('Generate help content') {
+      steps {
+        ansiColor('xterm') {
+          sh 'bob generate-and-copy-help-content'
+        }
+      }
+    }
+    stage('Main stage') {
+      failFast true
+      parallel {
+        stage('Lint') {
+          steps {
+            lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+              withCredentials([
+                file(credentialsId: env.system, variable: 'KUBECONFIG'),
+                usernamePassword(credentialsId: 'jenkins-api-token', usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_PASS')
+              ]) {
+                sh 'bob lint'
+              }
+            }
+          }
+        }
+        stage('Validate values yaml') {
+          steps {
+            sh 'bob validate-values-yaml'
+          }
+        }
+        stage('FOSS handling') {
+          stages {
+            stage('Lint FOSS') {
+              steps {
+                sh 'bob foss-helper:check-dependencies-files'
+              }
+            }
+            stage('Analyze FOSS') {
+              steps {
+                withCredentials([string(credentialsId: 'fossa-token', variable: 'FOSSA_API_KEY')]) {
+                  sh 'bob foss-analyze'
+                }
+              }
+            }
+            stage('Check Prim numbers') {
+              when {
+                expression {
+                  return  sh(
+                    script: 'bob -q foss-helper:check-dependencies-file-is-changed',
+                    returnStdout: true
+                  ).trim() != '0'
+                }
+              }
+              steps {
+                withCredentials([string(credentialsId: 'scasuser-token', variable: 'SCAS_TOKEN')]) {
+                  //Switch off bazaar scan until bazaar api issues are not solved
+                  //sh "bob foss-helper:dependency-update-with-scas"
+                  //Until that we are check only the prim numbers
+                  sh 'bob foss-helper:check-all-prim-number-filled'
+                }
+              }
+            }
+            stage('Merge manual & auto dependencies') {
+              steps {
+                sh 'bob foss-helper:merge-dependencies'
+              }
+            }
+            stage('Check Munin sync status') {
+              steps {
+                withCredentials([string(credentialsId: 'mimer-token-production', variable: 'MUNIN_TOKEN')]) {
+                  sh 'bob foss-helper:check-munin-sync-status'
+                }
+              }
+            }
+            stage('Pre-register to EVMS') {
+              steps {
+                withCredentials([string(credentialsId: 'evms-product-instance-token', variable: 'EVMS_API_KEY')]) {
+                  sh 'bob evms:pre-registration'
+                }
+              }
+            }
+            stage('Generate License Agreements') {
+              steps {
+                sh 'bob license-agreement'
+              }
+            }
+            stage('Validate FOSS') {
+              steps {
+                sh 'bob munin:validate-product-structure'
+              }
+            }
+          }
+        }
+        stage('Validation') {
+          stages {
+            stage('Unit tests') {
+              steps {
+                ansiColor('css') {
+                  sh 'bob test-ui test-ws'
+                }
+              }
+            }
+            stage('Sonar scanner') {
+              steps {
+                  withCredentials([string(credentialsId: 'platform-sonar-token', variable: 'SONAR_LOGIN_TOKEN')]) {
+                  ansiColor('xterm') {
+                    sh 'bob sonar-scanner'
+                    sh 'bob sonar-gate-check'
+                  }
+              }
+              }
+            }
+            stage('Selenium tests') {
+              steps {
+                ansiColor('css') {
+                  sh 'bob run-selenium-tests-frontend'
+                }
+              }
+            }
+          }
+        }
+        stage('K8S Build & Test') {
+          stages {
+            stage('Docker image') {
+              steps {
+                withCredentials([usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI')]) {
+                  sh 'bob image'
+                }
+              }
+            }
+            stage('Helm package') {
+              steps {
+                withCredentials([
+                  usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI')
+                ]) {
+                  ansiColor('xterm') {
+                    sh 'bob package'
+                  }
+                }
+              }
+            }
+            stage('K8S Test') {
+              steps {
+                lock(resource: null, label: 'presentation-ci', quantity: 1, variable: 'system') {
+                  withCredentials([
+                    usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+                    usernamePassword(credentialsId: 'arm-sero-eeaprodart-token', usernameVariable: 'ARM_USER_SERO', passwordVariable: 'ARM_TOKEN_SERO'),
+                    file(credentialsId: env.system, variable: 'KUBECONFIG')
+                  ]) {
+                    ansiColor('css') {
+                      sh 'bob k8s-test-nodeport -r ci/rulesets/deploy-upgrade-robustness.yaml'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    stage('Generate documentations') {
+      steps {
+        withCredentials([
+          usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+          usernamePassword(credentialsId: 'eridoc-username-password', usernameVariable: 'ERIDOC_USERNAME', passwordVariable: 'ERIDOC_PASSWORD'),
+          usernamePassword(credentialsId: 'git-functional-http-user', usernameVariable: 'GERRIT_USERNAME', passwordVariable: 'GERRIT_PASSWORD'),
+          string(credentialsId: 'jira-eceaconfl-token', variable: 'JIRA_TOKEN')
+        ]) {
+          ansiColor('xterm') {
+            sh 'bob generate-docs foss-helper:generate-dependencies-report munin:generate-documents-revision-list generate-pri'
+          }
+        }
+      }
+    }
+    stage('Stop in case of dry-run')
+    {
+      when { expression { env.GERRIT_EVENT_TYPE != 'change-merged' } }
+      steps {
+        error('Build is failed because the spinnaker pipeline should not be triggered in case of dry-run')
+      }
+    }
+    stage('Upload Eridoc files') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'eridoc-username-password', usernameVariable: 'ERIDOC_USERNAME', passwordVariable: 'ERIDOC_PASSWORD')]) {
+          sh 'bob eridoc-upload'
+        }
+      }
+    }
+    stage('Update Munin') {
+      steps {
+        withCredentials([string(credentialsId: 'mimer-token-production', variable: 'MUNIN_TOKEN')]) {
+          sh 'bob munin:skip-blocked-3pps munin:create-version'
+        }
+      }
+    }
+    stage('Publish artifacts') {
+      steps {
+        withCredentials([
+            usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI'),
+            usernamePassword(credentialsId: 'git-functional-http-user', usernameVariable: 'GERRIT_USERNAME', passwordVariable: 'GERRIT_PASSWORD')
+        ]) {
+          ansiColor('xterm') {
+            sh 'bob publish'
+          }
+        }
+      }
+    }
+    stage('Validate structured data') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'arm-seli-eeaprodart-token', usernameVariable: 'ARM_USER_SELI', passwordVariable: 'ARM_TOKEN_SELI')]) {
+          sh 'bob test-structured-data'
+        }
+      }
+    }
+  }
+  post {
+    always {
+      archiveArtifacts 'docs/release/metadata/license.agreement.json'
+      archiveArtifacts artifacts: '.bob/munin-sync-status-files/*.json', allowEmptyArchive: true
+      archiveArtifacts artifacts: '.bob/structured-data/eric-adp-gui-aggregator-service-structured-data.json', allowEmptyArchive: true
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: '.bob/check-charts/',
+        reportFiles: 'design-rule-check-report.html',
+        reportName: 'Helm Design Rule Check'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: '.bob/check-image/',
+        reportFiles: 'image-design-rule-check-report.html',
+        reportName: 'Helm Design Rule Image Check'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'backend/test/reports/mochawesome/',
+        reportFiles: 'mochawesome.html',
+        reportName: 'WS Endpoint Test Report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'frontend/test_js/allure-report/',
+        reportFiles: 'index.html',
+        reportName: 'Frontend Selenium Test Report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'integration-tests/test/backend/reports/mochawesome/',
+        reportFiles: 'mochawesome.html',
+        reportName: 'WS Endpoint Integration Report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'integration-tests/test/ui/allure-report/',
+        reportFiles: 'index.html',
+        reportName: 'UI Selenium Integration Report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'frontend/coverage/lcov-report',
+        reportFiles: 'index.html',
+        reportName: 'Frontend Component Test Coverage Report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'frontend/testReport/Chromium',
+        reportFiles: 'mochawesome.html',
+        reportName: 'Frontend Chromium Unit Test Report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: 'frontend/testReport/Firefox',
+        reportFiles: 'mochawesome.html',
+        reportName: 'Frontend Firefox Unit Test Report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: '.bob/reports',
+        reportFiles: 'dependencies-report.html',
+        reportName: 'Dependencies report'
+      ])
+      publishHTML(target: [
+        allowMissing: false,
+        alwaysLinkToLastBuild: false,
+        keepAll: true,
+        reportDir: '.bob/structured-data/',
+        reportFiles: 'artifact_dr_check_report.html',
+        reportName: 'Artifactory DR Checker Report'
+      ])
+    }
+    cleanup {
+      sh "docker ps -a -q --filter label=$BUILD_TAG | xargs --no-run-if-empty  docker stop"
+      sh "docker ps -a -q --filter label=$BUILD_TAG | xargs --no-run-if-empty  docker rm"
+    }
+    failure {
+      script {
+        if (env.GERRIT_EVENT_TYPE == 'change-merged') {
+          mail to: 'f98b007c.ericsson.onmicrosoft.com@emea.teams.ms',
+          subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+          body: "Failure on ${env.BUILD_URL}"
+        }
+      }
+    }
+  }
+}

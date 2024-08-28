@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-general-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "appArmorProfile": {
+      "$id": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/appArmorProfile",
+      "properties": {
+        "main": true,
+        "ericsecoauthsap": true,
+        "ericsecoauthproxy": true
+      },
+      "additionalProperties": false
+    },
+    "seccompProfile": {
+      "$id": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/seccompProfile",
+      "properties": {
+        "pod": true,
+        "main": true,
+        "ericsecoauthsap": true,
+        "ericsecoauthproxy": true
+      },
+      "additionalProperties": false
+    },
+    "productInfo": {
+      "$id": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/productInfo",
+      "properties": {
+        "rstate": true
+      },
+      "additionalProperties": false
+    },
+    "metrics": {
+      "$id": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/metrics",
+      "properties": {
+        "enabled": true,
+        "enableNewScrapePattern": true,
+        "port": true
+      },
+      "additionalProperties": false
+    },
+    "resources": {
+      "$id": "urn:adp:helm:schemas:v1:gas-general-conditional:v1/resources",
+      "properties": {
+        "main": true,
+        "ericsecoauthsap": true,
+        "ericsecoauthproxy": true
+      },
+      "additionalProperties": false
+    }
+  }
+}

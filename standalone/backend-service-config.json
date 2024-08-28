@@ -1,0 +1,15 @@
+{
+  "k8sQueryServiceEnabled": false,
+  "logging": {
+    "defaultLogLevel": "info",
+    "stdout": {
+      "enabled": true
+    },
+    "filelog": {
+      "enabled": false
+    },
+    "jsonTCPLog": {
+      "enabled": false
+    }
+  }
+}

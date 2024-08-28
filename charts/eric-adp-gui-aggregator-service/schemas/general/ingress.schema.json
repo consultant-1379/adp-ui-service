@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-ingress:v1",
+  "type": "object",
+  "properties": {
+    "ingress": {
+      "type": "object",
+      "allOf": [
+        {
+          "properties": {
+            "useContour": {
+              "type": "boolean"
+            },
+            "path": {
+              "type": "string"
+            },
+            "hostname": {
+              "oneOf": [
+                { "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/hostnameWithPort" },
+                { "type": "null" }
+              ]
+            },
+            "ingressClass": {
+              "$comment": "At the moment common schema is not suitable",
+              "type": ["null", "string"]
+            },
+            "adpIccrCaSecret": {
+              "type": ["null", "string"]
+            },
+            "adpIccrServiceName": {
+              "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/serviceName"
+            },
+            "tls": {
+              "allOf": [
+                {
+                  "$comment": "At the moment common schema is not suitable",
+                  "type": "object",
+                  "properties": {
+                    "passthrough": {
+                      "type": "boolean"
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "existingSecret": {
+                      "type": ["null", "string"]
+                    }
+                  },
+                  "required": ["passthrough", "enabled"]
+                },
+                { "$ref": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1/tls" }
+              ]
+            },
+            "certificates": {
+              "allOf": [
+                {
+                  "$comment": "At the moment common schema is not suitable",
+                  "type": "object",
+                  "properties": {
+                    "asymmetricKeyCertificateName": {
+                      "type": ["string", "null"]
+                    },
+                    "crlEnabled": {
+                      "description": "Indicates that CRL is enabled or disabled for the interface",
+                      "type": "boolean",
+                      "examples": [true, false]
+                    }
+                  },
+                  "required": ["crlEnabled"]
+                },
+                { "$ref": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1/certificates" }
+              ]
+            },
+            "timeoutPolicy": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/time"
+                    },
+                    "idle": {
+                      "type": "string",
+                      "$ref": "urn:adp:helm:schemas:v1:gas-propertyPatterns:v1/time"
+                    }
+                  },
+                  "required": ["response", "idle"]
+                },
+                { "$ref": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1/timeoutPolicy" }
+              ]
+            },
+            "enabled": {
+              "$comment": "To pass 'no additionalProperties' verification"
+            }
+          },
+          "required": [
+            "useContour",
+            "path",
+            "adpIccrServiceName",
+            "tls",
+            "certificates",
+            "timeoutPolicy"
+          ]
+        },
+        { "$ref": "urn:adp:helm:schemas:v1:DR-D1125-011-AD:v1/ingress" },
+        { "$ref": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1/ingress" }
+      ]
+    }
+  },
+  "required": ["ingress"]
+}

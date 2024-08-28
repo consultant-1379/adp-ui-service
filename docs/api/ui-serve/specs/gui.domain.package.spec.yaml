@@ -1,0 +1,60 @@
+openapi: 3.0.1
+info:
+  title: UI Package Config File Descriptor (IF.GUI.DOMAIN.PACKAGE)
+  description: |
+    # UI Package (modules) Config File Descriptor
+    This document describes the format of UI Package (modules) Config file descriptor and how it shall be exposed, as identified in the ADP GUI FA.
+
+    ## Terms
+    - **Package**: A reusable, shared package exposed by a Micro-service. A package contains at least one ES module, and can contain additional static assets (CSS, images, etc.).
+    - **ES Module (ESM)**: Part of a package, this is the atomic entity which is loaded by the browser. ES module specification is based on W3C standards.
+
+    ## Description
+    This file descriptor for shared packages is compatible with UI micro front-ends.
+    This file includes meta information of shared packages served by the current service for UI micro front-ends.
+
+    This file **MUST** be named as `config.package.json` and **MUST** be exposed by the service.
+
+    ### Design guidelines for shared packages:
+    - A package **MUST** be contained in its own folder.
+    - A package **MUST** contain at least one main module, but **MAY** contain multiple sub-modules.
+    - Static assets **MUST** be bundled into the package's folder.
+
+  contact:
+    name: Smart Insights Team
+    email: PDLSCRUMNW@pdl.internal.ericsson.com
+  version: "1.0.0"
+  x-api-id: 9fcb7122-43fd-46c5-a0af-44c6d42753a8
+  x-audience: company-internal
+servers:
+  - url: /
+    description: Base
+tags:
+  - name: IF.GUI.DOMAIN.PACKAGE
+    x-displayName: UI Package (modules) Config File Descriptor
+paths:
+  /config.package.json:
+    get:
+      operationId: getConfigPackageFileContent
+      summary: Fetch package metadata (config.package.json)
+      description: |
+        File descriptor for shared packages provided by the service.
+        This file includes meta information for the shared packages which contains ES modules suitable for modern Micro-frontends.
+
+        This file **MUST** be named as `config.package.json` and **MUST** be accessible from the service root context path.
+
+        Design guidelines for shared packages:
+        - A package **MUST** be contained in its own folder.
+        - A package **MUST** contain at least one main module, but **MAY** contain multiple sub-modules.
+        - Static assets **MUST** be bundled into the package's folder.
+      tags:
+        - IF.GUI.DOMAIN.PACKAGE
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/ui.config.package.yaml"
+        "400":
+          description: Bad Request - Path is incorrect

@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1",
+  "allOf": [false],
+  "$defs": {
+    "tls": {
+      "$id": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1/tls",
+      "properties": {
+        "passthrough": true,
+        "enabled": true,
+        "existingSecret": true
+      },
+      "additionalProperties": false
+    },
+    "certificates": {
+      "$id": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1/certificates",
+      "properties": {
+        "asymmetricKeyCertificateName": true,
+        "crlEnabled": true
+      },
+      "additionalProperties": false
+    },
+    "timeoutPolicy": {
+      "$id": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1/timeoutPolicy",
+      "properties": {
+        "response": true,
+        "idle": true
+      },
+      "additionalProperties": false
+    },
+    "ingress": {
+      "$id": "urn:adp:helm:schemas:v1:gas-ingress-conditional:v1/ingress",
+      "properties": {
+        "useContour": true,
+        "path": true,
+        "hostname": true,
+        "ingressClass": true,
+        "adpIccrCaSecret": true,
+        "adpIccrServiceName": true,
+        "tls": true,
+        "certificates": true,
+        "timeoutPolicy": true,
+        "enabled": true
+      },
+      "additionalProperties": false
+    }
+  }
+}

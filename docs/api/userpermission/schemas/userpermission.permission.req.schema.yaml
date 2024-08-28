@@ -1,0 +1,75 @@
+type: object
+description: |
+  The response returned by IAM's `/token` endpoint. Properties largely
+  depend on the IAM configuration.
+required:
+  - response_mode
+properties:
+  audience:
+    description: |
+      The client identifier of the resource server to which the client is seeking access.
+      It serves as a hint to Keycloak to indicate the context in which permissions should be evaluated.
+    type: string
+  realm:
+    description: The realm to fetch permission info from.
+    type: string
+  response_mode:
+    description: |
+      A string value indicating how the server should respond to authorization requests.
+
+      #### decision
+
+      Indicates that responses from the server should only represent the overall decision by returning a JSON.
+
+      In case of positive decision the response will be the following:
+
+      ```
+      {
+          "result": true
+      }
+      ```
+
+      If the user has no right to access the resource, or the resource does not exist the response will be the following:
+
+      ```
+      {
+          "result": false
+      }
+      ```
+
+      #### permissions
+
+      Indicates that responses from the server should contain any permission granted by the server by returning a JSON with the following format:
+
+      ```
+      [
+          {
+              "rsid": "resource-id",
+              "rsname":  "resource-name",
+              "scopes": ["GET", "POST"]
+          }
+      ]
+      ```
+
+      If the authorization request does not map to any permission a 403, if the resource does not exist a 400 HTTP status code is returned.
+    type: string
+    enum:
+      - decision
+      - permissions
+  permission:
+    description: |
+      An array that contains strings that represents a set of a resources and a scopes from which the client is seeking access.
+      The format of the string must be: RESOURCE_ID#SCOPE_ID, RESOURCE_ID or SCOPE_ID. <br>
+      For instance:
+      ```
+      [
+        "Resource A#Scope A",
+        "Resource A",
+        "#Scope A"
+        "#Scope B",
+        "#Scope C",
+      ]
+      ```
+    type: array
+    items:
+      type: string

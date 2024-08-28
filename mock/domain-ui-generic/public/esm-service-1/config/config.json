@@ -1,0 +1,69 @@
+{
+  "apps": [
+    {
+      "name": "mock-portal",
+      "module": "mock-portal",
+      "displayName": "Mock Portal",
+      "type": "euisdk",
+      "route": "mock-portal",
+      "version": "0.0.1",
+      "childNames": ["mock-portal-child-1", "mock-portal-child-2"],
+      "groupNames": ["mockapps"]
+    },
+    {
+      "name": "hidden-mock",
+      "module": "hidden-mock",
+      "displayName": "hidden-mock",
+      "type": "euisdk",
+      "route": "hidden-mock",
+      "version": "0.0.1",
+      "groupNames": ["mockapps"],
+      "hidden": true
+    },
+    {
+      "name": "mock-portal-child-1",
+      "module": "mock-portal-child-1",
+      "displayName": "Mock Child 1",
+      "type": "euisdk",
+      "route": "mock-portal-child-1",
+      "version": "0.0.1",
+      "groupNames": ["mockapps"]
+    },
+    {
+      "name": "mock-portal-child-2",
+      "module": "mock-portal-child-2",
+      "displayName": "Mock Child 2",
+      "type": "euisdk",
+      "route": "mock-portal-child-2",
+      "version": "0.0.1",
+      "groupNames": ["mockapps"],
+      "hidden": true
+    }
+  ],
+  "components": [
+    {
+      "name": "mock-view",
+      "module": "mock-view",
+      "version": "0.0.1",
+      "displayName": "Mock View"
+    }
+  ],
+  "groups": [
+    {
+      "displayName": "Mock Applications",
+      "version": "0.0.1",
+      "name": "mockapps",
+      "type": "product",
+      "descriptionLong": "Demo applications with E-UI SDK v2 frontend.",
+      "descriptionShort": "E-UI demo apps"
+    },
+    {
+      "displayName": "Mock Group",
+      "version": "0.0.1",
+      "name": "mock-group",
+      "type": "category",
+      "descriptionLong": "Group for demo applications with E-UI SDK v2 frontend.",
+      "descriptionShort": "Group of E-UI demo apps"
+    }
+  ]
+}

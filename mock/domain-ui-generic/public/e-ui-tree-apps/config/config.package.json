@@ -1,0 +1,52 @@
+{
+  "modules": [
+    {
+      "name": "parent-a",
+      "version": "0.0.1",
+      "path": "apps/tree-app",
+      "main": "tree-app.js"
+    },
+    {
+      "name": "parent-b",
+      "version": "0.0.1",
+      "path": "apps/tree-app",
+      "main": "tree-app.js"
+    },
+    {
+      "name": "child-1",
+      "version": "0.0.1",
+      "path": "apps/tree-app",
+      "main": "tree-app.js"
+    },
+    {
+      "name": "child-2",
+      "version": "0.0.1",
+      "path": "apps/tree-app",
+      "main": "tree-app.js"
+    },
+    {
+      "name": "grandchild-alpha",
+      "version": "0.0.1",
+      "path": "apps/tree-app",
+      "main": "tree-app.js"
+    },
+    {
+      "name": "grandchild-beta",
+      "version": "0.0.1",
+      "path": "apps/tree-app",
+      "main": "tree-app.js"
+    },
+    {
+      "name": "grandchild-gamma",
+      "version": "0.0.1",
+      "path": "apps/tree-app",
+      "main": "tree-app.js"
+    },
+    {
+      "name": "grandchild-delta",
+      "version": "0.0.1",
+      "path": "apps/tree-app",
+      "main": "tree-app.js"
+    }
+  ]
+}

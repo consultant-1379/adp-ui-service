@@ -1,0 +1,44 @@
+modelVersion: 2.0
+uses_encryption:
+  - product_number: CTX1041107
+    encryptions:
+      # Explain how the encryption is used
+      - usage: 'Used for HTTPS traffic, for inbound and outbound requests to get config/meta-data to applications'
+        # Encryption Purpose (possible values: 'Data confidentiality, OAM only', 'Data confidentiality, not only OAM', 'Other than data confidentiality')
+        # Data confidentiality, used only for internal traffic (within the Kubernetes cluster) between micro-services.
+        purpose: 'Data confidentiality, OAM only'
+        # Cryptographic Algorithms if used outside of protocols
+        #crypto_algorithms: []
+        # Encryption Protocols
+        protocols:
+          # Protocols in OpenSSL 3.0.7 which is used by node.js 20.12.2 (5/CTX1041107) https://www.openssl.org/docs/man3.0/man7/ssl.html#Dealing-with-Protocol-Methods
+          - protocol: TLS 1.3
+            # Provide a description of how the protocol is used
+            usage: 'Used for HTTPS traffic'
+            # Provide the name of the standard specifying the protocol
+            standard: 'IETF'
+          - protocol: TLS 1.2
+            usage: 'Used for HTTPS traffic'
+            standard: 'IETF'
+          - protocol: SSL
+            usage: 'Used for HTTPS traffic'
+            standard: 'IETF'
+        crypto_algorithms:
+          # Algorithm Name (for full list see Munin documentation)
+          # Key length: only mention same algorithm ones with the longes key
+          # cipher suits in node.js 20.12.2 (5/CTX1041107): https://nodejs.org/dist/v20.12.2/docs/api/tls.html#modifying-the-default-tls-cipher-suite
+          # cipher suits detailed info, useful page: https://ciphersuite.info/cs/?software=openssl&singlepage=true
+          - name: AES # Encryption function
+            key_length: 256
+            encryption_mode: CBC
+          - name: AES # Encryption function
+            key_length: 256
+            encryption_mode: GCM
+          - name: Chacha20-Poly1305 # Encryption function
+            key_length: 256
+          - name: DHE # Key Exchange protocol
+          - name: ECDHE # Key Exchange protocol
+          - name: ECDSA # Authentication protocol
+          - name: RSA # Key Exchange protocol
+          - name: SHA # Hash function
+            key_length: 256

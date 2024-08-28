@@ -1,0 +1,28 @@
+{{- $global := fromJson (include "eric-adp-gui-aggregator-service.global" .) -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "eric-adp-gui-aggregator-service.name" . }}-headless-svc
+  labels:
+    {{- include "eric-adp-gui-aggregator-service.labels" . | nindent 4 }}
+  annotations:
+    {{- include "eric-adp-gui-aggregator-service.annotations" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: {{ include "eric-adp-gui-aggregator-service.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - port: {{.Values.service.port}}
+      targetPort: adp-ui-port
+      protocol: TCP
+  # the primary IP address family of an existing Service cannot be changed
+  {{- if .Release.IsInstall -}}
+  {{- if $global.internalIPFamily }}
+  ipFamilies: [{{ $global.internalIPFamily | quote }}]
+  ipFamilyPolicy: SingleStack
+  {{- else }}
+  ipFamilyPolicy: PreferDualStack
+  {{- end }}
+  {{- end }}

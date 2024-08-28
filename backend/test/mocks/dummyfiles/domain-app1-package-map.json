@@ -1,0 +1,91 @@
+{
+  "domain1": {
+    "name": "domain1",
+    "uid": "domain-service-1-1.0.2-2",
+    "serviceurl": "domain1:4000",
+    "ingressBaseurl": "http://localhost/context",
+    "configContext": "/ui",
+    "meta": {
+      "modules": [
+        {
+          "name": "@eui/testpackage",
+          "version": "1.0.0",
+          "path": "./libs/",
+          "main": "testpackage.js"
+        },
+        {
+          "name": "app-1",
+          "version": "1.0.0",
+          "path": "/apps",
+          "main": "app-1.js"
+        },
+        {
+          "name": "comp-a",
+          "version": "1.0.0",
+          "path": "/components",
+          "main": "comp-a.js",
+          "dependencies": {
+            "utility": "1.x.x"
+          }
+        },
+        {
+          "name": "comp-b",
+          "version": "1.0.0",
+          "path": "/components",
+          "main": "comp-b.js",
+          "dependencies": {
+            "utility": "2.0.0",
+            "semver": "1.5.0"
+          }
+        },
+        {
+          "name": "utility",
+          "version": "2.0.0",
+          "path": "/utils/utility/2.0.0/",
+          "main": "utility.js"
+        },
+        {
+          "name": "semver",
+          "version": "1.5.0",
+          "path": "/node_modules/semver/1.5.0/",
+          "main": "semver.js"
+        }
+      ]
+    }
+  },
+  "domain2": {
+    "name": "domain2",
+    "uid": "domain-service-2-3.4.2-2",
+    "serviceurl": "domain2:4000",
+    "ingressBaseurl": "http://localhost/context",
+    "configContext": "/ui",
+    "meta": {
+      "modules": [
+        {
+          "name": "app-1",
+          "version": "2.0.0",
+          "path": "/apps",
+          "main": "app-1.js"
+        },
+        {
+          "name": "comp-d",
+          "version": "1.0.0",
+          "path": "/components",
+          "main": "comp-a.js",
+          "dependencies": {
+            "utility": "1.x.x"
+          }
+        },
+        {
+          "name": "comp-e",
+          "version": "1.0.0",
+          "path": "/components",
+          "main": "comp-a.js",
+          "dependencies": {
+            "utility": "1.x.x"
+          }
+        }
+      ]
+    }
+  }
+}

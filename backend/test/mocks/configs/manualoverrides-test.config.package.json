@@ -1,0 +1,10 @@
+{
+  "modules": [
+    {
+      "name": "group-override",
+      "version": "1.0.0",
+      "path": "./group-override",
+      "main": "group-override.js"
+    }
+  ]
+}
